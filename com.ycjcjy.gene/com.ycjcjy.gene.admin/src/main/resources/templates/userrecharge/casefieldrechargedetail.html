@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="/public/head :: onLoadHead(用户管理)">
+</head>
+<css th:replace="/public/css :: onLoadCSS"></css>
+<body ddata-type="widgets">
+<div class="am-g tpl-g">
+    <!-- 模态提示组件 -->
+    <div th:include="/public/tips :: Tips"></div>
+    <!-- 数据选择模态组件 -->
+    <div th:include="/public/dataBind :: RuBindTips" class="am-popup"  id="data-bind-modal"></div>
+    <!-- 内容区域 -->
+    <div class="tpl-content-wrapper none-margin">
+        <div class="row-content am-cf">
+            <div class="row">
+                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                            <div class="row">
+                                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                                    <div class="widget am-cf">
+                                        <div class="widget-head am-cf">
+                                            <div class="widget-title am-fl" th:if="${casefieldtocasefield}">案场充值</div>
+                                            <!--<div class="widget-title am-fl" th:if="${view}">查看充值信息</div>-->
+                                            <div class="widget-title am-fl" th:if="${validate}">验证</div>
+                                            <!--<div class="widget-function am-fr" th:unless="${view}">-->
+                                                <!--<a href="javascript:;" class="am-icon-cog"  th:onclick="'javascript:modalRU(\''+${entity.id}+'\',\''+${entity.realname}+'\')'">  绑定角色</a>-->
+                                            <!--</div>-->
+                                        </div>
+                                        <div class="widget-body am-fr">
+
+                                            <form class="am-form tpl-form-border-form tpl-form-border-br" id="DataFrom">
+                                                <input type="hidden" name="id" th:value="${entity.id}">
+
+                                                <!--<label class="am-u-sm-12 am-u-md-6 am-u-lg-2 am-u-lg-offset-2 am-form-label">充值类型 :</label>-->
+                                                <!--<div class="am-u-sm-12 am-u-md-6 am-u-lg-2">-->
+                                                    <!--<div class="am-form-group tpl-table-list-select">-->
+                                                        <!--<select data-am-selected="{btnSize: 'sm'}" id="type">-->
+                                                            <!--<option value="0" selected>用户充值</option>-->
+                                                            <!--<option value="1">案场充值</option>-->
+                                                            <!--<option value="2">后台充值</option>-->
+                                                        <!--</select>-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+
+                                                <div class="am-form-group" th:if="${casefieldtocasefield}">
+                                                    <label for="case_field_id" class="am-u-sm-3 am-form-label">案场</label>
+                                                    <div class="am-u-sm-9">
+                                                        <select data-am-selected="{btnSize: 'sm'}" name="case_field_id" id="case_field_id" onchange="getSysCaseField()" th:if="${avail == null}">
+                                                        </select>
+                                                        <input type="text" class="tpl-form-input" name="casefieldname" id="case_field_name"  th:value="${casefieldname}" th:if="${avail != null}" onfocus="this.blur()">
+                                                        <input type="hidden" name="casefieldid" id="casefieldid" th:value="${case_field_id}">
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group" th:if="${validate}">
+                                                    <label for="casefieldname" class="am-u-sm-3 am-form-label">案场 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" name="casefieldname" id="casefieldname" th:value="${entity.casefieldname}" onfocus="this.blur()">
+                                                        <!--<small th:unless="${view}">密码可包含大小写英文,数字,及部分特殊符号</small>-->
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="am-form-group">
+                                                    <label for="tel" class="am-u-sm-3 am-form-label">案场负责人的联系电话 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" name="tel" id="tel" onfocus="this.blur()"  >
+                                                        <small th:unless="${validate}">限中国地区有效手机号</small>
+                                                    </div>
+                                                </div>
+
+
+
+
+                                                <!--<div class="am-form-group">-->
+                                                    <!--<label for="icon" class="am-u-sm-3 am-form-label">封面图 <span class="tpl-form-line-small-title">Images</span></label>-->
+                                                    <!--<div class="am-u-sm-9">-->
+                                                        <!--<div class="am-form-group">-->
+                                                            <!--<div class="tpl-form-file-img onebean-upload-box" onclick="uploadFile(completeHandler,this)" th:disabled="${view}">-->
+                                                                <!--<img class="onebean-upload-img" id="iconImg" th:src="${entity.icon}">-->
+                                                            <!--</div>-->
+                                                            <!--<button type="button" class="am-btn am-btn-danger am-btn-sm" onclick="uploadFile(completeHandler,this)" th:disabled="${view}">-->
+                                                                <!--<i class="am-icon-cloud-upload"></i>上传图片-->
+                                                            <!--</button>-->
+                                                            <!--<input id="icon" type="hidden" name="icon" th:value="${entity.icon}">-->
+                                                        <!--</div>-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+
+
+
+                                                <!--<div class="am-form-group">-->
+                                                    <!--<label for="realname" class="am-u-sm-3 am-form-label">真实姓名 <span class="tpl-form-line-small-title">:</span></label>-->
+                                                    <!--<div class="am-u-sm-9">-->
+                                                        <!--<input type="text" class="tpl-form-input" name="realname" id="realname" placeholder="请输入真实姓名" th:disabled="${view}" th:value="${entity.realname}">-->
+                                                        <!--<small th:unless="${view}">用户真实姓名,可包含汉字英文</small>-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+
+                                                <!--<div class="am-form-group">-->
+                                                    <!--<label for="email" class="am-u-sm-3 am-form-label">邮箱 <span class="tpl-form-line-small-title">:</span></label>-->
+                                                    <!--<div class="am-u-sm-9">-->
+                                                        <!--<input type="email" class="tpl-form-input" name="email" id="email" placeholder="请输入用户邮箱" th:disabled="${view}" th:value="${entity.email}">-->
+                                                        <!--<small th:unless="${view}">邮箱email地址</small>-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+
+                                                <div class="am-form-group">
+                                                    <label for="actual" class="am-u-sm-3 am-form-label">充值金额 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="number" class="tpl-form-input" name="actual" id="actual" placeholder="请输入充值金额"  th:disabled="${validate}" th:value="${actual}">
+                                                        <small th:unless="${validate}">充值金额,限数字</small>
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group" th:if="${validate}">
+                                                    <label for="identifyingcode" class="am-u-sm-3 am-form-label">填写验证码 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" name="identifyingcode" id="identifyingcode" placeholder="请输入六位验证码">
+                                                        <small th:unless="${validate}">六位验证码</small>
+                                                    </div>
+                                                </div>
+
+                                                <!--<div class="am-form-group">-->
+                                                    <!--<label for="mobile" class="am-u-sm-3 am-form-label">手机号 <span class="tpl-form-line-small-title">:</span></label>-->
+                                                    <!--<div class="am-u-sm-9">-->
+                                                        <!--<input type="number" class="tpl-form-input" name="mobile" id="mobile" placeholder="请输入用户手机号" th:disabled="${view}" th:value="${entity.mobile}">-->
+                                                        <!--<small th:unless="${view}">限中国地区有效手机号</small>-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+
+
+                                                <!--<div class="am-form-group">-->
+                                                    <!--<label for="user_type" class="am-u-sm-3 am-form-label">用户类型 <span class="tpl-form-line-small-title">:</span></label>-->
+                                                    <!--<div class="am-u-sm-9">-->
+                                                        <!--<dic:code name="user_type" id="user_type" code="YHLX" th:attr="value=${entity.user_type},disabled=${view}"/>-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+
+                                                <!--<div class="am-form-group">-->
+                                                    <!--<label for="data_permission_level" class="am-u-sm-3 am-form-label">数据权限 <span class="tpl-form-line-small-title">:</span></label>-->
+                                                    <!--<div class="am-u-sm-9">-->
+                                                        <!--<dic:code name="data_permission_level" id="data_permission_level" code="SJQX" th:attr="disabled=${view},value=${entity.data_permission_level}"/>-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+
+                                                <!--<div class="am-form-group">-->
+                                                    <!--<label for="is_lock" class="am-u-sm-3 am-form-label">锁定用户</label>-->
+                                                    <!--<div class="am-u-sm-9">-->
+                                                        <!--<div class="tpl-switch">-->
+                                                            <!--<input type="hidden" class="hide tpl-switch-hider" value=""/>-->
+                                                            <!--<input type="checkbox" class="ios-switch bigswitch tpl-switch-btn" th:checked="${entity.is_lock eq '1'}" th:disabled="${view}" name="is_lock" id="is_lock"/>-->
+                                                            <!--<div class="tpl-switch-btn-view">-->
+                                                                <!--<div>-->
+                                                                <!--</div>-->
+                                                            <!--</div>-->
+                                                        <!--</div>-->
+
+                                                    <!--</div>-->
+                                                <!--</div>-->
+
+                                                <div class="am-form-group">
+                                                    <div class="am-u-sm-9 am-u-sm-push-3">
+                                                        <button type="submit" class="am-btn am-btn-primary tpl-btn-bg-color-success" th:unless="${validate}">提交</button>
+                                                        <button type="submit" class="am-btn am-btn-primary tpl-btn-bg-color-success" th:unless="${casefieldtocasefield}">确认验证</button>
+                                                        <!--<button type="button" class="am-btn am-btn-danger" th:onclick="'goUrl(\'/userrecharge/resend/'+${entity.id}+'\')'" th:unless="${casefieldtocasefield}>重新发送验证码</button>-->
+                                                        <button type="button" class="am-btn am-btn-danger" onclick="routingPage('/userrecharge/preview1/','案场充值列表')">返回</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<js th:replace="/public/js :: onLoadJS"></js>
+<script th:inline="javascript">
+    $(function () {
+        var casename = $("input[name='casefieldname']").val();
+        var target = $("#case_field_id");
+        // var target1 = $("#tel")
+        validateFrom();
+        initAllCase(casename,target);
+        // getSysCaseField();
+    })
+
+    // var completeHandler = function (arr) {
+    //     $('#upload-modal').modal('close');
+    //     if(arr.length == 1){
+    //         $('#icon').val(arr[0]);
+    //         $('#iconImg').attr("src",arr[0]);
+    //     }else{
+    //         $(".alert-modal-message").html("上传文件错误");
+    //         $(".alert-modal-title").html("只能上传一张图片作为头像!");
+    //         $(".alert-modal-button").html("额...好吧");
+    //         $('#alert-modal').modal('open');
+    //     }
+    // }
+
+    /**
+     * 校验登录表单
+     * @returns void
+     */
+    function validateFrom(){
+        $("#DataFrom").validate({
+            rules: {
+                casefieldname: {
+                    required:true,
+                    maxlength:64
+                },
+                tel:{
+                    required: true,
+                    isMobile: true
+                },
+                actual:{
+                    required:true,
+                    maxlength:10
+                },
+                identifyingcode:{
+                    required:true,
+                    maxlength:6
+                }
+
+            },
+            submitHandler: function(form) { //验证成功时调用
+                var param = $('#DataFrom').serializeJson();
+                var url = "/userrecharge/savecasefieldrecharge"
+                var completeHandler = function (result) {
+                        if(result.flag){
+                            // alert("充值成功！");
+                            routingPage('/userrecharge/preview1/','案场充值列表')
+                        }else{
+                            $(".alert-modal-message").html(result.msg);
+                            $(".alert-modal-title").html("错误提示");
+                            $(".alert-modal-button").html("确定")
+                            $('#alert-modal').modal('open');
+                        }
+
+
+
+                }
+                doPost(url,param,completeHandler)
+            }
+        });
+    }
+
+    //初始化所有案场
+    function initAllCase(casename,target) {
+        $.ajax({
+            type:'get',
+            dataType:'json',
+            url:'[(${ctx})]/syscasefield/findAllCase',
+            success:function (result) {
+                var values = result.data;
+                target.html('');
+                if(values.length!=0){
+                    var html = '<option value="">' +'请选择'+ '</option>';
+                    for(var i=0;i<values.length;i++){
+                        if(values[i].casefieldname==casename){
+                            html+='<option value="'+values[i].id+'" selected>'+values[i].casefieldname+'</option>';
+                            document.getElementById("tel").value=values[i].tel;
+                        }else{
+                            html+='<option value="'+values[i].id+'">'+values[i].casefieldname+'</option>';
+                        }
+                    }
+                    target.html(html);
+                }
+            }
+        })
+    }
+
+    // var target1 = $("#tel");
+    // var casename = $("#casefieldname").val();
+    function getSysCaseField() {
+        $.ajax({
+            type:'get',
+            dataType:'json',
+            // data:'$("#casefieldname option:selected").val()',
+            // url:'[(${ctx})]/syscasefield/findByCaseFieldName/{casefieldname}',
+            url:'[(${ctx})]/syscasefield/findAllCase',
+            success:function (result) {
+                var values = result.data;
+                if(values.length!=0){
+                    for(var i=0;i<values.length;i++){
+                        if(values[i].casefieldname==$("#case_field_id option:selected").text()){
+                            document.getElementById("tel").value=values[i].tel;
+                        }
+                        // document.getElementById("tel").value=values[i].tel;
+                    }
+                }
+            }
+        })
+    }
+
+</script>
+<script id="tpl-uploadTips" type="text/html" th:replace="/public/upload :: uploadTipsTemp"></script>
+<div class="am-popup"  id="upload-modal"></div>
+</body>
+</html>

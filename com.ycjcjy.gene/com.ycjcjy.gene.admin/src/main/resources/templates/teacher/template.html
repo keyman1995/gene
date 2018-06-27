@@ -1,0 +1,13 @@
+<script id="tpl-teacherList" type="text/html" th:fragment="teacherListTemp">
+    {{each $data as data}}
+    {{if data != null}}
+    <label class="am-checkbox">
+        <input type="checkbox" value="{{data.ruid}}" name="teacherList" data-am-ucheck> {{data.ch_name}}
+    </label>
+    {{else}}
+    <label class="am-checkbox">
+        <input type="checkbox" value="" data-am-ucheck disabled> 暂无数据
+    </label>
+    {{/if}}
+    {{/each}}
+</script>

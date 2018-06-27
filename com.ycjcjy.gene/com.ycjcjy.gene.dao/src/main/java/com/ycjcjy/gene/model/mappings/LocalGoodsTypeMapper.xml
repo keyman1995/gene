@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--author Ken Hu-->
+<!--description 商品类型管理 mapper-->
+<!--date 2018-06-11 15:43:08-->
+<mapper namespace="com.ycjcjy.gene.dao.LocalGoodsTypeDao">
+    <select id="findAllType" parameterType="Long" resultType="com.ycjcjy.gene.model.LocalGoodsType">
+      SELECT *
+      FROM local_goods_type
+      WHERE case_field_id = #{caseId}
+      and is_show = '1'
+      order by code
+    </select>
+
+    <select id="hasGoods" parameterType="String" resultType="int">
+        select count(1) from local_goods where type = #{type} and case_field_id = #{case_id} and is_show = '1'
+    </select>
+</mapper>

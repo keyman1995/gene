@@ -1,0 +1,31 @@
+<script id="tpl-serverDetail" type="text/html" th:fragment="serverDetail" xmlns:th="http://www.w3.org/1999/xhtml">
+
+    <tr>
+        <td>图片</td>
+        <td>排序</td>
+        <td>操作</td>
+    </tr>
+    {{each $data as data}}
+    {{if data != null}}
+    <tr>
+        <td> <img src=" {{data.img_url}}"  height="100px" width="100px"/></td>
+        <td><input type="text" readonly value="{{data.sort}}"></td>
+        <td>
+            <div class="tpl-table-black-operation" >
+                <a href="javascript:;" onclick="deleteImg(this)" data-url="/serverdetail/delete/{{data.id}}" class="tpl-table-black-operation-del">
+                    <i class="am-icon-trash" ></i> 删除
+                </a>
+            </div>
+            <div class="tpl-table-black-operation" >
+                <a href="javascript:;" onclick="editImg({{data.id}})"  class="tpl-table-black-operation">
+                    <i class="am-icon-trash" ></i> 编辑
+                </a>
+            </div>
+        </td>
+    </tr>
+    {{else}}
+
+    {{/if}}
+    {{/each}}
+
+</script>

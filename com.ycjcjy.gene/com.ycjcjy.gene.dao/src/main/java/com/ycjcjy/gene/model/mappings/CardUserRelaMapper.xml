@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.CardUserRelaDao" >
+<update id="updateSaleStateGuoQi" parameterType="String">
+        update card_user_rela r set r.state = 2 where r.end_time &lt; #{nowTime} and r.state = 0
+    </update>
+ <select id="getUserCard" parameterType="java.lang.String" resultType="com.ycjcjy.gene.model.CardUserRela">
+    SELECT
+	IFNULL(CONCAT(DATE_FORMAT( a.start_time, '%Y年%m月%d日' ),'-',DATE_FORMAT( a.end_time, '%Y年%m月%d日' )),'未激活')	AS startStr,
+	IFNULL(DATE_FORMAT( a.end_time, '%Y年%m月%d日' ),'未激活') as endStr,
+	a.card_type,
+	a.salve_id,
+	a.user_id,
+	a.id,
+CASE
+	a.card_type
+	WHEN 0 THEN
+	b.NAME
+	WHEN 2 THEN
+	d.NAME
+	END AS NAME,
+CASE
+	a.card_type
+	WHEN 0 THEN
+	b.remarks
+	WHEN 2 THEN
+	d.remarks
+	END AS remark,
+CASE
+	a.card_type
+	WHEN 0 THEN
+	b.price
+	WHEN 2 THEN
+	d.price
+	END AS price,
+CASE
+	a.card_type
+	WHEN 0 THEN
+	f.type
+	WHEN 2 THEN
+	d.card_gym_type
+	END AS card_tag,
+	b.course_id as courseId
+FROM
+	card_user_rela a
+	LEFT JOIN card_courde_basic b ON a.card_id = b.id
+	AND a.card_type = 0
+	LEFT JOIN card_gym_basic d ON a.card_id = d.id
+	AND a.card_type = 2
+	LEFT JOIN course_manager e ON b.course_id = e.id
+	AND a.card_type = 0
+	LEFT JOIN course_type f ON e.coursetype = f.id
+	WHERE a.user_id = #{user_id}
+	and a.state = #{state}
+	and a.card_type = #{card_type}
+	ORDER BY a.end_time asc
+	limit  ${base_offset},${base_pageSize}
+
+    </select>
+
+    <select id="getCardDetail" parameterType="java.lang.String" resultType="com.ycjcjy.gene.model.CardUserRela">
+        SELECT
+	IFNULL(CONCAT(DATE_FORMAT( a.start_time, '%Y年%m月%d日' ),'-',DATE_FORMAT( a.end_time, '%Y年%m月%d日' )),'未激活')	AS startStr,
+	IFNULL(DATE_FORMAT( a.end_time, '%Y年%m月%d日' ),'未激活') as endStr,
+	a.card_type,
+	a.salve_id,
+	a.user_id,
+	a.id,
+	b.name,
+	b.remarks as remark,
+	b.price
+
+FROM
+	card_user_rela a
+	LEFT JOIN card_gym_basic b ON a.card_id = b.id
+WHERE
+	a.id = #{id}
+    </select>
+
+    <select id="getCount" parameterType="java.lang.String" resultType="int">
+        select count(1) from(
+                 SELECT
+	DATE_FORMAT( a.start_time, '%Y年%m月%d日' ) AS startStr,
+	DATE_FORMAT( a.end_time, '%Y年%m月%d日' ) AS endStr,
+	a.card_type,
+	a.salve_id,
+	a.user_id,
+	a.id,
+CASE
+	a.card_type
+	WHEN 0 THEN
+	b.NAME
+	WHEN 2 THEN
+	d.NAME
+	END AS name,
+CASE
+	a.card_type
+	WHEN 0 THEN
+	b.remarks
+	WHEN 2 THEN
+	d.remarks
+	END AS remarks,
+CASE
+	a.card_type
+	WHEN 0 THEN
+	b.price
+	WHEN 2 THEN
+	d.price
+	END AS price ,
+	d.card_gym_type AS gymType
+FROM
+	card_user_rela a
+	LEFT JOIN card_courde_basic b ON a.card_id = b.id
+	AND a.card_type = 0
+	LEFT JOIN card_gym_basic d ON a.card_id = d.id
+	AND a.card_type = 2
+	WHERE a.user_id = #{user_id}
+	and a.state = #{state}
+	and a.card_type = #{card_type}
+        )faketable
+    </select>
+
+	<select id="queryCardsByTime" parameterType="string" resultType="com.ycjcjy.gene.model.CardUserRela">
+		select
+		user_id,
+		count(id) as cardcount
+		from card_user_rela
+		where card_type in (0,1) and state = 0 and end_time &lt;= #{newTime} and end_time >= #{nowHour}
+		group by user_id
+	</select>
+	<select id="queryCardsByTimeAndUserId" parameterType="string" resultType="com.ycjcjy.gene.model.CardUserRela">
+		select * FROM
+		(
+		SELECT
+			DATE_FORMAT( a.start_time, '%Y年%m月%d日' ) AS startStr,
+			DATE_FORMAT( a.end_time, '%Y年%m月%d日' ) AS endStr,
+			a.card_type,
+			case
+				when e.id = #{courseId} then 0
+				else 1
+			end as courseIdOrder,
+			a.id,
+			b.NAME,
+			b.remarks as remark,
+			b.price,
+			f.type AS courseTag,
+			 CASE
+				WHEN a.start_time &gt; #{nowTime}   THEN 0
+				WHEN a.start_time &lt; #{nowTime} and a.end_time &gt; #{nowTime} and e.id = #{courseId} THEN 1
+				WHEN a.start_time &lt; #{nowTime} and a.end_time &gt; #{nowTime} and e.id != #{courseId} THEN 0
+				WHEN a.end_time &lt; #{nowTime} THEN 0
+			 END as cardState
+		FROM
+			card_user_rela a
+			LEFT JOIN card_courde_basic b ON a.card_id = b.id
+			AND a.card_type = 0
+			LEFT JOIN course_manager e ON b.course_id = e.id
+			AND a.card_type = 0
+			LEFT JOIN course_type f ON e.coursetype = f.id
+			WHERE a.user_id = #{userId} and  a.card_type = 0 and a.state in (0,2)
+		) tmp
+		order by courseIdOrder,cardState
+
+	</select>
+	<select id="queryCardsByTimeAndUserIdCount" parameterType="string" resultType="int">
+		select count(*)
+		FROM
+		card_user_rela a
+		LEFT JOIN card_courde_basic b ON a.card_id = b.id
+		AND a.card_type = 0
+		LEFT JOIN course_manager e ON b.course_id = e.id
+		AND a.card_type = 0
+		LEFT JOIN course_type f ON e.coursetype = f.id
+		WHERE a.user_id = #{userId} and  a.card_type = 0
+
+		 and a.start_time &lt; #{nowTime} and a.end_time &gt; #{nowTime} and e.id = #{courseId}
+       and a.state =0
+	</select>
+
+	<select id="queryCardSendCount" parameterType="string" resultType="int">
+		select count(*)
+		FROM
+		card_user_rela a
+		WHERE a.state in (0,1) and  a.card_type = 0 AND  a.source = 2
+		and a.card_id = #{courseId} and a.user_id = #{userId}
+
+	</select>
+
+	<select id="getCardIsExist" parameterType="int" resultType="com.ycjcjy.gene.model.CardUserRela">
+		SELECT *
+		from card_user_rela
+		where salve_id = #{salveId}
+	</select>
+</mapper>

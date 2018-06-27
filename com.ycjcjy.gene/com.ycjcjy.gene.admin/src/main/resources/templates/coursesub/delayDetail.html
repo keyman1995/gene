@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml"
+      xmlns:course="http://www.w3.org/1999/html" xmlns:caseField="http://www.w3.org/1999/html">
+<head th:replace="/public/head :: onLoadHead(体验劵管理)">
+</head>
+<body ddata-type="widgets">
+
+<div class="am-g tpl-g">
+    <!-- 模态提示组件 -->
+    <div th:include="/public/tips :: Tips"></div>
+    <!-- 内容区域 -->
+    <div class="tpl-content-wrapper none-margin">
+        <div class="row-content am-cf">
+            <div class="row">
+                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+
+                            <div class="row">
+
+                                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                                    <div class="widget am-cf">
+                                        <div class="widget-head am-cf">
+                                            <div class="widget-title am-fl" th:if="${edit}">延迟上课</div>
+                                        </div>
+                                        <div class="widget-body am-fr">
+
+                                            <form class="am-form tpl-form-border-form tpl-form-border-br" id="DataFrom">
+                                                <input type="hidden" name="id" th:value="${entity.id}">
+                                                <input type="hidden" name="pcourseid" th:value="${entity.pcourseid}" id="pcourseid">
+                                                <div class="am-form-group">
+                                                    <label for="name" class="am-u-sm-3 am-form-label">子课名称 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" name="name" id="name" placeholder="请输入体验券名称" th:disabled="${view}" th:inline="text" th:value="${entity.subcousename}">
+                                                        </input>
+                                                    </div>
+                                                </div>
+                                                <div class="am-form-group">
+                                                    <label for="substartline" class="am-u-sm-3 am-form-label">推迟课程开始时间 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" name="substartline" id="substartline" th:disabled="${view}" th:inline="text" th:value="${entity.substartline}">
+                                                        </input>
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group">
+                                                    <label for="subendline" class="am-u-sm-3 am-form-label">推迟课程结束时间 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" name="subendline" id="subendline" th:disabled="${view}" th:inline="text" th:value="${entity.subendline}">
+                                                        </input>
+                                                    </div>
+                                                </div>
+
+
+
+                                                <div class="am-form-group">
+                                                    <div class="am-u-sm-9 am-u-sm-push-3">
+                                                        <button type="submit" class="am-btn am-btn-primary tpl-btn-bg-color-success" th:unless="${view}">提交</button>
+                                                        <button type="button" class="am-btn am-btn-danger" th:onclick="'routingPage(\'/coursesub/delay/'+${entity.pcourseid}+'\')'">返回</button>
+                                                    </div>
+                                                </div>
+
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<css th:replace="/public/css :: onLoadCSS"></css>
+<js th:replace="/public/js :: onLoadJS"></js>
+<script  th:inline="javascript">
+
+
+
+
+    $(function () {
+        validateFrom();
+
+    });
+    $('#substartline').datetimepicker({
+        language:  'zh-CN',
+        format: 'yyyy-mm-dd HH:mm:ss',
+        autoclose: true,
+        startView:2,
+        minView:'day',
+        maxView:1,
+        startDate: getTodayDataStr()
+    });
+    $('#subendline').datetimepicker({
+        language:  'zh-CN',
+        format: 'yyyy-mm-dd HH:mm:ss',
+        autoclose: true,
+        startView:2,
+        minView:'day',
+        maxView:1,
+        startDate: getTodayDataStr()
+    });
+
+
+
+
+
+
+
+    /**
+     * 校验登录表单
+     * @returns void
+     */
+    function validateFrom(){
+        $("#DataFrom").validate({
+            rules: {
+                start_time:{
+                    required:true
+                },
+                end_time:{
+                    required:true
+                }
+            },
+            submitHandler: function(form) { //验证成功时调用
+                    var pid = $('#pcourseid').val();
+                    var param = $('#DataFrom').serializeJson();
+                    var url = "/coursesub/delayThis";
+                    function completeHandler(data) {
+                        routingPage('/coursesub/delay/'+pid,'延迟列表')
+
+                    }
+                    doGet(url,param,completeHandler)
+
+
+
+            }
+        });
+    }
+
+
+
+
+
+
+</script>
+<!-- Pr树模态组件 -->
+<script id="tpl-PrTreeTempl" type="text/html"  th:replace="/sysrole/template :: PrTreeTempl"></script>
+<!-- 机构树模态组件 -->
+
+</body>
+</html>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="com.ycjcjy.gene.action" />
+        <module name="com.ycjcjy.gene.admin" />
+        <module name="com.ycjcjy.gene.dao" />
+        <module name="com.ycjcjy.gene.security" />
+        <module name="com.ycjcjy.gene.service" />
+        <module name="com.ycjcjy.gene.web" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="com.ycjcjy.gene" target="1.8" />
+      <module name="com.ycjcjy.gene.action" target="1.8" />
+      <module name="com.ycjcjy.gene.admin" target="1.8" />
+      <module name="com.ycjcjy.gene.dao" target="1.8" />
+      <module name="com.ycjcjy.gene.security" target="1.8" />
+      <module name="com.ycjcjy.gene.service" target="1.8" />
+      <module name="com.ycjcjy.gene.web" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

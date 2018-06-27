@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.CardCourdeBasicDao" >
+    <select id="findCourse" parameterType="com.ycjcjy.gene.model.CardCourdeBasic" resultType="com.ycjcjy.gene.model.CardCourdeBasic">
+		SELECT
+		a.id,
+		a.name,
+		a.course_id,
+		DATE_FORMAT(a.start_time, '%Y-%m-%d' ) startStr,
+		DATE_FORMAT(a.end_time, '%Y-%m-%d' ) endStr,
+		b.coursename AS coursename,
+		a.price,
+		b.img_url AS img_url,
+		b.courseaddress AS courseaddress,
+		b.courseintro AS courseintro,
+		a.start_time
+		FROM
+		card_courde_basic a
+		LEFT JOIN course_manager b ON a.course_id = b.id
+        order by a.start_time desc
+        <if test="base_pageSize !=null and base_pageSize !=''">
+            limit  ${base_offset},${base_pageSize}
+        </if>
+    </select>
+
+    <select id="pageCount" parameterType="com.ycjcjy.gene.model.CardCourdeBasic" resultType="int">
+        SELECT COUNT(1) FROM (
+         SELECT
+	a.id,
+	a.course_id,
+	a. NAME,
+	b.courseprice AS courseprice,
+	b.coursename AS coursename,
+	b.courseaddress AS courseaddress,
+	b.courseintro AS courseintro,
+	b.coursestartline AS coursestartline,
+b.img_url AS img_url
+FROM
+	card_courde_basic a
+LEFT JOIN course_manager b ON a.course_id = b.id
+        )faketable
+    </select>
+
+	<select id="checkIsOutDate" resultType="integer">
+		select count(1)  from card_courde_basic
+		where course_id = #{course_id} and now() &lt; end_time
+	</select>
+
+
+	<select id="findCardCourse" resultType="com.ycjcjy.gene.model.CardCourdeBasic" >
+		select id,course_id,name,price,start_time,end_time,DATE_FORMAT(start_time,'%Y-%c-%d %H:%i:%s') startStr,DATE_FORMAT(end_time,'%Y-%c-%d %H:%i:%s') endStr,remarks from card_courde_basic where id = #{id}
+	</select>
+
+
+
+	<select id="hasTicket" parameterType="int" resultType="int">
+		SELECT count(1) FROM card_ticket_master where target_id = #{target_id} AND ticket_type = 0
+	</select>
+</mapper>

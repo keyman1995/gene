@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--author szcc-->
+<!--description 商品订单子订单 mapper-->
+<!--date 2018-06-11 18:11:14-->
+<mapper namespace="com.ycjcjy.gene.dao.GoodsOrderSubDao">
+    <parameterMap id="orderSubParamMap" type="com.ycjcjy.gene.model.GoodsOrderSub"></parameterMap>
+    <update id="updateOrder" parameterType="com.ycjcjy.gene.model.GoodsOrderSub">
+        UPDATE goods_order_sub
+        SET order_state = 1
+        where pid  = #{pid}
+
+    </update>
+
+    <select id="findAllGoodsOrderSub" parameterMap="orderSubParamMap" resultType="com.ycjcjy.gene.model.GoodsOrderSub">
+        SELECT  t.*,concat(cfa.area_name,cdt.num,"号桌") as tableInfo,scf.casefieldname,g.goods_name as goodsName,su.mobile as salertel ,su.realname as salername
+        FROM goods_order_sub t
+        left join sys_case_field_table cdt on t.table_id = cdt.id
+        left join sys_case_field_area cfa on cfa.id = cdt.area
+        left join local_goods g on t.goods_id = g.id
+        left join sys_case_field scf on scf.id = t.case_field_id
+        left join sys_user su on su.id = t.saler_id
+        <where>
+
+            <if test="case_field_id !=null and case_field_id !=''">
+                and
+                t.case_field_id = #{case_field_id}
+            </if>
+
+            <if test="(order_state !=null and order_state != '') or order_state==0">
+                and
+                t.order_state = #{order_state}
+            </if>
+
+
+        </where>
+
+
+        <if test="base_sort !=null and base_sort !=''">
+            order by ${base_orderBy}  ${base_sort}
+        </if>
+        <if test="base_pageSize !=null and base_pageSize !=''">
+            limit  ${base_offset},${base_pageSize}
+        </if>
+    </select>
+
+    <select id="getAllCount" parameterMap="orderSubParamMap" resultType="int">
+        SELECT count(*)
+        FROM goods_order_sub t
+        left join sys_case_field_table cdt on t.table_id = cdt.id
+        left join sys_case_field_area cfa on cfa.id = cdt.area
+        left join local_goods g on t.goods_id = g.id
+        left join sys_case_field scf on scf.id = t.case_field_id
+        left join sys_user su on su.id = t.saler_id
+        <where>
+
+            <if test="case_field_id !=null and case_field_id !=''">
+                and
+                t.case_field_id = #{case_field_id}
+            </if>
+
+            <if test="(order_state !=null and order_state != '') or order_state==0">
+                and
+                t.order_state = #{order_state}
+            </if>
+
+        </where>
+    </select>
+    <select id="getMonthlyOrder" parameterType="int" resultType="com.ycjcjy.gene.VO.MonthOrderVO">
+        SELECT
+	DATE_FORMAT( a.create_time, '%Y年%m月' ) AS months,
+	(
+SELECT
+	count( 1 )
+FROM
+	card_ticket_salve c
+	LEFT JOIN card_ticket_master e ON c.pid = e.id
+WHERE
+	DATE_FORMAT( e.create_time, '%Y%m' ) = DATE_FORMAT( a.create_time, '%Y%m' )
+	AND c.state = 4
+        and e.org_id = #{case_id}
+	) AS used,
+	IFNULL(
+	(
+SELECT
+	SUM( d.count )
+FROM
+	card_ticket_master d
+WHERE
+	DATE_FORMAT( d.create_time, '%Y%m' ) = DATE_FORMAT( a.create_time, '%Y%m' )
+        and d.ticket_type = 1
+        and d.org_id = #{case_id}
+	),
+	0
+	) total
+FROM
+	card_ticket_master a
+	LEFT JOIN card_ticket_salve b ON a.id = b.pid
+WHERE
+	a.ticket_type = 1
+and
+    a.org_id = #{case_id}
+GROUP BY
+	months
+ORDER BY
+	a.create_time desc
+        <!--<if test="base_pageSize !=null and base_pageSize !=''">
+            limit  ${base_offset},${base_pageSize}
+        </if>-->
+    </select>
+    <select id="getMonthlyOrderCount" parameterType="int" resultType="int">
+        select conut(1) from (
+          SELECT
+	DATE_FORMAT( a.create_time, '%Y年%m月' ) AS months,
+	(
+SELECT
+	count( 1 )
+FROM
+	card_ticket_salve c
+	LEFT JOIN card_ticket_master e ON c.pid = e.id
+WHERE
+	DATE_FORMAT( e.create_time, '%Y%m' ) = DATE_FORMAT( a.create_time, '%Y%m' )
+	AND c.state = 4
+	) AS used,
+	IFNULL(
+	(
+SELECT
+	SUM( d.count )
+FROM
+	card_ticket_master d
+WHERE
+	DATE_FORMAT( d.create_time, '%Y%m' ) = DATE_FORMAT( a.create_time, '%Y%m' )
+	),
+	0
+	) total
+FROM
+	card_ticket_master a
+	LEFT JOIN card_ticket_salve b ON a.id = b.pid
+WHERE
+	a.ticket_type = 1
+and
+    a.org_id = #{case_id}
+GROUP BY
+	months
+ORDER BY
+	a.create_time
+        ) faketable
+    </select>
+
+    <select id="getThisMonthlyOrder" parameterType="int" resultType="com.ycjcjy.gene.VO.MonthOrderVO">
+        SELECT
+        DATE_FORMAT( a.create_time, '%Y年%m月' ) AS months,
+        (
+        SELECT
+        count( 1 )
+        FROM
+        card_ticket_salve c
+        LEFT JOIN card_ticket_master e ON c.pid = e.id
+        WHERE
+        DATE_FORMAT( e.create_time, '%Y%m' ) = DATE_FORMAT( a.create_time, '%Y%m' )
+        AND c.state = 4
+        and e.org_id = #{case_id}
+        ) AS used,
+        IFNULL(
+        (
+        SELECT
+        SUM( d.count )
+        FROM
+        card_ticket_master d
+        WHERE
+        DATE_FORMAT( d.create_time, '%Y%m' ) = DATE_FORMAT( a.create_time, '%Y%m' )
+        and d.ticket_type = 1
+        and d.org_id = #{case_id}
+        ),
+        0
+        ) total
+        FROM
+        card_ticket_master a
+        LEFT JOIN card_ticket_salve b ON a.id = b.pid
+        WHERE
+        a.ticket_type = 1
+        and
+        a.org_id = #{case_id}
+        GROUP BY
+        months
+        ORDER BY
+        a.create_time desc
+        limit 1
+        <!--<if test="base_pageSize !=null and base_pageSize !=''">
+            limit  ${base_offset},${base_pageSize}
+        </if>-->
+    </select>
+
+
+
+    <select id="exportExcelList" parameterType="int" resultType="com.ycjcjy.gene.VO.ExportExcelVO">
+        SELECT
+	t.order_no,
+	gy.type AS goodsType,
+	g.goods_name AS goodsName,
+	t.goods_num,
+	concat( cfa.area_name, cdt.num, "号桌" ) AS tableInfo,
+	DATE_FORMAT( gom.create_time, "%Y/%c/%d %H:%i:%s" ) AS create_str,
+	su.realname AS salername,
+	scf.casefieldname,
+	CASE
+	t.order_state
+	WHEN 0 THEN
+	'已生成'
+	WHEN 1 THEN
+	'已完成'
+	WHEN 2 THEN
+	'失败'
+	END AS order_state,
+	g.price as price
+FROM
+	goods_order_sub t
+	LEFT JOIN sys_case_field_table cdt ON t.table_id = cdt.id
+	LEFT JOIN sys_case_field_area cfa ON cfa.id = cdt.area
+	LEFT JOIN local_goods g ON t.goods_id = g.id
+	LEFT JOIN local_goods_type gy ON g.type = gy.id
+	LEFT JOIN sys_case_field scf ON scf.id = t.case_field_id
+	LEFT JOIN sys_user su ON su.id = t.saler_id
+	LEFT JOIN goods_order_main gom ON gom.id = t.pid
+	WHERE t.case_field_id = #{case_id}
+	and t.order_month = #{month}
+    </select>
+
+    <select id="getGiveCountBySalerId" resultType="int" parameterType="int">
+      SELECT ifnull(sum(goods_num),0)
+      FROM goods_order_sub
+      where saler_id = #{salerId}
+      <if test="ismonth==1">
+          and order_month = #{month}
+      </if>
+    </select>
+
+</mapper>

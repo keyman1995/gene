@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--author szcc-->
+<!--description 商品订单主表 mapper-->
+<!--date 2018-06-11 18:10:40-->
+<mapper namespace="com.ycjcjy.gene.dao.GoodsOrderMainDao">
+
+    <resultMap id="goodsOrderMainResultMap" type="com.ycjcjy.gene.model.GoodsOrderMain">
+        <result column="id" property="id"></result>
+        <result column="realname" property="realname"></result>
+        <result column="tableInfo" property="tableInfo"></result>
+        <result column="img_url" property="img_url"></result>
+        <result column="img_url_mono" property="img_url_mono"></result>
+        <result column="create_time_str" property="create_time_str"></result>
+        <collection property="list" select="findSubByPid" column="id" ofType="com.ycjcjy.gene.model.GoodsOrderSub" javaType="ArrayList"></collection>
+    </resultMap>
+    <select id="findNewGoodsOrderMain" parameterType="com.ycjcjy.gene.model.GoodsOrderMain" resultMap="goodsOrderMainResultMap">
+      SELECT gom.*,su.realname,concat(cfa.area_name,cdt.num,"号桌") as tableInfo,cfa.img_url,cfa.img_url_mono,DATE_FORMAT(gom.create_time,"%H:%i:%s") as create_time_str
+      FROM goods_order_main gom
+        left join sys_case_field_table cdt on gom.table_id = cdt.id
+        left join sys_case_field_area cfa on cfa.id = cdt.area
+        LEFT JOIN sys_user su ON gom.saler_id = su.id
+      where order_state = 0 and flag = #{flag}
+      <if test="case_field_id != null ">
+          and gom.case_field_id = #{case_field_id}
+      </if>
+        order by gom.create_time
+    </select>
+
+    <select id="findSubByPid" parameterType="int" resultType="com.ycjcjy.gene.model.GoodsOrderSub">
+        SELECT s.*,g.goods_name as goodsName
+        FROM goods_order_sub s left join local_goods g on s.goods_id = g.id
+        where s.pid = #{id}
+    </select>
+
+    <update id="updateNewGoodsOrderMain" parameterType="list">
+        UPDATE goods_order_main
+        SET flag = 1
+        where id in
+        <foreach collection="list" open="(" close=")" separator="," item="om">
+            #{om.id}
+        </foreach>
+
+    </update>
+
+    <update id="updateOrder" parameterType="com.ycjcjy.gene.model.GoodsOrderMain">
+        UPDATE goods_order_main
+        SET order_state = 1,done_time = #{done_time}
+        where id  = #{id}
+
+    </update>
+
+    <update id="updateOrderFlag" parameterType="com.ycjcjy.gene.model.GoodsOrderMain">
+        UPDATE goods_order_main
+        SET flag = 1
+        where id  = #{id}
+
+    </update>
+
+    <select id="toDayGoodsNum" parameterType="String" resultType="int">
+        select ifnull(sum(goods_num),0)
+        from goods_order_sub
+        where pid != #{id} and to_days(create_time)  = to_days(#{nowTime}) and case_field_id = #{caseId}
+    </select>
+    <select id="toDayOrderCount" parameterType="String" resultType="int">
+        select count(*)
+        from goods_order_main
+        where id != #{id} and to_days(create_time)  = to_days(#{nowTime}) and case_field_id = #{caseId}
+    </select>
+
+    <select id="findNewGoodsOrderMainForTui" parameterType="com.ycjcjy.gene.model.GoodsOrderMain" resultMap="goodsOrderMainResultMap">
+        SELECT gom.*,su.realname,concat(cfa.area_name,cdt.num,"号桌") as tableInfo,cfa.img_url,cfa.img_url_mono,DATE_FORMAT(gom.create_time,"%H:%i:%s") as create_time_str
+        FROM goods_order_main gom
+        left join sys_case_field_table cdt on gom.table_id = cdt.id
+        left join sys_case_field_area cfa on cfa.id = cdt.area
+        LEFT JOIN sys_user su ON gom.saler_id = su.id
+        where gom.id=#{id}
+        order by gom.create_time
+    </select>
+
+</mapper>

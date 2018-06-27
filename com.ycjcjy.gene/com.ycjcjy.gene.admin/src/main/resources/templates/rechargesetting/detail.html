@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="/public/head :: onLoadHead(用户管理)">
+</head>
+<body ddata-type="widgets">
+<div class="am-g tpl-g">
+    <!-- 模态提示组件 -->
+    <div th:include="/public/tips :: Tips"></div>
+    <!-- 数据选择模态组件 -->
+    <div th:include="/public/dataBind :: RuBindTips" class="am-popup"  id="data-bind-modal"></div>
+    <!-- 内容区域 -->
+    <div class="tpl-content-wrapper none-margin">
+        <div class="row-content am-cf">
+            <div class="row">
+                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                            <div class="row">
+                                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                                    <div class="widget am-cf">
+                                        <div class="widget-head am-cf">
+                                            <div class="widget-title am-fl" th:if="${add}">新增充值配置</div>
+                                            <!--<div class="widget-title am-fl" th:if="${view}">查看用户</div>-->
+                                            <div class="widget-title am-fl" th:if="${edit}">编辑充值配置</div>
+                                        </div>
+                                        <div class="widget-body am-fr">
+
+                                            <form class="am-form tpl-form-border-form tpl-form-border-br" id="DataFrom">
+                                                <input type="hidden" name="id" th:value="${entity.id}">
+
+
+                                                <div class="am-form-group">
+                                                    <label for="price" class="am-u-sm-3 am-form-label">充值金额 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="number" class="tpl-form-input" name="price" id="price" placeholder="请输入充值金额"  th:disabled="${view}" th:value="${entity.price}">
+                                                        <small th:unless="${view}">充值金额,限数字</small>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="am-form-group">
+                                                    <label for="gift_price" class="am-u-sm-3 am-form-label">赠送金额 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="number" class="tpl-form-input" name="gift_price" id="gift_price" placeholder="请输入赠送金额"  th:disabled="${view}" th:value="${entity.gift_price}">
+                                                        <small th:unless="${view}">赠送金额,限数字</small>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="am-form-group">
+                                                    <div class="am-u-sm-9 am-u-sm-push-3">
+                                                        <button type="submit" class="am-btn am-btn-primary tpl-btn-bg-color-success" th:unless="${view}">提交</button>
+                                                        <button type="button" class="am-btn am-btn-warning" onClick="'routingPage(\'/rechargesetting/edit/'+${entity.id}+'\',\''+编辑充值配置+'\')'" th:if="${view}">编辑</button>
+                                                        <button type="button" class="am-btn am-btn-danger" onclick="routingPage('/rechargesetting/preview/','充值配置列表')">返回</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<css th:replace="/public/css :: onLoadCSS"></css>
+<js th:replace="/public/js :: onLoadJS"></js>
+<script th:inline="javascript">
+    $(function () {
+        validateFrom();
+    })
+
+    // var completeHandler = function (arr) {
+    //     $('#upload-modal').modal('close');
+    //     if(arr.length == 1){
+    //         $('#icon').val(arr[0]);
+    //         $('#iconImg').attr("src",arr[0]);
+    //     }else{
+    //         $(".alert-modal-message").html("上传文件错误");
+    //         $(".alert-modal-title").html("只能上传一张图片作为头像!");
+    //         $(".alert-modal-button").html("额...好吧");
+    //         $('#alert-modal').modal('open');
+    //     }
+    // }
+
+    /**
+     * 校验登录表单
+     * @returns void
+     */
+    function validateFrom(){
+        $("#DataFrom").validate({
+            rules: {
+                price:{
+                    required:true
+                },
+                gift_price: {
+                    required:true
+                }
+
+            },
+            submitHandler: function(form) { //验证成功时调用
+                var param = $('#DataFrom').serializeJson();
+                var url = "/rechargesetting/save"
+                var completeHandler = function (data) {
+                    routingPage('/rechargesetting/preview/','充值配置列表')
+                }
+                doPost(url,param,completeHandler)
+            }
+        });
+    }
+
+</script>
+
+<div class="am-popup"  id="upload-modal"></div>
+</body>
+</html>

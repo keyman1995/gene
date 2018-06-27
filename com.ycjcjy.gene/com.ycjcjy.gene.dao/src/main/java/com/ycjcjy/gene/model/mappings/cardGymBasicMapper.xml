@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.CardGymBasicDao" >
+
+
+        <select id="findList" parameterType="com.ycjcjy.gene.model.CardGymBasic"  resultType="com.ycjcjy.gene.model.CardGymBasic">
+            SELECT
+            a.card_gym_type,
+            a.create_time,
+            a.id,
+            a.name,
+            a.price,
+            a.remarks,
+            a.start_time,
+            a.end_time,
+            DATE_FORMAT( a.end_time, '%Y-%m-%d' ) endStr,
+            DATE_FORMAT( a.start_time, '%Y-%m-%d' ) startStr
+            FROM
+            card_gym_basic a
+            order by a.start_time desc
+            <if test="base_pageSize !=null and base_pageSize !=''">
+                limit ${base_offset},${base_pageSize}
+            </if>
+        </select>
+
+        <select id="getCount" parameterType="com.ycjcjy.gene.model.CardGymBasic" resultType="int">
+            SELECT
+           count(*)
+            FROM
+            `card_gym_basic`
+        </select>
+
+
+    <select id="getById" parameterType="com.ycjcjy.gene.model.CardGymBasic" resultType="long">
+            SELECT
+                *
+            FROM
+                card_gym_basic
+            WHERE
+                id = #{target_id}
+    </select>
+
+    <select id="hasTicket" parameterType="int" resultType="int">
+		SELECT count(1) FROM card_ticket_master where target_id = #{target_id} AND ticket_type = 2
+	</select>
+
+
+
+    </mapper>

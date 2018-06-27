@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="/public/head :: onLoadHead(渠道管理管理)">
+</head>
+<body ddata-type="widgets">
+<div class="am-g tpl-g">
+    <!--引用通用样式-->
+    <css th:replace="/public/css :: onLoadCSS"></css>
+    <!--引用通用js-->
+    <js th:replace="/public/js :: onLoadJS"></js>
+    <!-- 模态提示组件 -->
+    <div th:include="/public/tips :: Tips"></div>
+    <!-- 内容区域 -->
+    <div class="tpl-content-wrapper none-margin">
+        <div class="row-content am-cf">
+            <div class="row">
+                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                    <div class="row">
+                        <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                            <div class="widget am-cf">
+                                <div class="widget-head am-cf">
+                                    <th:block th:include="/public/breadCrumbs :: breadCrumbsTempl"/>
+                                </div>
+                                <div class="widget-body am-fr">
+
+                                    <form class="am-form tpl-form-border-form tpl-form-border-br" id="DataFrom">
+                                                <input type="hidden" name="id" th:value="${entity.id}">
+
+                                                <div class="am-form-group">
+                                                    <label for="name" class="am-u-sm-3 am-form-label">渠道名 <span class="tpl-form-line-small-title">Text</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" name="name" id="name" placeholder="请输入渠道名" th:disabled="${view}" th:value="${entity.name}">
+                                                        <small th:unless="${view}">渠道名</small>
+                                                    </div>
+                                                </div>
+                                                <div class="am-form-group">
+                                                    <label for="code" class="am-u-sm-3 am-form-label">渠道code <span class="tpl-form-line-small-title">Text</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" name="code" id="code" placeholder="请输入渠道code" th:disabled="${view}" th:value="${entity.code}">
+                                                        <small th:unless="${view}">渠道code</small>
+                                                    </div>
+                                                </div>
+                                        <div class="am-form-group">
+                                            <div class="am-u-sm-9 am-u-sm-push-3">
+                                                <th:block sec:authorize="hasPermission('$everyone','PERM_CHANNEL_LIST_SAVE')">
+                                                    <button type="submit" class="am-btn am-btn-primary tpl-btn-bg-color-success" th:unless="${view}">提交</button>
+                                                </th:block>
+
+                                                <th:block sec:authorize="hasPermission('$everyone','PERM_CHANNEL_LIST_SAVE')">
+                                                    <button type="button" class="am-btn am-btn-warning" th:onclick="'routingPage(\'/channel/edit/'+${entity.id}+'\')',\'编辑\'" th:if="${view}">编辑</button>
+                                                </th:block>
+                                                <button type="button" class="am-btn am-btn-danger" onClick="routingPage('/channel/preview/')">返回</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script th:inline="javascript">
+    $(function () {
+        validateFrom();
+    });
+
+    /**
+     * 校验登录表单
+     * @returns void
+     */
+    function validateFrom(){
+        $("#DataFrom").validate({
+            rules: {
+            name:{
+            },
+            code:{
+            }
+
+            },
+            submitHandler: function(form) { //验证成功时调用
+                var param = $('#DataFrom').serializeJson();
+                var url = "/channel/save";
+                var completeHandler = function (data) {
+                    routingPage('/channel/preview/','渠道管理管理');
+                };
+                doPost(url,param,completeHandler);
+            }
+        });
+    }
+
+</script>
+</body>
+</html>

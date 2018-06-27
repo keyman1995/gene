@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="/public/head :: onLoadHead(课程详情)">
+
+
+</head>
+<body ddata-type="widgets">
+
+<div class="am-g tpl-g">
+    <!-- 模态提示组件 -->
+    <!--<div th:include="/public/tips :: Tips"></div>-->
+    <!-- 数据选择模态组件 -->
+    <!--<div th:include="/public/dataBind :: RuBindTips" class="am-popup"  id="data-bind-modal"></div>-->
+    <!-- 内容区域 -->
+    <div class="tpl-content-wrapper none-margin">
+        <div class="row-content am-cf">
+            <div class="widget-head am-cf">
+                <th:block th:include="/public/breadCrumbs :: breadCrumbsTempl"/>
+            </div>
+            <div class="row">
+                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+
+                            <div class="row">
+
+                                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                                    <div class="widget am-cf">
+                                        <div class="widget-head am-cf">
+                                            <div class="widget-title am-fl" th:if="${add}">新增课程</div>
+                                            <div class="widget-title am-fl" th:if="${view}">查看课程</div>
+                                            <div class="widget-title am-fl" th:if="${edit}">编辑课程</div>
+                                        </div>
+                                        <div class="widget-body am-fr">
+                                            <form class="am-form tpl-form-border-form tpl-form-border-br" id="DataFrom">
+                                                <input type="hidden" name="id" th:value="${entity.id}">
+                                                <input type="text" class="am-form-field" name="casename"  style="display: none" th:value="${entity.caseid}">
+                                                <input type="text" class="tpl-form-input" name="teachername" style="display: none" th:disabled="${view}" th:value="${entity.teacherids}">
+                                                <input type="text" class="tpl-form-input" name="subteacheridsfake" style="display: none" th:value="${entity.subteacherids}"/>
+
+                                                <input type="text" class="tpl-form-input" id="coursetypefake" style="display: none" th:value="${entity.coursetype}"/>
+                                                <input type="text" class="tpl-form-input" id="specialcoursefake" style="display: none" th:value="${entity.specialcourse}"/>
+                                                <input type="text" class="tpl-form-input" id="fakeisdiscount" style="display: none" th:value="${entity.isdiscount}"/>
+
+                                                <input type="text" class="tpl-form-input" id="fakeisleave" style="display: none" th:value="${entity.isleave}"/>
+                                                <input type="text" class="tpl-form-input" id="fakeisexperice" style="display: none" th:value="${entity.isexperice}"/>
+                                                <input type="text" class="tpl-form-input" id="fakeisgoon" style="display: none" th:value="${entity.isgoon}"/>
+                                                <input type="text" class="tpl-form-input" id="fakeispublic" style="display: none" th:value="${entity.ispublic}"/>
+
+                                                <div class="am-form-group">
+                                                    <label for="coursename" class="am-u-sm-3 am-form-label">课程名称 <span style='color:red'>*</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" name="coursename" id="coursename" placeholder="请输入课程名称" th:disabled="${view}" th:value="${entity.coursename}">
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group">
+                                                    <label for="coursetype" class="am-u-sm-3 am-form-label">课程分类 <span style='color:red'>*</span><span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <select data-am-selected="{btnSize: 'sm'}" name="coursetype"  id="coursetype" th:attr="disabled=${view}">
+                                                        </select>
+                                                        <span class="error" id="coursetypeError" style="display: none;">请选择课程分类</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group subcousetype secondclass">
+                                                    <label for="specialcourse" class="am-u-sm-3 am-form-label">课程类别 <span style='color:red'>*</span><span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <select data-am-selected="{btnSize: 'sm'}" name="specialcourse"  id="specialcourse" th:attr="disabled=${view}">
+                                                        </select>
+                                                        <span class="error" id="specialcourseError" style="display: none;">请选择课程类别</span>
+                                                    </div>
+                                                </div>
+
+
+                                                <!--共享课程类型 预约 系列 讲座-->
+                                                <div class="am-form-group shareclass">
+                                                    <div class="am-form-group">
+                                                        <label class="am-u-sm-3 am-form-label">共享课程类型 <span style='color:red'>*</span></label>
+                                                        <div class="am-u-sm-9">
+                                                            <dic:code name="specialclass" id="specialclass" code="SPECIAL_COURSE" th:attr="value=${entity.specialclass},disabled=${view}"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                 <!--主教练-->
+                                                <div class="am-form-group maincoach" style="display: none">
+                                                    <label for="teacherids" class="am-u-sm-3 am-form-label" id="called">主教练<span style='color:red'>*</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <select data-am-selected="{searchBox: 1}" name="teacherids" id="teacherids" th:attr="disabled=${view}">
+                                                        </select>
+                                                        <span class="error" id="teacheridsError" style="display: none;">请选择老师或教练</span>
+                                                    </div>
+                                                </div>
+
+                                                <!--辅助教练-->
+                                                <div class="am-form-group subcoach">
+                                                    <label for="subteacherids" class="am-u-sm-3 am-form-label" id="subcoachcalled">辅助教练<span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <select multiple data-am-selected="{searchBox: 1}" name="subteacherids" id="subcoachids" th:attr="disabled=${view}">
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <!--最小课时数-->
+                                                <div class="am-form-group coursecount" style="display: none">
+                                                    <label for="coursecount" class="am-u-sm-3 am-form-label">课时数<span style='color:red'>*</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="am-form-field" name="coursecount" placeholder="课时数" th:value="${entity.coursecount}"  th:disabled="${view}">
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group">
+                                                <label for="courseprice" class="am-u-sm-3 am-form-label courseprice">课程价格<span style='color:red'>*</span></label>
+                                                <div class="am-u-sm-9">
+                                                    <input type="text" class="am-form-field" name="courseprice" placeholder="课程价格" th:value="${entity.courseprice}"  th:disabled="${view}">
+                                                </div>
+                                                </div>
+
+                                                <div class="am-form-group coursetime" style="display: none">
+                                                    <label for="coursetime" class="am-u-sm-3 am-form-label coursetime">课时时长(单位小时)<span style='color:red'>*</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="am-form-field" name="coursetime" placeholder="课时时长" th:value="${entity.coursetime}">
+                                                        <span class="error" id="numberInfo" style="display: none;">课时时长必须要是整数或0.5结尾</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group isdiscount" style="display: none">
+                                                    <label for="isdiscount" class="am-u-sm-3 am-form-label">是否优惠 <span class="tpl-form-line-small-title">Switch</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <div class="tpl-switch">
+                                                            <input type="hidden" class="hide tpl-switch-hider" name="isdiscount" value=""/>
+                                                            <input type="checkbox" class="ios-switch bigswitch tpl-switch-btn" th:checked="${entity.isdiscount eq '1'}" th:disabled="${view}"  id="isdiscount"/>
+                                                            <div class="tpl-switch-btn-view">
+                                                                <div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group discountprice" style="display: none">
+                                                    <label for="discountprice" class="am-u-sm-3 am-form-label">活动价格</label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="number" class="am-form-field" name="discountprice" placeholder="活动价格" th:value="${entity.discountprice}">
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group">
+                                                    <label for="caseid" class="am-u-sm-3 am-form-label">案场<span style='color:red'>*</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <select data-am-selected="{searchBox: 1}" required name="caseid" id="case" th:attr="disabled=${view}">
+                                                        </select>
+                                                        <span class="error" id="caseidError" style="display: none;">请选择案场</span>
+                                                    </div>
+                                                </div>
+
+                                       <!--         <div class="am-form-group">
+                                                    <label for="courseaddress" class="am-u-sm-3 am-form-label">上课教室 <span style='color:red'>*</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" name="courseaddress" id="courseaddress" placeholder="请输入上课教室" th:disabled="${view}" th:value="${entity.courseaddress}">
+                                                    </div>
+                                                </div>-->
+
+                                                <div class="am-form-group coursenum">
+                                                    <label for="coursenum" class="am-u-sm-3 am-form-label">上课人数 <span style='color:red'>*</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="number" class="tpl-form-input" name="coursenum" id="coursenum" placeholder="请输入上课人数" th:disabled="${view}" th:value="${entity.coursenum}">
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group minnum">
+                                                    <label for="minnum" class="am-u-sm-3 am-form-label">最小开课人数 <span style='color:red'>*</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="number" class="tpl-form-input" name="minnum" id="minnum" placeholder="请输入最小成班人数" th:disabled="${view}" th:value="${entity.minnum}">
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="am-form-group isexperice" style="display: none">
+                                                    <label for="isexperice" class="am-u-sm-3 am-form-label">是否可以体验 <span class="tpl-form-line-small-title">Switch</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <div class="tpl-switch">
+                                                            <input type="hidden" class="hide tpl-switch-hider" name="isexperice" value=""/>
+                                                            <input type="checkbox" class="ios-switch bigswitch tpl-switch-btn" th:checked="${entity.isexperice eq '1'}" th:disabled="${view}"  id="isexperice"/>
+                                                            <div class="tpl-switch-btn-view">
+                                                                <div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="am-form-group expericeprice" style="display: none">
+                                                    <label for="expericeprice" class="am-u-sm-3 am-form-label">体验价<span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="number" class="tpl-form-input" name="expericeprice" id="expericeprice" placeholder="请输入体验价" th:disabled="${view}" th:value="${entity.expericeprice}">
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group isdatapart isdatatime">
+                                                    <label for="coursestartline" class="am-u-sm-3 am-form-label">课程开始时间<span style='color:red'>*</span> <span class="tpl-form-line-small-title">Time</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" id= "coursestartline" name="coursestartline" readonly  th:value="${entity.coursestartline_str}"  placeholder="课程开始时间">
+                                                        <small>开始时间</small>
+                                                        <span class="error" id="errorInfo" style="display: none;">开始时间大于结束时间</span>
+                                                    </div>
+                                                </div>
+                                                <div class="am-form-group isdatapart isdatatime">
+                                                    <label for="courseendline" class="am-u-sm-3 am-form-label">课程结束时间<span style='color:red'>*</span> <span class="tpl-form-line-small-title">Time</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" id= "courseendline" name="courseendline" readonly th:value="${entity.courseendline_str}"  placeholder="课程结束时间">
+                                                        <small>结束时间</small>
+                                                    </div>
+                                                </div>
+                                                <!--是否可以请假-->
+                                                <div class="am-form-group isleavetime" style="display: none">
+                                                    <label for="isleave" class="am-u-sm-3 am-form-label">是否可以请假 <span class="tpl-form-line-small-title">Switch</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <div class="tpl-switch">
+                                                            <input type="hidden" class="hide tpl-switch-hider" name="isleave" value=""/>
+                                                            <input type="checkbox" class="ios-switch bigswitch tpl-switch-btn" th:checked="${entity.isleave eq '1'}" th:disabled="${view}"  id="isleave"/>
+                                                            <div class="tpl-switch-btn-view">
+                                                                <div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!--请假时间/预约时间-->
+                                                <div class="am-form-group leavetimepart" style="display: none">
+                                                    <label for="leavetime" class="am-u-sm-3 am-form-label leavetime">提前多久可取消</label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="number" class="am-form-field" name="leavetime" placeholder="单位为小时" th:value="${entity.leavetime}">
+                                                    </div>
+                                                </div>
+
+                                                <!--课程简介-->
+                                                <div class="am-form-group courseintro">
+                                                    <label for="courseintro" class="am-u-sm-3 am-form-label">课程简介</label>
+                                                    <div class="am-u-sm-9">
+                                                        <textarea class="am-form-field" name="courseintro" placeholder="课程简介" th:field ="${entity.courseintro}"  th:disabled="${view}">
+                                                        </textarea>
+                                                    </div>
+                                                </div>
+
+                                                <!--课程简介-->
+                                                <div class="am-form-group coursetimeintro" style="display: none">
+                                                    <label for="coursetimeintro" class="am-u-sm-3 am-form-label">课程计划备注</label>
+                                                    <div class="am-u-sm-9">
+                                                        <input class="am-form-field" name="coursetimeintro" placeholder="课程计划备注" th:field ="${entity.coursetimeintro}"  th:disabled="${view}">
+                                                        </input>
+                                                        <small>如:每周一/三 12:15~13:15</small>
+                                                    </div>
+                                                </div>
+
+                                                <!--未达到最小成班人数是否需要延迟-->
+                                                <div class="am-form-group isgoon">
+                                                    <label for="isgoon" class="am-u-sm-3 am-form-label">是否可以延迟<span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <th:block th:if="${#lists.isEmpty(entity.isgoon)}">
+                                                            <input type="radio"   name="isgoon"   th:disabled="${view}"   checked="checked"  value="0" > 否
+                                                        </th:block>
+                                                        <th:block th:if="${not #lists.isEmpty(entity.isgoon)}">
+
+                                                            <input type="radio"   name="isgoon"   th:disabled="${view}"   th:field="*{entity.isgoon}"  value="0" > 否
+                                                        </th:block>
+                                                        <input type="radio"   name="isgoon"   th:disabled="${view}"      th:field="*{entity.isgoon}"  value="1">是
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group" style="display: none">
+                                                    <label for="coursestatus" class="am-u-sm-3 am-form-label">课程状态</label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="am-form-field" name="coursestatus" placeholder="单位为小时" th:value="'0'">
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group" style="display: none">
+                                                    <label for="ispublic" class="am-u-sm-3 am-form-label">是否发布</label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="am-form-field" name="ispublic" placeholder="单位为小时" th:value="'0'">
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group">
+                                                    <label for="limit_buy" class="am-u-sm-3 am-form-label">是否精选课程<span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <th:block th:if="${#lists.isEmpty(entity.isgreate)}">
+                                                            <input type="radio"   name="isgreate"   th:disabled="${view}"   checked="checked"  value="0" > 否
+                                                        </th:block>
+                                                        <th:block th:if="${not #lists.isEmpty(entity.isgreate)}">
+                                                            <input type="radio"   name="isgreate"   th:disabled="${view}"   th:field="*{entity.isgreate}"  value="0" > 否
+                                                        </th:block>
+                                                        <input type="radio"   name="isgreate"   th:disabled="${view}"      th:field="*{entity.isgreate}"  value="1">是
+                                                    </div>
+                                                </div>
+
+                                                <!--课程标签-->
+                                                <div class="am-form-group"  >
+                                                    <label for="coursetags" class="am-u-sm-3 am-form-label">课程标签<span style='color:red'>*</span><span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <select  th:disabled="${view}"  data-placeholder="选择课程标签"    id="coursetags"  style="min-width:300px;" multiple class="chosen-select" tabindex="8">
+                                                            <th:block th:each="c : ${tags}">
+                                                                <option  th:value="${c.id}" th:text="${c.name}"></option>
+                                                            </th:block>
+                                                        </select>
+                                                        <input  type="hidden" th:value="${entity.coursetags}" id="courseEdit"   name="coursetags"/>
+                                                        <span class="error" id="tagsInfo" style="display: none;">课程标签最多两个</span>
+                                                        <small>课程标签最多两个</small>
+                                                    </div>
+                                                </div>
+
+                                            <!--    <div class="am-form-group"  >
+                                                    <label for="coursetags" class="am-u-sm-3 am-form-label">课程标签<span class="tpl-form-line-small-title"><span style='color:red'>*</span></span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input id="coursetags" type="text" class="tpl-form-input"    name="coursetags"   data-role="tagsinput" th:disabled="${view}" th:value="${entity.coursetags}"  style="width: 100%!important;" />
+                                                        <span class="error" id="tagsInfo" style="display: none;">课程标签最多两个</span>
+                                                        <small>课程标签最多两个,每个标签字数少于六个字</small>
+                                                    </div>
+                                                </div>-->
+                                                <div class="am-form-group">
+                                                    <label for="icon" class="am-u-sm-3 am-form-label">课程主图 <span class="tpl-form-line-small-title">Images</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <div class="am-form-group">
+                                                            <div class="tpl-form-file-img onebean-upload-box" onclick="uploadFile(completeHandlers,this)" th:disabled="${view}">
+                                                                <img class="onebean-upload-img"  id="img_url_pre" th:src="${entity.img_url}">
+                                                                <small>图片大小：750*960</small>
+
+                                                            </div>
+                                                            <button type="button" class="am-btn am-btn-success am-btn-sm" onclick="uploadFile(completeHandlers,this)" th:disabled="${view}">
+                                                                <i class="am-icon-cloud-upload"></i>上传图片
+                                                            </button>
+                                                            <button type="button" class="am-btn am-btn-danger am-btn-sm" onclick="clearUploadImg(this)" th:disabled="${view}">
+                                                                <i class="am-icon-cloud-upload"></i>删除图片
+                                                            </button>
+                                                            <input id="img_url" type="hidden" name="img_url" th:value="${entity.img_url}">
+                                                            <span class="error" id="imgError" style="display: none;">请上传主图</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group fit_img" style="display:none;">
+                                                    <label for="icon" class="am-u-sm-3 am-form-label">健身列表图<span class="tpl-form-line-small-title">Images</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <div class="am-form-group">
+                                                            <div class="tpl-form-file-img onebean-upload-box" onclick="uploadFile(fitnesscompleteHandlers,this)" th:disabled="${view}">
+                                                                <img class="onebean-upload-img" id="fitness_url_pre"  th:src="${entity.fitness_url}">
+                                                                <small>图片大小：650*300</small>
+                                                            </div>
+                                                            <button type="button" class="am-btn am-btn-success am-btn-sm" onclick="uploadFile(fitnesscompleteHandlers,this)" th:disabled="${view}">
+                                                                <i class="am-icon-cloud-upload"></i>上传图片
+                                                            </button>
+                                                            <button type="button" class="am-btn am-btn-danger am-btn-sm" onclick="clearUploadImg(this)" th:disabled="${view}">
+                                                                <i class="am-icon-cloud-upload"></i>删除图片
+                                                            </button>
+                                                            <input id="fitness_url" type="hidden" name="fitness_url" th:value="${entity.fitness_url}">
+                                                            <span class="error" id="fitnessError" style="display: none;">请上传健身列表图</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group">
+                                                    <div class="am-u-sm-9 am-u-sm-push-3">
+                                                        <button type="submit" class="am-btn am-btn-primary tpl-btn-bg-color-success" th:unless="${view}">提交</button>
+
+                                                        <button type="button" class="am-btn am-btn-warning editbutton" th:onclick="'routingPage(\'/course/editCourse/'+${entity.id}+'\')'" th:if="${view}">编辑</button>
+
+                                                        <button type="button" class="am-btn am-btn-danger" onClick="routingPage('/course/preview/')">返回</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<css th:replace="/public/css :: onLoadCSS"></css>
+<js th:replace="/public/js :: onLoadJS"></js>
+<link th:href="${oss_ctx}+@{system_assets/css/chosen/amazeui.chosen.css}" rel="stylesheet" type="text/css" />
+<script th:src="${oss_ctx}+@{system_assets/js/chosen/amazeui.chosen.js}" type="text/javascript"></script>
+<script  th:inline="javascript">
+    $(document).on("change", "#coursetype", function(){
+        $("#coursestartline,#courseendline").val('');
+        var courseType = $("#coursetype").val();
+        var formPart = $("#DataFrom");
+        changElementByCouseType(courseType);
+        if(courseType=='3'){//健身
+            $("#coursetypeError").hide();
+            $("#called").html("主教练"+"<span style='color:red'>*</span>");
+            $(".minCount").html("课时数"+"<span style='color:red'>*</span>");
+        }else if(courseType =='2'){//共享教室
+            $("#coursetypeError").hide();
+            $("#called").html("老师"+"<span style='color:red'>*</span>");
+        }
+        initAllTeacher(courseType,formPart," "," ");
+        $.ajax({
+            type:'post',
+            dataType:'json',
+            url:'[(${ctx})]/coursetype/findByParam?parentid='+courseType,
+            async:false,
+            success:function (result) {
+                var subtarget = formPart.find("#specialcourse");
+                subtarget.html('');
+                var values = result.data;
+                if(values){
+                    if(values.length!=0){
+                        var html = '<option value=" ">' +'请选择'+ '</option>';
+                        for(var i=0;i<values.length;i++){
+                            html+='<option value="'+values[i].id+'">'+values[i].name+'</option>';
+                        }
+                        subtarget.html(html);
+                    }
+                }
+            }
+        })
+    });
+    //改变元素内容
+    function changElementByCouseType(val) {
+        if(val=='2'){//共享教室
+            $(".subcoach,.fit_img").hide();
+            $(".subcoach,.fit_img").attr("disabled",true);
+            $(".shareclass,.isdatabutton,.subcousetype").show();
+            $(".shareclass,.isdatabutton,.subcousetype").attr("disabled",false);
+        }else if(val=='3'){//健身
+            $(".secondclass,.subcoach,.maincoach,.fit_img").show();
+            $(".secondclass,.subcoach,.maincoach,.fit_img").attr("disabled",false);
+            $(".shareclass,.thirdclass").hide();
+            $(".shareclass,.thirdclass").attr("disabled",true);
+        }
+    }
+
+    $(document).on("change","#specialcourse", function(){
+        $("#coursestartline,#courseendline").val('');
+        var specialcourse = $("#specialcourse").val();
+        changElementBySpecialCourse(specialcourse);
+        if(specialcourse=='5'){//私教端
+            initDatePicker($("#coursestartline"),"803");
+            initDatePicker($("#courseendline"),"803");
+            $("#specialcourseError").hide();
+            $(".minCount").html('最小课时数'+"<span style='color:red'>*</span>");
+            $(".courseprice").html('课时单价'+"<span style='color:red'>*</span>");
+            $(".leavetime").html('提前多久可取消');
+        }
+        if(specialcourse!=" "){
+            if(specialcourse!='5'){//即不是私教课也不是预约课
+                initDatePicker($("#coursestartline"),$("#specialclass").val());
+                initDatePicker($("#courseendline"),$("#specialclass").val());
+                $(".courseprice").html('课程价格'+"<span style='color:red'>*</span>");
+                $("#specialcourseError").hide();
+                if(specialcourse=='4'){//健身团体课端
+                    initDatePicker($("#coursestartline"),"804");
+                    initDatePicker($("#courseendline"),"804");
+                    $(".minCount").html("课时数"+"<span style='color:red'>*</span>");
+                }
+            }
+        }
+    });
+    //改变元素内容
+    function changElementBySpecialCourse(val) {
+        if(val=="5"){
+            $(".coursetime,.maincoach,.leavetimepart,.coursecount,.coursetimeintro").show();
+            $(".coursetime,.maincoach,.leavetimepart,.coursecount,.coursetimeintro").attr("disabled",false);
+            $(".subcoach,.thirdclass,.isleavetime,.coursenum,.minnum,.isgoon").hide();
+            $(".subcoach,.thirdclass,.isleavetime,.coursenum,.minnum,.isgoon,.coursecount").attr("disabled",true);
+        }
+        if(val!=" "){
+            if(val!='5'){
+                $(".coursetime").hide();
+                $(".coursetime").attr("disabled",true);
+                if(val=='4'){
+                    $(".subcoach,.coursecount,.maincoach,.isgoon,.coursetimeintro").show();
+                    $(".subcoach,.coursecount,.maincoach,.isgoon,.coursetimeintro").attr('disabled',false);
+                }else{
+                    $(".subcoach").hide();
+                    $(".subcoach").attr('disabled',true);
+                }
+                $(".minnum").show();
+                $(".minnum").attr("disabled",false);
+                $(".leavetimepart").hide();
+                $(".leavetimepart").attr("disabled",true);
+            }
+        }
+    }
+    //动态监听共享课程类型
+    $(document).on("change","#specialclass",function(){
+        $("#coursestartline,#courseendline").val('');
+        var specialclass = $("#specialclass").val();
+        changElementBySpecialClass(specialclass);
+        initDatePicker($("#coursestartline"),specialclass);
+        initDatePicker($("#courseendline"),specialclass);
+    });
+    //改变元素内容
+    function changElementBySpecialClass(val) {
+        if(val=="800"){//讲座没有老师
+            $(".maincoach,.isleavetime,.coursecount,.coursetimeintro").hide();
+            $(".maincoach,.isleavetime,.coursecount,.coursetimeintro").attr("disabled",true);
+            $(".coursenum,.minnum,.isgoon").show();
+            $(".coursenum,.minnum,.isgoon").attr("disabled",false);
+        }
+        if(val=="801"){//预约课程需要预约时间,没有课程周期
+            $(".coursenum,.minnum,.isleavetime,.coursecount,.isgoon").hide();
+            $(".coursenum,.minnum,.isleavetime,.coursecount,.coursetimeintro,.isgoon").attr("disabled",true);
+            $(".maincoach,.coursetimeintro").show();
+            $(".maincoach,.coursetimeintro").attr("disabled",false);
+        }
+        if(val=="802"){//系列课程
+            $(".maincoach,.coursenum,.minnum,.coursecount,.coursetimeintro,.isgoon").show();
+            $(".maincoach,.coursenum,.minnum,.coursecount,.coursetimeintro,.isgoon").attr("disabled",false);
+            $(".isleavetime").hide();
+            $(".isleavetime").attr("disabled",true);
+        }
+    }
+    //动态监听讲座课程的开始时间
+    $(document).on("change","#coursestartline",function () {
+        var specialclass = $("#specialclass").val();
+        var coursestyle = $("#coursetype").val();
+        $("#courseendline").datetimepicker('destroy');
+        if(specialclass=='800' && coursestyle=='2'){//讲座课程需要限制结束时间的日期 只能选择时间
+            var startDate = $("#coursestartline").val().split(" ");
+            $("#courseendline").datetimepicker('setStartDate',startDate[0]+" 0:00:00");
+            $("#courseendline").datetimepicker('setEndDate',startDate[0]+" 23:59:59");
+            $("#courseendline").datetimepicker({
+                language: 'zh-CN',
+                format: 'yyyy-mm-dd hh:ii:00',
+                autoclose: true,
+                startView:2,
+                minView:'hour',
+                maxView:4,
+                startDate: getTodayDataStr()
+            });
+        }else{
+            $("#courseendline").datetimepicker('setStartDate',null);
+            $("#courseendline").datetimepicker('setEndDate',null);
+            $("#courseendline").datetimepicker({
+                language:  'zh-CN',
+                format: 'yyyy-mm-dd',
+                autoclose: true,
+                startView:2,
+                minView:2,
+                maxView:4,
+                startDate: getTodayDataStr()
+            });
+        }
+    });
+/*    $(document).on("change","#isdiscount",function () {
+        var isdiscount = $("input[name='isdiscount']").val();
+        if(isdiscount=='1'){
+            $('.discountprice').show();
+        }
+        if(isdiscount=='0'){
+            $('.discountprice').hide();
+            $("input[name='discountprice']").val('');
+        }
+    });*/
+    $(document).on("change","#isleave",function () {
+        var isleave = $("input[name=isleave]").val();
+        if(isleave=='0'){
+            $('.leavetimepart').hide();
+        }else{
+            $('.leavetimepart').show();
+        }
+    });
+/*    $(document).on("change","#isexperice",function () {
+        var isexperice = $("input[name=isexperice]").val();
+        if(isexperice=='0'){
+            $('.expericeprice').hide();
+        }else{
+            $('.expericeprice').show();
+        }
+    });*/
+    $(document).on("change","#case",function () {
+        var caseid = $("#case").val();
+        if(caseid!=""){
+            $("#caseidError").hide();
+        }
+    });
+    $(document).on("change","#teacherids",function(){
+        var teacherids = $("#teacherids").val();
+        if(teacherids!=""){
+            $("#teacheridsError").hide();
+        }
+    });
+    $(function () {
+        var casename = $("input[name='casename']").val();//案场
+        var teacherid = $("input[name='teachername']").val();//老师/主教练
+        var subcoach = $("input[name='subteacheridsfake']").val().split(',');//副教练
+        var courseType = $("#coursetypefake").val();//课程类型
+        var isdiscount = $("#fakeisdiscount").val();//是否优惠
+        var formPart = $("#DataFrom");
+        var ispublic =  $("#fakeispublic").val();//是否发布
+        if(ispublic=='1'){
+            $(".editbutton").hide();
+        }else{
+            $(".editbutton").show();
+        }
+        //初始化老师信息和是否判断
+        initCouseShow(courseType,teacherid,subcoach,isdiscount,formPart);
+        //初始化案场信息
+        initAllCase(casename,formPart);
+        //初始化课程类型
+        initAllCourse(courseType,formPart);
+        //初始化课程标签
+        initAllTag();
+        validateFrom();
+    });
+    var completeHandlers = function (arr) {
+        $('#upload-modal').modal('close');
+        if(arr.length == 1){
+            $('#img_url').val(arr[0]);
+            $('#img_url_pre').attr("src",arr[0]);
+        }else{
+            $(".alert-modal-message").html("上传文件错误");
+            $(".alert-modal-title").html("只能上传一张图片!");
+            $(".alert-modal-button").html("额...好吧");
+            $('#alert-modal').modal('open');
+        }
+    };
+    var fitnesscompleteHandlers = function (arr) {
+        $('#upload-modal').modal('close');
+        if(arr.length == 1){
+            $('#fitness_url').val(arr[0]);
+            $('#fitness_url_pre').attr("src",arr[0]);
+        }else{
+            $(".alert-modal-message").html("上传文件错误");
+            $(".alert-modal-title").html("只能上传一张图片!");
+            $(".alert-modal-button").html("额...好吧");
+            $('#alert-modal').modal('open');
+        }
+    };
+    function initDatePicker(targetId,val) {
+        if(val=='802' || val=='803' || val=='801' || val=='804'){
+            var minView = 'month';
+            var dateFormat = 'yyyy-mm-dd';
+        }else{
+            var minView = 'hour';
+            var dateFormat = 'yyyy-mm-dd hh:ii:00';
+        }
+        targetId.datetimepicker('remove');
+        targetId.datetimepicker({
+            language:  'zh-CN',
+            format: dateFormat,
+            autoclose: true,
+            startView:2,
+            minView:minView,
+            maxView:4,
+            startDate: getTodayDataStr()
+        });
+    }
+
+    /**
+     *
+     *
+     * @author chenjie
+     * @date 2018/5/28 13:52
+     * @param
+     * @return
+     */
+    function initAllTag() {
+        var badgeList = $("#courseEdit").val();
+        debugger;
+        if(badgeList!=""){
+            var arr=new Array();
+            arr=badgeList.split(',');
+            for(var i=0;i<arr.length;i++){
+                $("#coursetags option[value='"+arr[i]+"']").attr("selected",true);
+            }
+        }
+        $('#coursetags').chosen();
+    }
+
+    /**
+     * 校验登录表单
+     * @returns void
+     */
+    function validateFrom(){
+        $("#DataFrom").validate({
+            rules: {
+                coursename: {
+                    required:true,
+                    maxlength: 11
+                },
+                coursecount:{
+                    required:true,
+                    number:true,
+                    min:1
+                },
+                courseprice:{
+                    required:true,
+                    number:true,
+                    min:1
+                },
+                coursenum:{
+                    required:true,
+                    min:1
+                },
+                minnum:{
+                    required:true,
+                    min:1
+                },
+                discountprice:{
+                    required:true,
+                    min:0
+                },
+                coursetime:{
+                    required:true,
+                    number:true,
+                    min:0.5
+                },
+                coursestartline:{
+                    required:true
+                },
+                courseendline:{
+                    required:true
+                },
+                img_url:{
+                    required:true
+                },
+                fitness_url:{
+                    required:true
+                },
+                courseintro:{
+                    required:true,
+                    maxlength:300
+                }
+
+            },
+
+            submitHandler: function(form) { //验证成功时调用
+                var subid = $("#subcoachids").val();
+                var tags = $("#coursetags").val();
+                var param = $('#DataFrom').serializeJson();
+                if(tags==null) {
+                    $("#tagsInfo").show();
+                    $("#tagsInfo").html('请选择课程标签');
+                    return;
+                }else if(tags.length>2){
+                    $("#tagsInfo").show();
+                    $("#tagsInfo").html('最多两个课程标签')
+                    return;
+                }else {
+                    $("#tagsInfo").hide();
+                }
+                param.coursetags = tags.join(',');
+                /*if(coursetag.length==1){
+                    if(coursetag[0]==""){
+                        $("#tagsInfo").show();
+                        $("#tagsInfo").html('必填字段');
+                        return;
+                    }
+                }else{
+                    $("#tagsInfo").hide();
+                }
+                for(var i=0;i<coursetag.length;i++){
+                    if(coursetag[i].length>6){
+                        $("#tagsInfo").show();
+                        $("#tagsInfo").html('标签字数大于6个')
+                        return;
+                    }else{
+                        $("#tagsInfo").hide();
+                    }
+                }*/
+
+                if(param.coursestartline>param.courseendline){
+                    $("#errorInfo").show();
+                    return;
+                }else{
+                    $("#errorInfo").hide();
+                }
+                if(param.coursetype==""){
+                    $("#coursetypeError").show();
+                    return;
+                }else{
+                    $("#coursetypeError").hide();
+                }
+
+                if(param.specialcourse==""){
+                    $("#specialcourseError").show();
+                    return;
+                }else{
+                    $("#specialcourseError").hide();
+                }
+                if(param.specialcourse=="4"){
+                    param.specialclass = "804";
+                }
+
+
+                if(param.specialcourse=="5"){//私教课程
+                    param.specialclass = "803";
+                    var coursetime = param.coursetime;
+                    var val = coursetime%0.5;
+                    if(val!=0){
+                        $("#numberInfo").show();
+                        return;
+                    }else{
+                        $("#numberInfo").hide();
+                    }
+                }
+
+                if(param.specialclass=='800' || param.specialclass=='801'){//讲座和预约课程属于单次课程 需要设置countcount为1
+                    $("#coursecount").attr("disabled",false);
+                    param.coursecount = 1;
+                }
+
+                if(param.specialclass!='800'){//不是讲座的课程 都需要处理一下开始时间和结束时间
+                    param.coursestartline = param.coursestartline +" 00:00:00";
+                    param.courseendline = param.courseendline+" 23:59:59";
+                }
+                if(param.specialclass!='800'){
+                    if(param.teacherids==""){
+                        $("#teacheridsError").show();
+                        return;
+                    }else{
+                        $("#teacheridsError").hide();
+                    }
+                }
+
+                if(param.caseid==""){
+                    $("#caseidError").show();
+                    return;
+                }else{
+                    $("#caseidError").hide();
+                }
+                if(param.img_url==""){
+                    $("#imgError").show();
+                    return;
+                }else{
+                    $("#imgError").hide();
+                }
+                if(param.coursetype=='3'){
+                    if(param.fitness_url==""){
+                        $("#fitnessError").show();
+                        return;
+                    }else{
+                        $("#fitnessError").hide();
+                    }
+                }
+
+                if(subid){
+                    if(param.subteacherids){
+                        param.subteacherids = subid.toString();
+                    }
+                }
+
+                var url = "/course/saveCourse";
+                function completeHandler(data) {
+                    routingPage('/course/preview','课程列表');
+                }
+                doGet(url,param,completeHandler)
+            }
+        });
+    }
+    //初始老师信息
+    function initCouseShow(courseType,teacherid,subteacherids,isdiscount,formPart) {
+        //找教练
+        if(courseType=='3'){
+            initAllTeacher(courseType,formPart,teacherid,subteacherids);
+        }
+        //找老师
+        if(courseType=='2'){
+            initAllTeacher(courseType,formPart,teacherid,"");
+        }
+
+    }
+    //初始化老师
+    function initAllTeacher(courseType,formPart,teacherid,subteacherids) {
+        if(courseType=='2'){//找到所有共享课程的老师
+            $.ajax({
+                type:'get',
+                dataType:'json',
+                url:'[(${ctx})]/coach/findAllCoach',
+                async:false,
+                data:{'type':'1'},
+                success:function (result) {
+                    var target = formPart.find("#teacherids");
+                    var values = result.data;
+                    target.html('');
+                    if(values.length!=0) {
+                        var html = '<option value=" ">' + '请选择' + '</option>';
+                        for (var i = 0; i < values.length; i++) {
+                            if (values[i].id == teacherid) {
+                                html += '<option value="' + values[i].id + '" selected>' + values[i].name + '</option>';
+                            } else {
+                                html += '<option value="' + values[i].id + '">' + values[i].name + '</option>';
+                            }
+                        }
+                        target.html(html)
+                    }
+                }
+            })
+        }
+        if(courseType=='3'){//健身课程判断
+            var target = formPart.find("#teacherids");
+            var subtarget = formPart.find("#subcoachids");
+            $.ajax({
+                type:'get',
+                dataType:'json',
+                url:'[(${ctx})]/coach/findAllCoach',
+                async:false,
+                data:{'type':0},
+                success:function (result) {
+                    var values = result.data;
+                    target.html('');
+                    if(values.length!=0){
+                        var html = '<option value=" ">' +'请选择'+ '</option>';
+                        var subhtml = '<option value=" ">' +'请选择'+ '</option>';
+                        for(var i=0;i<values.length;i++){
+                            if(values[i].id==teacherid){
+                                html+='<option value="'+values[i].id+'" selected>'+values[i].name+'</option>';
+                            }else{
+                                html+='<option value="'+values[i].id+'">'+values[i].name+'</option>';
+                            }
+                        }
+                        for(var i=0;i<values.length;i++){
+                            subhtml+='<option value="'+values[i].id+'">'+values[i].name+'</option>';
+                        }
+                        subtarget.html(subhtml);
+                        for(var i=0;i<values.length;i++){
+                            for(var j=0;j<subteacherids.length;j++){
+                                if(values[i].id==subteacherids[j]){
+                                    subtarget.children().eq(i+1).attr('selected','true');
+                                }
+                            }
+                        }
+                        target.html(html);
+                    }
+                }
+            })
+        }
+    }
+    //渲染所有课程信息
+    function initAllCourse(courseType,formPart) {
+        $.ajax({
+            type:'get',
+            dataType:'json',
+            url:'[(${ctx})]/coursetype/findByParam?parentid=1',
+            async:false,
+            success:function(result){
+                var values = result.data;
+                var selectvalues;
+                var subselectvalues;
+                var target = formPart.find("#coursetype");
+                target.html('');
+                if(values.length!=0){
+                    var html = '<option value=" ">' +'请选择'+ '</option>';
+                    for(var i=0;i<values.length;i++){
+                        if(values[i].id==courseType){
+                            selectvalues = values[i];
+                            html+='<option value="'+values[i].id+'" selected>'+values[i].name+'</option>';
+                        }else{
+                            html+='<option value="'+values[i].id+'">'+values[i].name+'</option>';
+                        }
+                    }
+                    target.html(html);
+                }
+
+                if(courseType=='2'){//共享课
+                    $("#called").html("老师"+"<span style='color:red'>*</span>");
+                    $(".subcoach").hide();
+                    $(".shareclass").show();
+                    $(".fit_img").hide();
+                    if(selectvalues.childList.length!=0){
+                        var subvalues =selectvalues.childList;
+                        $(".subcousetype").show();
+                        var subtarget = formPart.find("#specialcourse");
+                        var specialcourse = $("#specialcoursefake").val();
+                        var subhtml = '';
+                        for(var i=0;i<subvalues.length;i++){
+                            if(specialcourse){
+                                if(subvalues[i].id==specialcourse){
+                                    subselectvalues = subvalues[i];
+                                    subhtml+='<option value="'+subvalues[i].id+'" selected>'+subvalues[i].name+'</option>';
+                                }else{
+                                    subhtml+='<option value="'+subvalues[i].id+'">'+subvalues[i].name+'</option>';
+                                }
+                            }
+                        }
+                        subtarget.html(subhtml);
+                        if($("#fakeisleave").val()=='1'){
+                            $(".leavetimepart").show();
+                        }
+                        var specialclass = $("#specialclass").val();
+                        changElementBySpecialClass(specialclass);
+                        initDatePicker($("#coursestartline"),specialclass);
+                        initDatePicker($("#courseendline"),specialclass);
+                    }
+                }
+                if(courseType=='3'){//健身端
+                    $(".shareclass").hide();
+                    $(".fit_img").show();
+                    if($("#fakeisleave").val()=='1'){
+                        $(".leavetimepart").show();
+                    }
+                    if(selectvalues.childList.length!=0){
+                        var subvalues =selectvalues.childList;
+                        $(".subcousetype").show();
+                        var subtarget = formPart.find("#specialcourse");
+                        var specialcourse = $("#specialcoursefake").val();
+                        var subhtml = '';
+                        for(var i=0;i<subvalues.length;i++){
+                            if(specialcourse){
+                                if(subvalues[i].id==specialcourse){
+                                    subselectvalues = subvalues[i];
+                                    subhtml+='<option value="'+subvalues[i].id+'" selected>'+subvalues[i].name+'</option>';
+                                }else{
+                                    subhtml+='<option value="'+subvalues[i].id+'">'+subvalues[i].name+'</option>';
+                                }
+                            }
+                        }
+                        subtarget.html(subhtml);
+                    }
+                    changElementBySpecialCourse(subselectvalues.id);
+                    if(subselectvalues.id=='5'){//私教
+                        $(".minCount").html("最小课时数"+"<span style='color:red'>*</span>");
+                        $(".courseprice").html('课时单价'+"<span style='color:red'>*</span>");
+                        $("#called").html("教练"+"<span style='color:red'>*</span>");
+
+                      initDatePicker($("#coursestartline"),"803");
+                       initDatePicker($("#courseendline"),"803");
+                    }else{//健身团体课
+                        initDatePicker($("#coursestartline"),"804");
+                        initDatePicker($("#courseendline"),"804");
+                    }
+                }
+            }
+        })
+    }
+    //初始化所有案场
+    function initAllCase(casename,formPart) {
+        $.ajax({
+            type:'get',
+            dataType:'json',
+            url:'[(${ctx})]/syscasefield/findAllCase',
+            success:function (result) {
+                var values = result.data;
+                var target = formPart.find("#case");
+                target.html('');
+                if(values.length!=0){
+                    var html = '<option value=" ">'+'请选择'+'</option>';
+                    for(var i=0;i<values.length;i++){
+                        if(values[i].id==casename){
+                            html+='<option value="'+values[i].id+'" selected>'+values[i].casefieldname+'</option>';
+                        }else{
+                            html+='<option value="'+values[i].id+'">'+values[i].casefieldname+'</option>';
+                        }
+                    }
+                    target.html(html);
+                }
+            }
+        })
+    }
+
+</script>
+<script id="tpl-uploadTips" type="text/html" th:replace="/public/upload :: uploadTipsTemp"></script>
+<div class="am-popup"  id="upload-modal"></div>
+</body>
+</html>

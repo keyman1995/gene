@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.TeacherDao" >
+    <parameterMap id="teacherParamMap" type="com.ycjcjy.gene.model.Teacher"></parameterMap>
+
+
+
+
+    <select id="findCoachByType" parameterType="string" resultType="map">
+        select
+        id,
+        name
+        from teacher
+        where type=#{type}
+    </select>
+
+    <select id="findAllTeacher" parameterMap="teacherParamMap" resultType="com.ycjcjy.gene.model.Teacher">
+        SELECT t.*
+        FROM teacher t
+        <where>
+            1=1
+            <if test="name !=null and name!=''">
+                and t.name like concat('%',#{name},'%')
+            </if>
+
+                and t.type = #{type}
+
+            <if test="caseids !=null and caseids !=''">
+                and
+                find_in_set(#{caseids},t.caseids)
+            </if>
+        </where>
+        <if test="base_sort !=null and base_sort !=''">
+            order by ${base_orderBy}  ${base_sort}
+        </if>
+        <if test="base_pageSize !=null and base_pageSize !=''">
+            limit  ${base_offset},${base_pageSize}
+        </if>
+    </select>
+
+    <select id="getAllCount" parameterMap="teacherParamMap" resultType="int">
+        SELECT count(*)
+        FROM teacher t
+        <where>
+            1=1
+                and t.type = #{type}
+            <if test="name !=null and name!=''">
+                and t.name like concat('%',#{name},'%')
+            </if>
+            <if test="caseids !=null and caseids !=''">
+                and
+                find_in_set(#{caseids},t.caseids)
+            </if>
+        </where>
+    </select>
+
+    <select id="findByField" parameterMap="teacherParamMap" resultType="com.ycjcjy.gene.model.Teacher">
+        SELECT * FROM `teacher` where can_tiyan = '1' and FIND_IN_SET(#{caseid},caseids)
+    </select>
+
+    <select id="findByTel" parameterType="String" resultType="com.ycjcjy.gene.model.Teacher">
+        SELECT * FROM `teacher` where phone = #{tel} limit 1
+    </select>
+
+    <select id="findByOpenId" parameterType="String" resultType="com.ycjcjy.gene.model.Teacher">
+        select u.*
+        from teacher u
+        where u.open_id= #{openId}
+    </select>
+
+
+    <select id="findTeacherByParam" parameterMap = "teacherParamMap" resultType="map">
+        select u.*,IFNULL(min(c.courseprice),''
+        ) minprice,c.ispublic,c.coursestatus
+        from teacher u
+        left join course_manager c
+        on u.id = c.teacherids
+        <where>
+            1=1
+            and u.type = #{type}
+            <if test="name !=null and name!=''">
+                and u.name like concat('%',#{name},'%')
+            </if>
+            <if test="can_star!=null and can_star!='' ">
+                and u.can_star = #{can_star}
+            </if>
+        </where>
+        GROUP BY u.id
+        ORDER by u.teache_num desc
+        <if test="base_pageSize !=null and base_pageSize !=''">
+            limit  ${base_offset},${base_pageSize}
+        </if>
+    </select>
+
+    <select id = "findTeacherCount" parameterMap="teacherParamMap" resultType="integer">
+        select count(1) from (
+        select u.*,min(c.courseprice) minprice
+        from teacher u
+        left join course_manager c
+        on u.id = c.teacherids
+        <where>
+            1=1
+            and u.type = #{type}
+            <if test="name !=null and name!=''">
+                and u.name like concat('%',#{name},'%')
+            </if>
+            <if test="can_star!=null and can_star!='' ">
+                and u.can_star = #{can_star}
+            </if>
+            GROUP BY u.id
+        </where>
+        )  faketable
+    </select>
+
+    <select id="findByIdForWeb" resultType="com.ycjcjy.gene.model.Teacher">
+        select u.id,u.experience,u.service_info,u.goodat,u.caseids,u.img,u.name,u.evaluate_point,u.title
+        from teacher u
+        where u.id = #{id}
+    </select>
+
+</mapper>

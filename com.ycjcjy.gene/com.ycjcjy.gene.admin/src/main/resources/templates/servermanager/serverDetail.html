@@ -1,0 +1,72 @@
+<!-- role-user数据绑定 -->
+
+<div class="am-popup" id="img-bind-modal" th:fragment="serverBind" xmlns:th="http://www.w3.org/1999/xhtml">
+
+
+    <div class="am-popup-inner">
+        <div class="am-popup-hd">
+            <h4 class="am-popup-title data-bind-title">服务详情</h4>
+            <span data-am-modal-close
+                  class="am-close">&times;</span>
+        </div>
+        <form id="DataFrom">
+            <div class="am-popup-bd">
+            <input type="hidden" id="serverId"/>
+            <input type="hidden" id="imgId"/>
+            <div class="am-form">
+
+                <div class="am-form-group">
+                    <label for="icon" class="am-u-sm-3 am-form-label">服务详情 <span class="tpl-form-line-small-title">Images</span></label>
+                    <div class="am-u-sm-9">
+                        <div class="am-form-group" id="ready-upload">
+                            <div class="tpl-form-file-img onebean-upload-box">
+                                <img class="onebean-upload-img" id="iconImg">
+                                <input type="hidden" id="upType" value="1"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="am-u-sm-9">
+                        <div class="am-form-group">
+                            <button type="button" class="am-btn am-btn-danger am-btn-sm" onclick="uploadFile(completeHandlerImg,this)" >
+                                <i class="am-icon-cloud-upload"></i>
+                                <span id="imgInfo">上传图片</span><small>图片大小：750*960</small>
+                                <input id="img_url" type="hidden" name="img_url">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="am-form-group" id="sortImg" style="display: none;">
+                    <div class="am-u-sm-9">
+                        <span>详情顺序:</span><input type="text" name="sort" id="sort" placeholder="请输入图片的顺序">
+                        <span class="error" id="sortInfo" style="display: none;">请输入正确的图片顺序</span>
+                    </div>
+                </div>
+
+
+                <div class="am-form-group" style="display: none;" id="confirmEdit">
+                    <div class="am-u-sm-12 am-u-md-6 am-u-lg-2">
+                        <div class="am-form-group" style="float: right">
+                            <div class="am-btn-toolbar">
+                                <div class="am-btn-group am-btn-group-xs">
+                                    <button type="button" class="am-btn am-btn-default am-btn-success"  onclick="addDetail()"><span class="am-icon-plus"></span>确认修改</button>
+                                    <!--<button type="button" class="am-btn am-btn-default am-btn-secondary" onclick="initImgDataTable()" ><span class="am-icon-search"></span> 刷新</button>-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="am-u-sm-12">
+                    <table width="100%" class="am-table am-table-compact am-table-bordered am-table-radius am-table-striped tpl-table-black "
+                           id="example-m">
+                        <tbody id="imgTable">
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </form>
+    </div>
+</div>
+<!-- role-user数据绑定 -->

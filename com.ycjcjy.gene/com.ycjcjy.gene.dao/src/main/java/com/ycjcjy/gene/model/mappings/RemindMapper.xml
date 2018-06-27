@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.RemindDao" >
+
+    <select id="findReminds" parameterType="com.ycjcjy.gene.model.Remind" resultType="com.ycjcjy.gene.model.Remind">
+        select
+          r.*
+        from remind r
+        where r.user_id = #{user_id} and r.type = #{type}
+        order by r.create_time desc
+        limit  ${base_offset},${base_pageSize}
+    </select>
+
+    <select id="findCounts" parameterType="com.ycjcjy.gene.model.Remind" resultType="integer">
+        select count(*)
+        from remind r
+        where r.user_id = #{user_id} and r.type = #{type}
+    </select>
+</mapper>

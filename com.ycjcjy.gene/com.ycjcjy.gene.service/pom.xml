@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>com.ycjcjy.gene</artifactId>
+        <groupId>com.ycjcjy</groupId>
+        <version>1.1.0.3.RELEASE</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>com.ycjcjy.gene.service</artifactId>
+    <name>com.ycjcjy.gene.service</name>
+    <url>http://maven.apache.org</url>
+    <packaging>jar</packaging>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.ycjcjy</groupId>
+            <artifactId>com.ycjcjy.gene.dao</artifactId>
+            <version>${gene.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.onebean</groupId>
+            <artifactId>net.onebean.redis</artifactId>
+            <version>${onebean.version}</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>net.onebean</groupId>
+            <artifactId>net.onebean.aliyun.oss</artifactId>
+            <version>${onebean.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.onebean</groupId>
+            <artifactId>net.onebean.aliyun.sms</artifactId>
+            <version>${onebean.version}</version>
+        </dependency>
+
+        <dependency>
+             <groupId>org.apache.poi</groupId>
+             <artifactId>poi</artifactId>
+             <version>3.14</version>
+       </dependency>
+
+        <dependency>
+            <groupId>com.alipay.sdk</groupId>
+            <artifactId>alipay-sdk-java</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
+    </dependencies>
+
+</project>

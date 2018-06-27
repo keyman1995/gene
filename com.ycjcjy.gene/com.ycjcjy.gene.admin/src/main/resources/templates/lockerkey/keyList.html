@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="/public/head :: onLoadHead(首页)">
+
+</head>
+<body data-type="widgets">
+<div class="am-g tpl-g">
+    <!-- 模态提示组件 -->
+    <div th:include="/public/tips :: Tips"></div>
+
+    <div th:include="/lockerkey/bind :: lockerkeyBindTemp" class="am-popup"  id="tpl-lockerkeyBind"></div>
+    <!-- 内容区域 -->
+    <div class="tpl-content-wrapper none-margin">
+        <div class="row-content am-cf">
+            <div class="row">
+                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                    <div class="widget am-cf">
+                        <div class="widget-head am-cf">
+                            <div class="widget-title  am-cf">钥匙列表</div>
+                        </div>
+                        <div class="widget-body am-fr">
+                            <form class="am-form tpl-form-border-form tpl-form-border-br paramFrom" data-flush="1">
+                                <input type="hidden" class="paramInput" th:value="${userFieldId}" param-pattern="case_field_id@string@eq$"/>
+                                <label class="am-u-sm-1 am-u-md-1 am-form-label line-hight-10" style="text-align: right">锁柜号 :</label>
+                                <div class="am-u-sm-3 am-u-md-3 am-u-lg-3 line-hight-10">
+                                    <input type="text" class="tpl-form-input paramInput" param-pattern="lock_num@long@eq$"  placeholder="请输入锁柜编号">
+                                </div>
+                                <label class="am-u-sm-12 am-u-md-2 am-u-lg-2 am-form-label">每页数量/条 :</label>
+                                <div class="am-u-sm-12 am-u-md-6 am-u-lg-2">
+                                    <div class="am-form-group tpl-table-list-select">
+                                        <select data-am-selected="{btnSize: 'sm'}" id="limitSelector" class="onebean-param-select-box">
+                                            <option value="5">5</option>
+                                            <option value="10" selected>10</option>
+                                            <option value="30">30</option>
+                                            <option value="50">50</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="am-u-sm-12 am-u-md-6 am-u-lg-12">
+                                    <div class="am-form-group" style="float: right">
+                                        <div class="am-btn-toolbar">
+                                            <div class="am-btn-group am-btn-group-xs">
+                                                <button type="button" class="am-btn am-btn-default am-btn-secondary query-button"><span class="am-icon-search"></span> 查询</button>
+                                                <button type="button"  class="am-btn am-btn-default am-btn-warning reset-button"><span class="am-icon-archive"></span> 重置</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </form>
+
+
+                            <div class="am-u-sm-12">
+                                <table width="100%" class="am-table am-table-compact am-table-bordered am-table-radius am-table-striped tpl-table-black "
+                                       id="example-r">
+                                    <thead>
+                                    <tr>
+                                        <th>锁柜编号</th>
+                                        <th>当前用户</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="dataTable">
+
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="am-u-lg-12 am-cf">
+                                <div class="am-fr" id="pagination">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <css th:replace="/public/css :: onLoadCSS"></css>
+    <js th:replace="/public/js :: onLoadJS"></js>
+    <script type="text/javascript" >
+        $(function () {
+            initDataTable();
+
+
+
+        });
+        $(function(){
+            $(document).keydown(function(event){
+                if(event.keyCode==13){
+                    $("#bindBtn").click();
+                    $('#alertH').empty();
+                }
+            });
+
+
+        })
+
+        function initDataTable(){
+            var pageSize = $("#limitSelector").val()
+            var currentPage = $("#tpl-pagination").attr("currentPage")
+            var orderBy = "lock_num";
+            var sort = "asc";
+            var param = {orderBy: orderBy, sort: sort, currentPage: currentPage, pageSize: pageSize,conditionList: formatQueryFromParam()};
+            doGet("/lockerkey/list",param,function (res) {
+                    $('#dataTable').html(template('tpl-localgoodsfield', res.data));
+                    $('#pagination').html(template('tpl-pagination', res.pagination))
+
+            })
+        }
+
+        function unbindKey(id) {
+            var url = "/lockerkey/unbind/"+id;
+            var completeHandler = function (data) {
+                $('#tpl-lockerkeyBind').modal('close');
+                initDataTable();
+
+
+            }
+            var paramImg={};
+            doPost(url,paramImg,completeHandler);
+        }
+        function closeIt() {
+            $('#alertH').empty();
+        }
+
+        function modalKeyBind(keyId,type,id,num,belong_id) {
+            $('#alertH').empty();
+            /*$("#userInfo").hide();
+            //1001 用户 1002 订单  1003 商品 1005课程     1007 VIP卡
+            $("#userInfo").show();*/
+
+            var url = "/lockerkey/bind";
+            $("#castType").val(type);
+            $("#castId").val(id);
+            $("#castSaleId").val(belong_id);
+            $("#castNum").val(num);
+            var completeHandler = function (data) {
+                if(data.msg != null && data.msg != ''){
+                    alert(data.msg)
+                }
+                $('#tpl-lockerkeyBind').modal('close');
+                initDataTable()
+
+            }
+            var paramImg={id:keyId,type:type,userId:belong_id,orderId:id};
+            doPost(url,paramImg,completeHandler);
+
+        }
+        $('#alertM').empty();
+        function modalBind(uid){
+            $('#bindId').val(uid);
+            $('#tpl-lockerkeyBind').modal('open');
+            $('#alertH').empty();
+        }
+        function showQrInfo(keyId) {
+            $('#alertH').empty();
+            // 二维码组成字段           1类型 ，2 ID 3 二维码所属人ID 4 数量
+
+            //1003,19,1,5  商品
+
+            //1001,1,1,1  用户
+            var qrInfo = $('#qrInfo').val();
+            if (qrInfo == null || qrInfo == '') {
+                alert('请扫二维码！');
+                return;
+            }
+            if (qrInfo.indexOf('-') != -1) {
+                var keyId = $('#bindId').val();
+                var arr = new Array();
+                arr = qrInfo.split("-");
+                var type = arr[0];    //1001 用户 1002 订单  1003 商品 1005课程     1007 VIP卡
+                var id = arr[1];
+                var belong_id = arr[2];
+                var num = arr[3];
+                $('#qrInfo').val('')
+                if(type==1013){
+                    var json = new Object();
+                    json.type = arr[0];    //1001 用户 1002 订单  1003 商品 1005课程     1007 VIP卡
+                    json.id = arr[1];
+                    json.belong_id = arr[2];
+                    json.keyId = keyId;
+                    var $link = '/orderSub/previewList/?qrInfo='+JSON.stringify(json);
+                    $link = encodeURI($link);
+                    routingPage($link);
+                }else {
+
+                    modalKeyBind(keyId, type, id, num, belong_id);
+                }
+
+
+            } else {
+                var html = '<span style="color: red; float: right; font-size: large; font: -apple-system-tall-body" >二维码错误！</span>';
+                $('#alertH').html(html);
+                $('#qrInfo').val('')
+                return;
+            }
+        }
+       /*$('#qrInfo').on('change',function () {
+           /!*alert($('#qrInfo').length)*!/
+           if($('#qrInfo').length>2){
+               showQrInfo()
+           }
+       })*/
+
+
+
+
+    </script>
+    <script id="tpl-localgoodsfield" type="text/html">
+        {{each $data as data}}
+        <tr  class={{if $index%2==0}} "gradeX" {{else}} "even gradeC" {{/if}} >
+        <td>{{data.lock_num}} </td>
+        <td>{{data.current_user_name}}</td>
+        <td>
+            {{if data.status == 1}}
+            无人
+            {{else}}
+            有人
+            {{/if}}
+        </td>
+        <td>
+            <div class="tpl-table-black-operation">
+
+                {{if data.status == 1}}
+                <a href="javascript:;" onclick="modalBind({{data.id}})"  class="tpl-table-black-operation-del">
+                    <i class="am-icon-trash" ></i> 绑定
+                </a>
+                {{else}}
+                <a href="javascript:;" onclick="unbindKey({{data.id}})"  class="tpl-table-black-operation-del">
+                    <i class="am-icon-trash" ></i> 解绑
+                </a>
+                {{/if}}
+            </div>
+        </td>
+        </tr>
+        {{/each}}
+    </script>
+<script id="tpl-pagination" type="text/html" th:replace="/public/pagination :: paginationTemplate"></script>
+</body>
+</html>

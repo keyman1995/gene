@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.OrderSubDao" >
+
+    <select id="querySiJiaoOrderDetailList" parameterType="String" resultType="com.ycjcjy.gene.model.OrderSub">
+        select os.id,os.order_state,cf.casefieldname,os.sijiao_index
+        ,CONCAT(DATE_FORMAT(os.appointment_start_time,"%Y/%c/%d %H:%i"),"-",DATE_FORMAT(os.appointment_end_time,"%H:%i")) as sub_time_str
+        FROM order_sub os
+        LEFT JOIN order_main om on om.id = os.order_id
+        LEFT JOIN course_manager cm on cm.id = om.course_id
+         left join sys_case_field cf on cf.id = cm.caseid
+        WHERE cm.teacherids = #{teacherId} and cm.specialclass = 803 and om.user_id = #{userId}
+        order by os.appointment_start_time desc
+        limit  ${base_offset},${base_pageSize}
+    </select>
+    <select id="querySiJiaoOrderDetailListCount" parameterType="String" resultType="int">
+        select count(*)
+        FROM order_sub os
+        LEFT JOIN order_main om on om.id = os.order_id
+        LEFT JOIN course_manager cm on cm.id = om.course_id
+        left join sys_case_field cf on cf.id = cm.caseid
+        WHERE cm.teacherids = #{teacherId} and cm.specialclass = 803 and om.user_id = #{userId}
+    </select>
+
+    <select id="getLessons" parameterType="com.ycjcjy.gene.model.OrderSub" resultType="com.ycjcjy.gene.model.OrderSub">
+       SELECT
+       os.id,
+  scf.casefieldname AS fieldName,
+	os.case_field_id,
+	os.order_id,
+	os.order_state,
+CASE
+	os.is_delay
+	WHEN 0 THEN
+	os.appointment_start_time
+	WHEN 1 THEN
+	os.delay_start_time
+	END AS start_time,
+	CASE
+	os.is_delay
+	WHEN 0 THEN
+	DATE_FORMAT(os.appointment_start_time,'%Y年%m月%d日 %H时%i分')
+	WHEN 1 THEN
+	DATE_FORMAT(os.delay_start_time,'%Y年%m月%d日 %H时%i分')
+	END AS startStr,
+		CASE
+	os.is_delay
+	WHEN 0 THEN
+	DATE_FORMAT(os.appointment_end_time,'%Y年%m月%d日 %H时%i分')
+	WHEN 1 THEN
+	DATE_FORMAT(os.delay_end_time,'%Y年%m月%d日 %H时%i分')
+	END AS endStr,
+CASE
+	os.is_delay
+	WHEN 0 THEN
+	os.appointment_end_time
+	WHEN 1 THEN
+	os.delay_end_time
+	END AS end_time,
+	om.user_id,
+	cm.coursename AS courseName,
+	cm.id as courseId,
+	csm.subcousename AS courseSubName
+
+FROM
+	order_sub os
+	LEFT JOIN order_main om ON os.order_id = om.id
+	LEFT JOIN course_manager cm ON cm.id= om.course_id
+	LEFT JOIN course_sub_manager csm ON os.course_sub_id = csm.id
+	LEFT JOIN sys_case_field scf ON os.case_field_id = scf.id
+WHERE
+	os.order_id = #{order_id}
+	AND om.order_type = 0
+	AND om.course_type IN(802,804)
+	order by start_time asc
+		<if test="base_pageSize !=null and base_pageSize !=''">
+			limit  ${base_offset},${base_pageSize}
+		</if>
+    </select>
+    <select id="getLessonsCount" parameterType="com.ycjcjy.gene.model.OrderSub" resultType="int">
+        select count(1) from(
+          SELECT
+	os.case_field_id,
+	os.order_id,
+	os.order_state,
+CASE
+	os.is_delay
+	WHEN 0 THEN
+	os.appointment_start_time
+	WHEN 1 THEN
+	os.delay_start_time
+	END AS start_time,
+CASE
+	os.is_delay
+	WHEN 0 THEN
+	os.appointment_end_time
+	WHEN 1 THEN
+	os.delay_end_time
+	END AS end_time,
+	CASE
+	os.is_delay
+	WHEN 0 THEN
+	DATE_FORMAT(os.appointment_start_time,'%Y年%m月%d日 %H时%i分')
+	WHEN 1 THEN
+	DATE_FORMAT(os.delay_start_time,'%Y年%m月%d日 %H时%i分')
+	END AS startStr,
+		CASE
+	os.is_delay
+	WHEN 0 THEN
+	DATE_FORMAT(os.appointment_end_time,'%Y年%m月%d日 %H时%i分')
+	WHEN 1 THEN
+	DATE_FORMAT(os.delay_end_time,'%Y年%m月%d日 %H时%i分')
+	END AS endStr,
+	om.user_id,
+	cm.coursename AS courseName,
+	cm.id as courseId,
+	csm.subcousename AS courseSubName
+
+FROM
+	order_sub os
+	LEFT JOIN order_main om ON os.order_id = om.id
+	LEFT JOIN course_manager cm ON cm.id= om.course_id
+	LEFT JOIN course_sub_manager csm ON os.course_sub_id = csm.id
+WHERE
+	os.order_id = #{order_id}
+	AND om.order_type = 0
+	AND om.course_type IN(802,804)
+        ) faketable
+    </select>
+
+    <select id="getLesson" parameterType="com.ycjcjy.gene.model.OrderSub" resultType="com.ycjcjy.gene.model.OrderSub">
+        SELECT
+        os.id,
+    scf.casefieldname AS fieldName,
+	os.case_field_id,
+	os.order_id,
+	os.order_state,
+CASE
+	os.is_delay
+	WHEN 0 THEN
+	os.appointment_start_time
+	WHEN 1 THEN
+	os.delay_start_time
+	END AS start_time,
+CASE
+	os.is_delay
+	WHEN 0 THEN
+	os.appointment_end_time
+	WHEN 1 THEN
+	os.delay_end_time
+	END AS end_time,
+	CASE
+	os.is_delay
+	WHEN 0 THEN
+	DATE_FORMAT(os.appointment_start_time,'%Y年%m月%d日 %H时%i分')
+	WHEN 1 THEN
+	DATE_FORMAT(os.delay_start_time,'%Y年%m月%d日 %H时%i分')
+	END AS startStr,
+		CASE
+	os.is_delay
+	WHEN 0 THEN
+	DATE_FORMAT(os.appointment_end_time,'%Y年%m月%d日 %H时%i分')
+	WHEN 1 THEN
+	DATE_FORMAT(os.delay_end_time,'%Y年%m月%d日 %H时%i分')
+	END AS endStr,
+	om.user_id,
+	cm.coursename AS courseName,
+	cm.id as courseId,
+  cm.coursename AS courseSubName
+
+FROM
+	order_sub os
+	LEFT JOIN order_main om ON os.order_id = om.id
+	LEFT JOIN course_manager cm ON cm.id= om.course_id
+	LEFT JOIN sys_case_field scf ON os.case_field_id = scf.id
+WHERE
+	os.order_id = #{order_id}
+	AND om.order_type = 0
+    </select>
+    <select id="getLessonCount" parameterType="com.ycjcjy.gene.model.OrderSub" resultType="int">
+        select count(1) from(
+        SELECT
+	os.case_field_id,
+	os.order_id,
+	os.order_state,
+CASE
+	os.is_delay
+	WHEN 0 THEN
+	os.appointment_start_time
+	WHEN 1 THEN
+	os.delay_start_time
+	END AS start_time,
+CASE
+	os.is_delay
+	WHEN 0 THEN
+	os.appointment_end_time
+	WHEN 1 THEN
+	os.appointment_end_time
+	END AS end_time,
+	om.user_id,
+	cm.coursename AS courseName,
+	cm.id as courseId,
+  cm.coursename AS courseSubName
+
+FROM
+	order_sub os
+	LEFT JOIN order_main om ON os.order_id = om.id
+	LEFT JOIN course_manager cm ON cm.id= om.course_id
+WHERE
+	os.order_id = #{order_id}
+	AND om.order_type = 0
+	AND om.course_type IN(800,801)
+        )faketable
+    </select>
+
+	<select id="queryCoursesByTime" parameterType="string" resultType="com.ycjcjy.gene.model.OrderSub">
+		SELECT
+	t.*
+FROM
+	(
+		(
+			SELECT
+				m.appointment_start_time,
+				cm.coursename as courseName,
+				m.is_delay,
+				m.delay_start_time,
+				m.course_sub_id,
+				m.user_id
+			FROM
+				(
+					SELECT
+						os.appointment_start_time,
+						om.course_id,
+						os.is_delay,
+						os.delay_start_time,
+						os.course_sub_id,
+						om.user_id
+					FROM
+						order_sub os
+					LEFT JOIN order_main om ON os.order_id = om.id
+					WHERE
+
+					os.order_state IN ('0','2')
+					AND om.course_type = 801
+					and os.appointment_start_time &lt; #{newTime} and os.appointment_start_time >= #{nowHour}
+				) m,
+				course_manager cm
+			WHERE
+				m.course_id = cm.id
+		)
+		UNION ALL
+			(
+				SELECT
+					m.appointment_start_time,
+					cs.subcousename as courseName,
+					m.is_delay,
+					m.delay_start_time,
+					m.course_sub_id,
+					m.user_id
+				FROM
+					(
+						SELECT
+							os.appointment_start_time,
+							os.course_sub_id,
+							os.is_delay,
+							os.delay_start_time,
+							om.user_id
+						FROM
+							order_sub os
+						LEFT JOIN order_main om ON os.order_id = om.id
+						WHERE
+
+						os.order_state IN ('0','2')
+						AND om.course_type != 801
+						and os.appointment_start_time &lt; #{newTime} and os.appointment_start_time >= #{nowHour}
+					) m,
+					course_sub_manager cs
+				WHERE
+					m.course_sub_id = cs.id
+			)
+	) t
+	</select>
+
+    <select id="queryUsersByTime" parameterType="string" resultType="com.ycjcjy.gene.model.OrderSub">
+        SELECT
+        t.user_id,
+        cu.username AS username,
+        cu.tel AS tel
+        FROM
+        (
+        SELECT
+        om.user_id
+        FROM
+        order_sub os
+        LEFT JOIN order_main om ON os.order_id = om.id
+        WHERE
+        om.course_type = 803
+        AND os.order_state = '2'
+        AND os.appointment_end_time &lt;= #{nowHour}
+        AND os.appointment_end_time >= #{newTime}
+        ) t
+        LEFT JOIN customer_user cu ON t.user_id = cu.id
+    </select>
+
+	<select id="findListBySubId" parameterType="int" resultType="com.ycjcjy.gene.model.OrderSub">
+		select * from order_sub where course_sub_id = #{course_sub_id}
+	</select>
+
+    <select id="getLessonDoneCount" parameterType="int" resultType="int">
+        select count(1) from order_sub where order_id = #{order_id} AND order_state = 1
+    </select>
+
+	<select id="findCheckInByMonth" parameterType="string" resultType="int">
+		SELECT
+	COUNT( 1 )
+		FROM
+	order_sub b
+	WHERE
+	DATE_FORMAT( b.verification_time ,'%Y%m' ) = DATE_FORMAT( now( ), '%Y%m' )
+	AND b.order_state IN(1,3)
+	<if test="case_id != '' and case_id != null">
+		and b.case_field_id =#{case_id}
+	</if>
+	</select>
+
+	<select id="getLessonDoneByNow" resultType="map" parameterType="string">
+		select
+		(select count(1) from order_sub s
+		where DATE_FORMAT(verification_time,'%Y%m%d') = DATE_FORMAT(now(),'%Y%m%d')
+		and (order_state = 1 or order_state=3)
+		<if test="caseid!=null and caseid!=''">
+		and	s.case_field_id = #{caseid}
+		</if>
+		) signnum,
+
+		(select count(s.id) from order_sub s
+		left join order_main m on s.order_id = m.id
+		where m.order_state = 1 and (
+		TO_DAYS(s.appointment_start_time) - TO_DAYS(now()) = 1
+		or TO_DAYS(s.delay_start_time)-TO_DAYS(now()) = 1 and s.is_delay = '1')
+		<if test="caseid!=null and caseid!=''">
+			and	s.case_field_id = #{caseid}
+		</if>
+		)tomorronum,
+
+		(select count(s.id) from order_sub s
+		left join order_main m on s.order_id = m.id
+		where m.order_state in (1,2) and (
+		TO_DAYS(s.appointment_start_time) = TO_DAYS(now())
+		or TO_DAYS(s.delay_start_time)=TO_DAYS(now()) and s.is_delay = '1')
+		<if test="caseid!=null and caseid!=''">
+			and	s.case_field_id = #{caseid}
+		</if>
+		) nownum
+
+		from dual
+
+	</select>
+
+
+
+</mapper>

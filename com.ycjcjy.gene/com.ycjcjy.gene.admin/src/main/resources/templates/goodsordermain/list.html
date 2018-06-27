@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<style>
+    .widget-body {
+        display: flex;
+        flex-direction: row;
+        -webkit-box-align: flex-start;
+        -ms-flex-align: flex-start;
+        -webkit-align-items: flex-start;
+        align-items: flex-start;
+        width: 1000px;
+    }
+    .widget-body p {
+        margin: 0;
+        padding: 0;
+    }
+    .widget-body .box{
+        display: flex;
+        flex-direction: column;
+        float: left;
+        width: 313px;
+        flex: 0 0 313px;
+        min-height: 300px;
+        padding: 26px 30px;
+        color: #666666;
+        background-color: #FFFFFF;
+        border-radius: 4px;
+        margin: 10px;
+        transition: all linear 0.3s;
+    }
+    .widget-body .box .top{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 18px 15px 18px;
+        border-bottom: 1px solid #E8E8E8;
+    }
+    .widget-body .box .top .img_logo {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        line-height: 56px;
+        text-align: center;
+        border: 1px solid #FFDCDC;
+        overflow: hidden;
+        background-color: #fff;
+        font-size: 0;
+    }
+    .widget-body .box .top .img_logo img{
+        display: inline-block;
+        vertical-align: middle;
+    }
+    .widget-body .box .top .img_info {
+
+    }
+    .widget-body .box .top .img_info p:nth-of-type(1){
+        font-size: 18px;
+        color: #666;
+        line-height: 18px;
+        margin-bottom: 3px;
+        height: 18px;
+        font-weight: bolder;
+    }
+    .widget-body .box .top .img_info p:nth-of-type(2){
+        font-size: 16px;
+        color: #999;
+        line-height: 16px;
+    }
+    .widget-body .box .top .img_info p:nth-of-type(2) i{
+        font-style: normal;
+    }
+    .widget-body .box .top .img_info p:nth-of-type(3){
+        line-height: 16px;
+    }
+    .widget-body .box .top .img_info p:nth-of-type(3) span{
+        font-size: 14px;
+        color: #999;
+        letter-spacing: 3px;
+        margin-right: 4px;
+        vertical-align: middle;
+    }
+    .widget-body .box .top .img_info p:nth-of-type(3) i{
+        font-size: 18px;
+        color: #FC6243;
+        font-style: normal;
+        vertical-align: middle;
+    }
+    .widget-body .box .middle {
+        font-size: 14px;
+        padding: 15px 20px;
+    }
+    .widget-body .box .middle div{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .widget-body .box .middle div{
+        margin-bottom: 15px;
+    }
+    .widget-body .box .middle div i{
+        font-style: normal;
+    }
+    .widget-body .box .middle div:last-child{
+        margin-bottom: 0;
+    }
+    .widget-body .box .bottom{
+        padding: 13px 15px;
+        font-size: 13px;
+        border-top: 1px solid #E8E8E8;
+    }
+    .widget-body .box .button{
+        padding: 10px 15px 10px 15px;
+        font-size: 13px;
+        color: #FC6243;
+        text-align: center;
+        box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+    }
+    .widget-body .box .button span{
+        display: block;
+        height: 40px;
+        line-height: 40px;
+        margin: 0px auto;
+        width: 100%;
+        vertical-align: middle;
+        color: #FC6243;
+        border: 1px solid #FC6243;
+        border-radius: 4px;
+        text-align: center;
+    }
+    .confirm_dialog {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,.5);
+        z-index: 999999;
+        transition: all linear 0.3s;
+        -os-transition: all linear 0.3s;
+        -moz-transition: all linear 0.3s;
+        transform: scale(0);
+        -webkit-transform: scale(0);
+        -moz-transform: scale(0);
+        -os-transform: scale(0);
+        opacity: 0;
+    }
+    .confirm_dialog.active {
+        transform: scale(1);
+        -webkit-transform: scale(1);
+        -moz-transform: scale(1);
+        -os-transform: scale(1);
+        opacity: 1;
+    }
+    .confirm_dialog .confirm_dialog_view {
+        background-color: #fff;
+        padding: 71px 40px 39px 40px;
+        box-sizing: border-box;
+        border-radius: 6px;
+    }
+    .confirm_dialog p {
+        font-size: 18px;
+        color: #000000;
+        background-color: #fff;
+        margin: 0 0 40px 0;
+        text-align: center;
+    }
+    .confirm_dialog .confirm_dialog_view div {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .confirm_dialog .confirm_dialog_view div span{
+        font-size: 15px;
+        color: #000000;
+        padding: 8px 54px;
+        border: 1px solid #000;
+        border-radius: 4px;
+    }
+    .confirm_dialog .confirm_dialog_view div span:nth-of-type(1){
+        margin-right: 40px;
+    }
+</style>
+<head th:replace="/public/head :: onLoadHead(首页)">
+
+</head>
+<body data-type="widgets" style="padding: 0 50px">
+
+
+<!--<script language="javascript" th:src="@{/assets/js/LodopFuncs.js}"  ></script>
+
+<object  id="LODOP_OB" classid="clsid:2105C259-1E0C-4534-8141-A753534CB4CA" width=0 height=0>
+    <embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0></embed>
+</object>-->
+
+<div class="am-g tpl-g">
+    <!-- 模态提示组件 -->
+    <div th:include="/public/tips :: Tips"></div>
+    <!-- 内容区域 -->
+    <div class="tpl-content-wrapper none-margin" >
+        <div class="row-content am-cf">
+            <div class="row">
+                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                    <input type="hidden" id="userId" th:value="${userId}">
+                    <div class="widget-body am-fr" id="ooo">
+                            <!--<div class="listItem">-->
+                                <!--<img class="topIcon" src="/admin/system_assets/img/logo1.png" alt="">-->
+                                <!--<div class="title">-->
+                                    <!--<img src="/admin/system_assets/img/logo1.png" alt="">-->
+                                    <!--<span>案场1号桌</span>-->
+                                <!--</div>-->
+                                <!--<ul class="goodsList">-->
+                                    <!--<li>-->
+                                        <!--<span>商品名称</span>-->
+                                        <!--<span>数量</span>-->
+                                    <!--</li>-->
+                                    <!--<li>-->
+                                        <!--<span>充气娃娃</span>-->
+                                        <!--<span>100</span>-->
+                                    <!--</li>-->
+                                    <!--<li>-->
+                                        <!--<span>充气娃娃</span>-->
+                                        <!--<span>100</span>-->
+                                    <!--</li>-->
+                                    <!--<li>-->
+                                        <!--<span>充气娃娃</span>-->
+                                        <!--<span>100</span>-->
+                                    <!--</li>-->
+                                    <!--<li>-->
+                                        <!--<span>充气娃娃</span>-->
+                                        <!--<span>100</span>-->
+                                    <!--</li>-->
+                                <!--</ul>-->
+                                <!--<div class="subInfo">-->
+                                    <!--<span>下单人：刘德华</span>-->
+                                    <!--<span>下单时间：就刚才</span>-->
+                                <!--</div>-->
+                                <!--<div class="remark">-->
+                                    <!--<span>备注：</span>-->
+                                    <!--<span>不要香菜！不要香菜！不要香菜！不要香菜！不要香菜！不要香菜！不要香菜！不要香菜！</span>-->
+                                <!--</div>-->
+                                <!--<span>城的空间·城咖啡</span>-->
+                            <!--</div>-->
+                        </div>
+
+                         <!--<div class="box" id="boxxxxx">
+                            <div class="top">
+                                <div class="img_logo">
+                                    <img src="" alt="">
+                                </div>
+                                <div class="img_info">
+                                    <p>书吧3号桌</p>
+                                    <p>下单时间：<i>14:13:08</i></p>
+                                    <p><span>已等待:</span><i class="timeeeeee" data-time="13:10:08">03:05</i></p>
+                                    <button onclick="printTicket()">打印</button>
+                                </div>
+                            </div>
+
+
+                            <div class="middle">
+                                <div><p>美食特浓</p><i>x1</i></div>
+                                <div><p>卡布奇诺</p><i>x1</i></div>
+                                <div><p>特曼宁</p><i>x1</i></div>
+                            </div>
+                            <div class="bottom">备注：卡布奇诺不要奶，其他都不要糖，椰子水要冰的，焦糖玛奇朵加焦糖</div>
+                            <div class="button" data-id="1">
+                                <span data-id="1">完成</span>
+                            </div>
+                        </div>-->
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<div id="zzz" style="width: 0; height: 0;margin-left: -1000000px"></div>    <div class="confirm_dialog" id="opopopopop">
+        <div class="confirm_dialog_view">
+            <p>确定该订单已完成吗？</p>
+            <div>
+                <span id="plplpl">确定</span>
+                <span id="kjkjkj">取消</span>
+            </div>
+        </div>
+    </div></div>
+
+    <css th:replace="/public/css :: onLoadCSS"></css>
+    <js th:replace="/public/js :: onLoadJS"></js>
+    <script th:src="${oss_ctx}+@{system_assets/js/print/LodopFuncs.js}" type="text/javascript"></script>
+
+    <script type="text/javascript" >
+
+
+        //websocket
+
+
+
+
+        var WbObserver = function (options) {
+            if (!this.checkWebsocket()) {
+                throw new Error('浏览器不支持websocket');
+            }
+            if (!options && typeof options === 'undefined') {
+                throw new Error('参数错误');
+            }
+            this.options = options;
+            this.lockReconnect = false; // 避免重复链接
+            this.webSocketObject = null;
+            this.onMessage = this.options.onMessage;
+            this.initWebSocket();
+        };
+
+        WbObserver.prototype = {
+            // 初始化
+            initWebSocket: function () {
+                var _self = this;
+                if (!this.webSocketObject || typeof this.webSocketObject !== 'object') {
+                    this.webSocketObject = new WebSocket(this.options.url)
+                }
+                this.webSocketObject.onopen = function () {
+                    _self.heartConnect().reset().start();
+                };
+                this.webSocketObject.onmessage = function (e) {
+
+                    _self.heartConnect().reset().start();
+                    _self.onMessage(e)
+                };
+                this.webSocketObject.onclose = this.closeWebSocket;
+            },
+            // 检查连接
+            checkWebsocket: function () {
+                return 'WebSocket' in window ? 1 : 0;
+            },
+            // 关闭连接事件监听
+            closeWebSocket: function () {
+                this.reconnect();
+            },
+            // 主动关闭
+            closeObjfn: function () {
+                this.webSocketObject.close()
+            },
+            // 心跳链接
+            heartConnect: function () {
+                var _self = this;
+                return {
+                    timeout: 8000,        //9分钟发一次心跳
+                    timeoutObj: null,
+                    serverTimeoutObj: null,
+                    reset: function() {
+                        clearTimeout(this.timeoutObj);
+                        clearTimeout(this.serverTimeoutObj);
+                        return this;
+                    },
+                    start: function(){
+                        var self = this;
+                        this.timeoutObj = setTimeout(function(){
+                            //这里发送一个心跳，后端收到后，返回一个心跳消息，
+                            //onmessage拿到返回的心跳就说明连接正常
+                            _self.webSocketObject.send("ping");
+                            console.log("ping!");
+                            self.serverTimeoutObj = setTimeout(function(){//如果超过一定时间还没重置，说明后端主动断开了
+                                _self.webSocketObject.close()     //如果onclose会执行reconnect，我们执行ws.close()就行了.如果直接执行reconnect 会触发onclose导致重连两次
+                            }, self.timeout)
+                        }, this.timeout)
+                    }
+                }
+            },
+            reconnect: function () {
+                if(this.lockReconnect) return;
+                this.lockReconnect = true;
+                var _self = this;
+                setTimeout(function () {     //没连接上会一直重连，设置延迟避免请求过多
+                    _self.initWebSocket();
+                    console.log(2)
+                    _self.lockReconnect = false;
+                }, 2000);
+            }
+        };
+
+        $(function () {
+            var clickObj = null;
+            // var userId = "ws://localhost:8079/wx/websocket/SYS_USER_" + $('#userId').val();
+            var userId = "ws://cdkj.ycjcjy.com/wx/websocket/SYS_USER_" + $('#userId').val();
+            console.log(userId);
+//            var options={
+//                url: userId,
+//                onMessage: function (e) {
+//                    var resouse = eval("("+e.data+")"),
+//                        allData,
+//                        goodsArray;
+//                    console.log(typeof resouse.message)
+//                    if (!resouse.message) {
+//                        allData = resouse.message;
+//                        console.log('数据格式不对');
+//                        return false;
+//                    } else {
+//                        console.log(1)
+//                        goodsArray = allData.list;
+//                        //处理数据
+//                        renderData(allData, goodsArray);
+//                        //更新flag
+//                        updateOrderFlag(allData.id);
+//                    }
+//
+//                }
+//            };
+//            var wbObserver = new WbObserver(options);
+//
+//            window.onbeforeunload = function() {
+//                wbObserver.closeObjfn();
+//            };
+
+            var lockReconnect = false;  //避免ws重复连接
+            var ws = null;          // 判断当前浏览器是否支持WebSocket
+            createWebSocket(userId);   //连接ws
+
+            function createWebSocket(url) {
+                try{
+                    if('WebSocket' in window){
+                        ws = new WebSocket(url);
+                    }else if('MozWebSocket' in window){
+                        ws = new MozWebSocket(url);
+                    }else{
+                        console.log("您的浏览器不支持websocket协议,建议使用新版谷歌、火狐等浏览器，请勿使用IE10以下浏览器，360浏览器请使用极速模式，不要使用兼容模式！");
+                    }
+                    initEventHandle();
+                }catch(e){
+                    reconnect(url);
+                    console.log(e);
+                }
+            }
+            var heartCheck = {
+                timeout: 60*1000*2,        //9分钟发一次心跳
+                timeoutObj: null,
+                serverTimeoutObj: null,
+                reset: function(){
+                    clearTimeout(this.timeoutObj);
+                    clearTimeout(this.serverTimeoutObj);
+                    return this;
+                },
+                start: function(){
+                    var self = this;
+                    this.timeoutObj = setTimeout(function(){
+                        //这里发送一个心跳，后端收到后，返回一个心跳消息，
+                        // onmessage拿到返回的心跳就说明连接正常
+                        ws.send("ping");
+                        console.log("ping!")
+                        self.serverTimeoutObj = setTimeout(function(){//如果超过一定时间还没重置，说明后端主动断开了
+                            ws.close();     //如果onclose会执行reconnect，我们执行ws.close()就行了.如果直接执行reconnect 会触发onclose导致重连两次
+                        }, self.timeout)
+                    }, this.timeout)
+                }
+            }
+            function initEventHandle() {
+                ws.onclose = function () {
+                    reconnect(userId);
+                    console.log("llws连接关闭!" + new Date().toUTCString());
+                };
+                ws.onerror = function () {
+                    reconnect(userId);
+                    console.log("llws连接错误!");
+                };
+                ws.onopen = function () {
+                    heartCheck.reset().start();      //心跳检测重置
+                    console.log("llws连接成功!" + new Date().toUTCString());
+                };
+                ws.onmessage = function (e) {    //如果获取到消息，心跳检测重置
+                    heartCheck.reset().start();      //拿到任何消息都说明当前连接是正常的
+                    console.log("llws收到消息啦");
+                    if (e.data != 'pong') {
+                        var resouse = eval("(" + e.data + ")"),
+                            allData,
+                            goodsArray;
+                        if (resouse.message) {
+                            allData = resouse.message;
+                            goodsArray = allData.list;
+                            //处理数据
+                            renderData(allData, goodsArray);
+                            //更新flag
+                            updateOrderFlag(allData.id);
+                        }
+                    }
+                }
+            }
+// 监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+                    window.onbeforeunload = function () {
+                        ws.close();
+                    };
+                    function reconnect(url) {
+                        if (lockReconnect) return;
+                        lockReconnect = true;
+                        setTimeout(function () {     //没连接上会一直重连，设置延迟避免请求过多
+                            createWebSocket(url);
+                            lockReconnect = false;
+                        }, 2000);
+                    }
+//心跳检测
+
+            $('#ooo').on('click', '.box .button', function () {
+                $('#opopopopop').addClass('active');
+                clickObj = $(this)
+            });
+            $('#plplpl').on('click',function () {
+                $('#opopopopop').removeClass('active');
+                var that = clickObj.parent();
+                var id = clickObj.attr("data-id");
+                //完成
+                var url = "/goodsordermain/updateOrderState";
+                var completeHandler = function (data) {
+                    that.fadeOut()
+                };
+                var param={orderId:id};
+                doPost(url,param,completeHandler);
+            });
+            $('#kjkjkj').on('click', function () {
+                $('#opopopopop').removeClass('active')
+            });
+             setTimeout("findNewOrder(1)",2000);
+             setTimeout("findNewOrder(0)",3000);
+            setInterval("updateTimeStr()", 1000);
+        })
+
+
+        function renderData (allData,goodsArray) {
+            var html = '',
+                htmls = '';
+            html+='<div class="box">';
+            html+='<div class="top">';
+            html+='<div class="img_logo">';
+            html+='<img src="'+allData.img_url+'" alt="" height="26" width="26" >';
+            html+='</div>';
+            html+='<div class="img_info">';
+            html+='<p>'+allData.tableInfo+'</p>';
+            html+='<p>下单时间：<i>'+allData.create_time_str+'</i></p>';
+            html+='<p><span>已等待:</span><i class="timeeeeee" data-time="'+allData.haomiaoshu+'">00:00</i></p>';
+            html+='</div>';
+            html+='</div>';
+            html+='<div class="middle">';
+            for(var i = 0; i < goodsArray.length ;i++){
+                html+='<div><p>'+goodsArray[i].goodsName+'</p><i>x'+goodsArray[i].goods_num+'</i></div>';
+            }
+
+            html+='</div>';
+            html+='<div class="bottom">备注：'+allData.remark+'</div>';
+            html+='<div class="button" data-id="'+allData.id+'" >';
+            html+='<span data-id="'+allData.id+'">完成</span>';
+            html+='</div>';
+            html+='</div>';
+            $("#ooo").append(html);
+
+            htmls+='<div class="listItem" style="width: 100%;position: relative;overflow: hidden;background: #fff;margin: 0 auto;" id="'+allData.id+'">';
+            htmls+='<img class="topIcon" style="display:block;width:40%;margin:15px 0 0 10px;" src="http://jingcheng-resourceplat.oss-cn-shanghai.aliyuncs.com/upload/111101940020.png" alt="">';
+            htmls+='<div class="title" style="width:100%;margin-left:0;font-size:0;white-space:nowrap;padding:10px 0;border-bottom:1px dashed #000;text-align:center;margin-top:30px;">';
+            htmls+='<img style="display:inline-block;line-height:1;vertical-align:middle;height:30px;margin-right:5px;" src='+allData.img_url_mono+' alt="">';
+            htmls+='<div style="display:inline-block;line-height:1;vertical-align:middle;font-size:18px;font-weight:bolder;color:#000;">'+allData.tableInfo+'</div>';
+            htmls+='</div>';
+            htmls+='<div class="goodsList" style="width:100%;margin-left:0;position:relative;overflow:hidden;padding-bottom:10px;border-bottom:1px dashed #000;">';
+            htmls+='<div style="width:100%;margin: 8px 0 5px;position:relative;overflow:hidden;font-size: 0;white-space: nowrap;">';
+            htmls+='<div style="width: 70%;display:inline-block;vertical-align: top;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;line-height: 24px;font-size: 13px;color: #000;text-indent: 0;margin-left: 0;padding-left: 0;">商品名称</div>';
+            htmls+='<div style="width: 30%;display:inline-block;vertical-align: top;line-height: 24px;font-size: 13px;color: #000;text-indent: 0;margin-left: 0;padding-left: 0;text-align: center;">数量</div>';
+            htmls+='</div>';
+            for(var j=0;j<goodsArray.length;j++){
+                htmls+='<div style="width:100%;margin: 0 auto;position:relative;overflow:hidden;font-size: 0;white-space: nowrap;">';
+                htmls+='<div style="width: 70%;display:inline-block;vertical-align: top;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;line-height: 24px;font-size: 13px;color: #000;">'+goodsArray[j].goodsName+'</div>';
+                htmls+='<div style="width: 30%;display:inline-block;vertical-align: top;line-height: 24px;font-size: 13px;color: #000;text-indent: 0;margin-left: 0;padding-left: 0;text-align: center;">'+goodsArray[j].goods_num+'</div>';
+                htmls+='</div>';
+            }
+            htmls+='</div>';
+            htmls+='<div class="subInfo" style="width:100%;margin-left:0;position:relative;overflow:hidden;padding-bottom:15px;border-bottom:1px dashed #000;">';
+            htmls+='<div style="width:100%;margin: 15px auto 0;line-height:24px;display:block;font-size:13px;color:#000;">下单人：'+allData.realname+'</div>';
+            htmls+='<div style="width:100%;margin: 0 auto;line-height:24px;display:block;font-size:13px;color:#000;">下单时间：<i>'+allData.create_time_str+'</i></div>';
+            htmls+='</div>';
+            htmls+='<div class="remark" style="width:100%;margin-left:0;position:relative;overflow:hidden;padding-bottom:10px;border-bottom:1px dashed #000;">';
+            htmls+='<div style="width:100%;margin:5px 0;display:block;color:#000;font-size:18px;font-weight:bolder;line-height:30px;">备注：</div>';
+            htmls+='<div style="width:100%;margin: 0 auto;line-height:20px;display:block;font-size:13px;color:#000;text-align: justify;">'+allData.remark+'</div>';
+            htmls+='</div>';
+            htmls+='<div style="width:100%;margin: 0 auto 30px;display:block;font-size:13px;color:#000;text-align:right;line-height:30px;">城的空间·城咖啡</div>';
+            htmls+='</div>';
+            if(allData.flag==0){
+                $("#zzz").append(htmls);
+                $("#zzz").find('#'+allData.id).get(0).style.cssText = $("#zzz").find('#'+allData.id).get(0).style.cssText + 'height:' + $("#zzz").find('#'+allData.id).height() + 'px';
+                printTicket(allData.id,$("#zzz").find('#'+allData.id).height());
+            }
+
+
+
+        }
+        
+        function updateOrderFlag(id) {
+            var url = "/goodsordermain/updateOrderFlag";
+
+            var completeHandler = function (data) {
+
+            }
+            var param={orderId:id};
+            doPost(url,param,completeHandler);
+        }
+
+
+
+
+        //局部打印方法
+        function printTicket(id,height) {
+            var LODOP = getLodop();
+            var strFormHtml = "<body style='height:"+height+"px'>" + $("#"+id).html() + "</body>";
+            //LODOP.NEWPAGEA();
+            LODOP.PRINT_INIT("打印");
+            LODOP.SET_PRINT_PAGESIZE(3,480,40,'');
+            LODOP.ADD_PRINT_HTM(0, 0, "48mm", height + 'mm', strFormHtml);
+            LODOP.PRINT();
+            //LODOP.PREVIEW();
+        }
+
+        function updateTimeStr(){
+            var today=new Date().getTime();
+            $("#ooo .timeeeeee").each(function (obj) {
+                var thattime = $(this).attr("data-time");
+                var cha = parseInt(today) - parseInt(thattime)
+
+
+
+                var sj = formatSeconds(cha/1000);
+
+
+                $(this).html(sj);
+
+            })
+
+        }
+
+
+        function formatSeconds(value) {
+            var secondTime = parseInt(value);// 秒
+            var minuteTime = 0;// 分
+            var hourTime = 0;// 小时
+            if(secondTime > 60) {//如果秒数大于60，将秒数转换成整数
+                //获取分钟，除以60取整数，得到整数分钟
+                minuteTime = parseInt(secondTime / 60);
+                //获取秒数，秒数取佘，得到整数秒数
+                secondTime = parseInt(secondTime % 60);
+                //如果分钟大于60，将分钟转换成小时
+                if(minuteTime > 60) {
+                    //获取小时，获取分钟除以60，得到整数小时
+                    hourTime = parseInt(minuteTime / 60);
+                    //获取小时后取佘的分，获取分钟除以60取佘的分
+                    minuteTime = parseInt(minuteTime % 60);
+                }
+            }
+            var result = "" + checkTime(parseInt(secondTime))  ;
+
+            if(minuteTime > 0) {
+                result = "" + checkTime(parseInt(minuteTime)) + ":" + result;
+            }
+            if(hourTime > 0) {
+                result = "" + checkTime(parseInt(hourTime)) + ":" + result;
+            }
+            return result;
+        }
+
+        function checkTime(i)
+        {
+            if (i<10)
+            {i="0" + i}
+            return i
+        }
+
+
+
+        function findNewOrder(flag) {
+            var url = "/goodsordermain/getNewOrder";
+
+            var completeHandler = function (data) {
+                if(data.success==1){
+                    if(data.list){
+                        if(data.list.length>0){
+
+                            for(var i=0;i<data.list.length;i++){
+                                renderData(data.list[i], data.list[i].list);
+                            }
+
+                        }
+                    }
+
+                }else{
+
+                    alert("系统错误!");
+                }
+            }
+            var param={flag:flag};
+            doPost(url,param,completeHandler);
+        }
+    </script>
+
+
+
+</body>
+</html>

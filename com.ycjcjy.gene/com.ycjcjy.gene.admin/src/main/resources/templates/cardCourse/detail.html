@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml"
+      xmlns:course="http://www.w3.org/1999/html" xmlns:caseField="http://www.w3.org/1999/html">
+<head th:replace="/public/head :: onLoadHead(体验劵管理)">
+</head>
+<body ddata-type="widgets">
+
+<div class="am-g tpl-g">
+    <!-- 模态提示组件 -->
+    <div th:include="/public/tips :: Tips"></div>
+    <!-- 内容区域 -->
+    <div class="tpl-content-wrapper none-margin">
+        <div class="row-content am-cf">
+            <div class="row">
+                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+
+                    <div class="row">
+
+                        <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                            <div class="widget am-cf">
+                                <div class="widget-head am-cf">
+                                    <div class="widget-title am-fl" th:if="${add}">新增卡券</div>
+                                    <div class="widget-title am-fl" th:if="${view}">查看卡券</div>
+                                    <div class="widget-title am-fl" th:if="${edit}">编辑卡券</div>
+                                </div>
+                                <div class="widget-body am-fr">
+
+                                    <form class="am-form tpl-form-border-form tpl-form-border-br" id="DataFrom">
+                                        <input type="hidden" name="target_id" th:value="${entity.course_id}" id="target_id">
+                                        <input type="hidden" name="id" th:value="${entity.id}">
+                                        <div class="am-form-group">
+                                            <label for="name" class="am-u-sm-3 am-form-label">体验券名称 <span class="tpl-form-line-small-title">:</span></label>
+                                            <div class="am-u-sm-9">
+                                                <input type="text" class="tpl-form-input" name="name" id="name" placeholder="请输入体验券名称" th:disabled="${view}" th:inline="text" th:value="${entity.name}">
+                                                </input>
+                                            </div>
+                                        </div>
+                                        <div class="am-form-group" id="course">
+                                            <label for="course_id" class="am-u-sm-3 am-form-label">课程：<span class="tpl-form-line-small-title">:</span></label>
+                                            <div class="am-u-sm-9" >
+
+                                                <select id ="course_id" name="course_id"  data-am-selected="{btnSize: 'sm'}"></select>
+                                            </div>
+                                        </div>
+                                        <div class="am-form-group">
+                                            <label for="start_time" class="am-u-sm-3 am-form-label">体验券开始时间 <span class="tpl-form-line-small-title">:</span></label>
+                                            <div class="am-u-sm-9">
+                                                <input type="text" readonly class="tpl-form-input" name="start_time" id="start_time" th:disabled="${view}" th:inline="text" th:value="${entity.start_time}">
+                                                </input>
+                                            </div>
+                                        </div>
+
+                                        <div class="am-form-group">
+                                            <label for="end_time" class="am-u-sm-3 am-form-label">体验券结束时间 <span class="tpl-form-line-small-title">:</span></label>
+                                            <div class="am-u-sm-9">
+                                                <input type="text" readonly class="tpl-form-input" name="end_time" id="end_time" th:disabled="${view}" th:inline="text" th:value="${entity.end_time}">
+                                                </input>
+                                            </div>
+                                        </div>
+
+
+
+                                        <!--<div class="am-form-group">-->
+                                        <!--<label for="org_id" class="am-u-sm-3 am-form-label">所属机构 <span class="tpl-form-line-small-title">:</span></label>-->
+                                        <!--<div class="am-u-sm-9"  th:with="pid=(${entity.org_id} != null)?${entity.org_id}:1">-->
+                                        <!--<input type="hidden" class="treeValue" name="org_id" id="org_id" th:value="${pid}">-->
+                                        <!--<tree:org th:attr="disabled=${view},value=${entity.org_id},pid=${pid}"  th:unless="${add}"/>-->
+                                        <!--<tree:org th:attr="pid=${pid}" th:if="${add}"/>-->
+                                        <!--&lt;!&ndash;<small th:unless="${view}">从机构树上选择一个机构</small>&ndash;&gt;-->
+                                        <!--</div>-->
+                                        <!--</div>-->
+
+
+
+
+
+
+
+                                        <!--<div class="am-form-group">
+                                            <label for="ticket_type" class="am-u-sm-3 am-form-label">类型 <span class="tpl-form-line-small-title">:</span></label>
+                                            <div class="am-u-sm-9">
+                                                <dic:code name="ticket_type" id="ticket_type" code="TYJ_TYPE" th:attr="value=${entity.ticket_type},disabled=${view}" />
+                                            </div>
+                                        </div>-->
+
+
+
+                                        <!--<div class="am-form-group" id="act">
+                                            <label for="act_id" class="am-u-sm-3 am-form-label">课程：<span class="tpl-form-line-small-title">:</span></label>
+                                            <div class="am-u-sm-9" >
+                                                <select id ="act_id" name="act_id" data-am-selected="{btnSize: 'sm'}"></select>
+                                            </div>
+                                        </div>-->
+
+
+
+                                        <div class="am-form-group">
+                                            <label for="price" class="am-u-sm-3 am-form-label">体验券价格 <span class="tpl-form-line-small-title">:</span></label>
+                                            <div class="am-u-sm-9">
+                                                <input type="text" class="tpl-form-input" name="price" id="price" placeholder="请输入体验券价格" th:disabled="${view}" th:inline="text" th:value="${entity.price}">
+                                                </input>
+                                            </div>
+                                        </div>
+                                        <div class="am-form-group">
+                                            <label for="remarks" class="am-u-sm-3 am-form-label">体验券描述 <span class="tpl-form-line-small-title">:</span></label>
+                                            <div class="am-u-sm-9">
+                                                <!--<input type="text" class="tpl-form-input" name="remarks" id="remarks" placeholder="请输入体验券描述" th:disabled="${view}" th:inline="text" maxlength="30">
+                                                </input>-->
+                                                <th:block th:if="${not #lists.isEmpty(entity.remarks)}">
+                                                    <textarea name="remarks" id="remarks"  placeholder="请输入体验券描述 "  th:disabled="${view}" th:inline="text" maxlength="30">[[${entity.remarks}]]</textarea>
+                                                </th:block>
+
+                                                <th:block th:if="${#lists.isEmpty(entity.remarks)}">
+                                                    <textarea name="remarks" id="remarks"  placeholder="请输入体验券描述 "  th:disabled="${view}" th:inline="text" maxlength="30"></textarea>
+                                                </th:block>
+                                            </div>
+                                        </div>
+
+
+
+
+                                        <div class="am-form-group">
+                                            <div class="am-u-sm-9 am-u-sm-push-3">
+                                                <button type="submit" class="am-btn am-btn-primary tpl-btn-bg-color-success" th:unless="${view}">提交</button>
+                                                <button type="button" class="am-btn am-btn-danger" onClick="routingPage('/cardCourse/preview/','课程卡列表')">返回</button>
+                                            </div>
+                                        </div>
+
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<css th:replace="/public/css :: onLoadCSS"></css>
+<js th:replace="/public/js :: onLoadJS"></js>
+<script  th:inline="javascript">
+
+
+
+
+    $(function () {
+        validateFrom();
+        goodslist();
+
+    });
+
+
+
+
+
+
+
+
+    function goodslist() {
+        var url = '/course/allCourse';
+        var id = '#course_id';
+        var param = '';
+        /* $('#goods').show();*/
+
+
+
+
+        doPost(url,param,function (result) {
+
+            var data = result.data;
+            var target_id = $('#target_id').val();
+            $(id).html('');
+            $(id).append("<option value=''>请选择</option>");
+            for (var i=0;i<data.length;i++){
+                if (data[i].id == target_id){
+                    $(id).append("<option data-coursestartline='"+data[i].coursestartline_str+"' data-courseendline='"+data[i].courseendline_str+"' selected value="+data[i].id+">"+data[i].coursename+"</option>");
+                } else {
+                    $(id).append("<option data-coursestartline='"+data[i].coursestartline_str+"' data-courseendline='"+data[i].courseendline_str+"' value="+data[i].id+">"+data[i].coursename+"</option>");
+                }
+
+
+            }
+            // $(id).selected('destroy');
+            // $(id).selected();
+        });
+    }
+    var flag = true;
+    var once = true;
+    $(document).on("change", "#course_id", function(){
+        $("#start_time").datetimepicker('remove');
+        $("#end_time").datetimepicker('remove');
+        if (once) {
+            once = !once
+            return
+        }
+        flag = false;
+        var start = '';
+        var id = $('#course_id').val();
+        for(var i=0;i<$('#course_id').find('option').length;i++){
+            if($('#course_id option')[i].value == id){
+                start = $($('#course_id option')[i]).data('coursestartline');
+            }
+        }
+        console.log(start);
+
+        $('#start_time').datetimepicker({
+            language:  'zh-CN',
+            format: 'yyyy-mm-dd 00:00:00',
+            autoclose: true,
+            startView:2,
+            minView:'month',
+            maxView:1,
+            endDate:start
+        }).on('changeDate', function (e) {
+            $('#end_time').val('');
+            var start_time = $('#start_time').val();
+            var end = '';
+            for(var i=0;i<$('#course_id').find('option').length;i++){
+                if($('#course_id option')[i].value == id){
+                    end = $($('#course_id option')[i]).data('courseendline');
+                }
+            }
+            console.log(end);
+            //$("#end_time").datetimepicker('setStartDate',start_time);
+            $('#end_time').datetimepicker({
+                language:  'zh-CN',
+                format: 'yyyy-mm-dd 23:59:59',
+                autoclose: true,
+                startView:2,
+                minView:'month',
+                maxView:1,
+                startDate: start_time,
+                endDate:end
+            });
+        });
+
+    });
+
+
+    /**
+     * 校验登录表单
+     * @returns void
+     */
+    function validateFrom(){
+        $("#DataFrom").validate({
+            rules: {
+
+                name: {
+                    required:true,
+                    maxlength: 50
+                },
+                start_time:{
+                    required:true
+                },
+                end_time:{
+                    required:true
+                },
+                price:{
+                    required:true,
+                    min:0
+                }
+
+            },
+            submitHandler: function(form) { //验证成功时调用
+                var start = $('#start_time').val();
+                var end = $('#end_time').val();
+                if(start == '' || start == null){
+                    alert('请输入开始时间');
+                    return
+                }
+                if(end == '' || end == null){
+                    alert('请输入结束时间');
+                    return
+                }
+                var s = new Date(start).valueOf();
+                var e = new Date(end).valueOf();
+                console.log(s)
+                console.log(e)
+                if (e<s){
+                    alert('结束时间不能早于开始时间');
+                    return
+                }
+
+                var param = $('#DataFrom').serializeJson();
+                var url = "/cardCourse/save"
+                function completeHandler(data) {
+                    routingPage('/cardCourse/preview','课程卡列表')
+                }
+                doGet(url,param,completeHandler)
+
+
+
+            }
+        });
+    }
+
+
+
+
+
+
+</script>
+<!-- Pr树模态组件 -->
+<script id="tpl-PrTreeTempl" type="text/html"  th:replace="/sysrole/template :: PrTreeTempl"></script>
+<!-- 机构树模态组件 -->
+
+</body>
+</html>
+
+
+
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml"-->
+      <!--xmlns:course="http://www.w3.org/1999/html" xmlns:caseField="http://www.w3.org/1999/html">-->
+<!--<head th:replace="/public/head :: onLoadHead(体验劵管理)">-->
+<!--</head>-->
+<!--<body ddata-type="widgets">-->
+
+<!--<div class="am-g tpl-g">-->
+    <!--&lt;!&ndash; 模态提示组件 &ndash;&gt;-->
+    <!--<div th:include="/public/tips :: Tips"></div>-->
+    <!--&lt;!&ndash; 内容区域 &ndash;&gt;-->
+    <!--<div class="tpl-content-wrapper none-margin">-->
+        <!--<div class="row-content am-cf">-->
+            <!--<div class="row">-->
+                <!--<div class="am-u-sm-12 am-u-md-12 am-u-lg-12">-->
+
+                            <!--<div class="row">-->
+
+                                <!--<div class="am-u-sm-12 am-u-md-12 am-u-lg-12">-->
+                                    <!--<div class="widget am-cf">-->
+                                        <!--<div class="widget-head am-cf">-->
+                                            <!--<div class="widget-title am-fl" th:if="${add}">新增卡券</div>-->
+                                            <!--<div class="widget-title am-fl" th:if="${view}">查看卡券</div>-->
+                                            <!--<div class="widget-title am-fl" th:if="${edit}">编辑卡券</div>-->
+                                        <!--</div>-->
+                                        <!--<div class="widget-body am-fr">-->
+
+                                            <!--<form class="am-form tpl-form-border-form tpl-form-border-br" id="DataFrom">-->
+                                                <!--<input type="hidden" name="target_id" th:value="${entity.course_id}" id="target_id">-->
+                                                <!--<input type="hidden" name="id" th:value="${entity.id}">-->
+                                                <!--<div class="am-form-group">-->
+                                                    <!--<label for="name" class="am-u-sm-3 am-form-label">体验券名称 <span class="tpl-form-line-small-title">:</span></label>-->
+                                                    <!--<div class="am-u-sm-9">-->
+                                                        <!--<input type="text" class="tpl-form-input" name="name" id="name" placeholder="请输入体验券名称" th:disabled="${view}" th:inline="text" th:value="${entity.name}">-->
+                                                        <!--</input>-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+                                           <!--&lt;!&ndash;     <div class="am-form-group" id="course">-->
+                                                    <!--<label for="course_id" class="am-u-sm-3 am-form-label">课程：<span class="tpl-form-line-small-title">:</span></label>-->
+                                                    <!--<div class="am-u-sm-9" >-->
+
+                                                        <!--<select id ="course_id" name="course_id"  data-am-selected="{btnSize: 'sm'}"></select>-->
+                                                    <!--</div>-->
+                                                <!--</div>&ndash;&gt;-->
+                                                <!--<div class="am-form-group"  >-->
+                                                    <!--<label for="course_id" class="am-u-sm-3 am-form-label">课程<span class="tpl-form-line-small-title">:</span></label>-->
+                                                    <!--<div class="am-u-sm-9">-->
+                                                        <!--<select  th:disabled="${view}"  data-placeholder="选择课程"    id="courseidsEdit"  style="min-width:300px;" multiple class="chosen-select" tabindex="8">-->
+                                                            <!--<th:block th:each="c : ${courses}">-->
+                                                                <!--<option  th:value="${c.id}" th:text="${c.coursename}+'('+${c.casefieldname}+'/'+${c.startline}+')'"></option>-->
+                                                            <!--</th:block>-->
+                                                        <!--</select>-->
+                                                        <!--<input  type="hidden" th:value="${entity.course_id}" id="course_id"   name="course_id"  />-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+
+
+
+                                                <!--<div class="am-form-group">-->
+                                                    <!--<label for="start_time" class="am-u-sm-3 am-form-label">体验券开始时间 <span class="tpl-form-line-small-title">:</span></label>-->
+                                                    <!--<div class="am-u-sm-9">-->
+                                                        <!--<input type="text" readonly class="tpl-form-input" name="start_time" id="start_time" th:disabled="${view}" th:inline="text" th:value="${entity.startStr}">-->
+                                                        <!--</input>-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+
+                                                <!--<div class="am-form-group">-->
+                                                    <!--<label for="end_time" class="am-u-sm-3 am-form-label">体验券结束时间 <span class="tpl-form-line-small-title">:</span></label>-->
+                                                    <!--<div class="am-u-sm-9">-->
+                                                        <!--<input type="text" readonly class="tpl-form-input" name="end_time" id="end_time" th:disabled="${view}" th:inline="text" th:value="${entity.endStr}">-->
+                                                        <!--</input>-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+
+                                                <!--<div class="am-form-group">-->
+                                                    <!--<label for="price" class="am-u-sm-3 am-form-label">体验券价格 <span class="tpl-form-line-small-title">:</span></label>-->
+                                                    <!--<div class="am-u-sm-9">-->
+                                                        <!--<input type="text" class="tpl-form-input" name="price" id="price" placeholder="请输入体验券价格" th:disabled="${view}" th:inline="text" th:value="${entity.price}">-->
+                                                        <!--</input>-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+                                                <!--<div class="am-form-group">-->
+                                                    <!--<label for="remarks" class="am-u-sm-3 am-form-label">体验券描述 <span class="tpl-form-line-small-title">:</span></label>-->
+                                                    <!--<div class="am-u-sm-9">-->
+                                                        <!--&lt;!&ndash;<input type="text" class="tpl-form-input" name="remarks" id="remarks" placeholder="请输入体验券描述" th:disabled="${view}" th:inline="text" maxlength="30">-->
+                                                        <!--</input>&ndash;&gt;-->
+                                                        <!--<th:block th:if="${not #lists.isEmpty(entity.remarks)}">-->
+                                                            <!--<textarea name="remarks" id="remarks"  placeholder="请输入体验券描述 "  th:disabled="${view}" th:inline="text" maxlength="30">[[${entity.remarks}]]</textarea>-->
+                                                        <!--</th:block>-->
+
+                                                        <!--<th:block th:if="${#lists.isEmpty(entity.remarks)}">-->
+                                                            <!--<textarea name="remarks" id="remarks"  placeholder="请输入体验券描述 "  th:disabled="${view}" th:inline="text" maxlength="30"></textarea>-->
+                                                        <!--</th:block>-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+
+
+
+
+                                                <!--<div class="am-form-group">-->
+                                                    <!--<div class="am-u-sm-9 am-u-sm-push-3">-->
+                                                        <!--<button type="submit" class="am-btn am-btn-primary tpl-btn-bg-color-success" th:unless="${view}">提交</button>-->
+                                                        <!--<button type="button" class="am-btn am-btn-danger" onClick="routingPage('/cardCourse/preview/','课程卡列表')">返回</button>-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+
+                                            <!--</form>-->
+                                        <!--</div>-->
+                                    <!--</div>-->
+                                <!--</div>-->
+                            <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+
+<!--<css th:replace="/public/css :: onLoadCSS"></css>-->
+<!--<js th:replace="/public/js :: onLoadJS"></js>-->
+<!--<link th:href="${oss_ctx}+@{system_assets/css/chosen/amazeui.chosen.css}" rel="stylesheet" type="text/css" />-->
+<!--<script th:src="${oss_ctx}+@{system_assets/js/chosen/amazeui.chosen.js}" type="text/javascript"></script>-->
+<!--<script  th:inline="javascript">-->
+
+
+    <!--$(function () {-->
+        <!--validateFrom();-->
+        <!--goodslist();-->
+    <!--});-->
+
+
+
+    <!--function goodslist() {-->
+        <!--var caseList = $("#course_id").val();-->
+        <!--if (caseList != "") {-->
+            <!--var arr = new Array();-->
+            <!--arr = caseList.split(',');-->
+            <!--for (var i = 0; i < arr.length; i++) {-->
+                <!--$("#courseidsEdit option[value='" + arr[i] + "']").attr("selected", true);-->
+            <!--}-->
+        <!--}-->
+        <!--$("#courseidsEdit").chosen();-->
+        <!--$("#course_id").val($("#courseidsEdit").val());-->
+        <!--$('#start_time').datetimepicker({-->
+            <!--language:  'zh-CN',-->
+            <!--format: 'yyyy-mm-dd 00:00:00',-->
+            <!--autoclose: true,-->
+            <!--startView:2,-->
+            <!--minView:'month',-->
+            <!--maxView:1,-->
+            <!--startDate:getTodayDataStr()-->
+        <!--});-->
+        <!--var courseText =  $("#courseidsEdit").find("option:selected").text();-->
+        <!--var startLine = courseText.split('/')[1];-->
+        <!--initDateTimePicker($("#end_time"),startLine,true);-->
+    <!--}-->
+
+
+    <!--$(document).on("change", "#courseidsEdit", function(){-->
+        <!--var courseIds = $("#courseidsEdit").val();-->
+        <!--var courseText =  $("#courseidsEdit").find("option:selected").text();-->
+        <!--var  startLine='';-->
+        <!--if(courseIds){-->
+            <!--if(courseIds.length>1){-->
+                <!--$('#end_time').datetimepicker('remove');-->
+                <!--return alert("请选择一门课程");-->
+            <!--}else{-->
+                <!--startLine = courseText.split('/')[1];-->
+                <!--initDateTimePicker($("#end_time"),startLine,false);-->
+            <!--}-->
+        <!--}-->
+    <!--});-->
+
+    <!--function initDateTimePicker(target,startLine,flag) {-->
+        <!--if(!flag){-->
+            <!--$('#end_time').val('');-->
+        <!--}-->
+        <!--target.datetimepicker('remove');-->
+        <!--target.datetimepicker({-->
+            <!--language:  'zh-CN',-->
+            <!--format: 'yyyy-mm-dd 23:59:59',-->
+            <!--startView:2,-->
+            <!--minView:'month',-->
+            <!--maxView:4,-->
+            <!--autoclose: 1,-->
+            <!--endDate:startLine,-->
+            <!--startDate:getTodayDataStr()-->
+        <!--});-->
+    <!--}-->
+
+    <!--/**-->
+     <!--* 校验登录表单-->
+     <!--* @returns void-->
+     <!--*/-->
+    <!--function validateFrom(){-->
+        <!--$("#DataFrom").validate({-->
+            <!--rules: {-->
+
+                <!--name: {-->
+                    <!--required:true,-->
+                    <!--maxlength: 50-->
+                <!--},-->
+                <!--start_time:{-->
+                    <!--required:true-->
+                <!--},-->
+                <!--end_time:{-->
+                    <!--required:true-->
+                <!--},-->
+                <!--price:{-->
+                    <!--required:true,-->
+                    <!--min:0-->
+                <!--}-->
+
+            <!--},-->
+            <!--submitHandler: function(form) { //验证成功时调用-->
+                <!--var start = $('#start_time').val();-->
+                <!--var end = $('#end_time').val();-->
+                <!--if(start == '' || start == null){-->
+                    <!--alert('请输入开始时间');-->
+                    <!--return-->
+                <!--}-->
+                <!--if(end == '' || end == null){-->
+                    <!--alert('请输入结束时间');-->
+                    <!--return-->
+                <!--}-->
+                <!--var s = new Date(start).valueOf();-->
+                <!--var e = new Date(end).valueOf();-->
+                <!--console.log(s)-->
+                <!--console.log(e)-->
+                <!--if (e<s){-->
+                    <!--alert('结束时间不能早于开始时间');-->
+                    <!--return-->
+                <!--}-->
+                <!--var courseid = $("#courseidsEdit").val();-->
+                <!--if(courseid.length>1){-->
+                    <!--return alert("只能选择一个课程");-->
+                <!--}-->
+                <!--var param = $('#DataFrom').serializeJson();-->
+                <!--param.course_id = courseid.join(',');-->
+                    <!--var url = "/cardCourse/save"-->
+                    <!--function completeHandler(data) {-->
+                        <!--routingPage('/cardCourse/preview','课程卡列表')-->
+                    <!--}-->
+                    <!--doGet(url,param,completeHandler)-->
+            <!--}-->
+        <!--});-->
+    <!--}-->
+
+
+
+
+
+
+<!--</script>-->
+<!--&lt;!&ndash; Pr树模态组件 &ndash;&gt;-->
+<!--<script id="tpl-PrTreeTempl" type="text/html"  th:replace="/sysrole/template :: PrTreeTempl"></script>-->
+<!--&lt;!&ndash; 机构树模态组件 &ndash;&gt;-->
+
+<!--</body>-->
+<!--</html>-->

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.SysUserDao" >
+
+    <resultMap id="userMap" type="com.ycjcjy.gene.model.SysUser">
+        <id property="id" column="ID"/>
+        <result property="username" column="username"/>
+        <result property="password" column="PASSWORD"/>
+        <result property="org_id" column="org_id"/>
+        <result property="field_id" column="field_id"/>
+        <result property="user_type" column="user_type"/>
+        <collection property="roles" ofType="com.ycjcjy.gene.model.SysRole">
+            <result column="name" property="name"/>
+        </collection>
+    </resultMap>
+    
+    <select id="findByUserName" parameterType="string" resultMap="userMap">
+		select u.*
+		,r.name
+		from sys_User u
+        LEFT JOIN sys_role_user sru on u.id= sru.sys_user_id
+        LEFT JOIN sys_role r on sru.sys_role_id=r.id
+        where u.username= #{username} and u.is_lock = '0'
+	</select>
+
+    <select id="findUserById" parameterType="int" resultMap="userMap" >
+        select u.*
+        ,r.name
+        from sys_User u
+        LEFT JOIN sys_role_user sru on u.id= sru.sys_user_id
+        LEFT JOIN sys_role r on sru.sys_role_id=r.id
+        where u.id= #{id} and u.is_lock = '0'
+    </select>
+
+    <select id="findUserAndCaseById" parameterType="int" resultType="com.ycjcjy.gene.model.SysUser">
+       select
+       u.id, u.username,   u.icon, u.realname, u.email, u.number, u.mobile, u.is_lock, u.is_delete, u.user_type, u.creat_time,
+       u.org_id, u.field_id,  u.open_id, u.is_field_contact,
+       u.msg_state, u.can_send, u.can_send_card
+       ,f.casefieldname as field_name
+        from sys_User u
+        LEFT JOIN sys_case_field f on f.id = u.field_id
+        where     u.is_lock = 0 and u.is_delete=0 and u.id = #{id}
+    </select>
+
+    <select id="findUserByPhone" parameterType="String" resultType="com.ycjcjy.gene.model.SysUser" >
+        select u.realname,u.id,r.casefieldname as field_name,u.user_type
+        from sys_User u
+        LEFT JOIN sys_case_field r on u.field_id=r.id
+        where u.mobile= #{phone}
+    </select>
+    <select id="findByOpenId" parameterType="String" resultType="com.ycjcjy.gene.model.SysUser">
+        select u.*
+        from sys_User u
+        where  u.user_type in ('manager','sale') and u.open_id= #{openId}
+    </select>
+
+    <select id="findMangers" resultType="com.ycjcjy.gene.model.SysUser">
+        SELECT
+	*
+FROM
+	sys_user
+WHERE
+	user_type = 'manager'
+	AND is_field_contact = 1
+    </select>
+    <select id="findCoffeeMaker" resultType="com.ycjcjy.gene.model.SysUser">
+        SELECT
+            *
+        FROM
+            sys_user
+        WHERE
+            user_type = 'coffeemaker'
+            AND field_id = #{field_id}
+    </select>
+    <select id="findThisManger" parameterType="Long" resultType="com.ycjcjy.gene.model.SysUser">
+        SELECT
+	*
+FROM
+	sys_user
+WHERE
+	user_type = 'manager'
+	AND is_field_contact = 1
+	AND field_id = #{field_id}
+    </select>
+    <select id="findCoffeeMakerByCaseId" parameterType="int" resultType="com.ycjcjy.gene.model.SysUser">
+        select u.*
+        from sys_User u
+        where  u.user_type = 'coffeemaker'  and u.field_id= #{caseId}
+    </select>
+
+    <update id="updateSalerCanSend" parameterType="int">
+        UPDATE sys_User set can_send = #{canSend} WHERE id = #{id}
+    </update>
+
+    <update id="updateSalerCanSendCard" parameterType="int">
+        UPDATE sys_User set can_send_card = #{canSend} WHERE id = #{id}
+    </update>
+
+
+</mapper>

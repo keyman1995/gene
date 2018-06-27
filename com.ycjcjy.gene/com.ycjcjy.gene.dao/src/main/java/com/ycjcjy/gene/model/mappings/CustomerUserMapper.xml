@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.CustomerUserDao" >
+
+	<parameterMap id="customerUserParamMap" type="com.ycjcjy.gene.model.CustomerUser"></parameterMap>
+
+    <update id="updateGiftBalanceById" parameterType="com.ycjcjy.gene.model.CustomerUser">
+		update customer_user
+		set gift_balance = #{gift_balance,jdbcType=DECIMAL}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+    <update id="updateBalanceById" parameterType="com.ycjcjy.gene.model.CustomerUser">
+		update customer_user
+		set gift_balance = gift_balance - #{gift_balance,jdbcType=DECIMAL}
+		, actual_balance = actual_balance - #{actual_balance,jdbcType=DECIMAL}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<select id="findByTel" parameterType="string" resultType="com.ycjcjy.gene.model.CustomerUser">
+		select u.*
+		from customer_user u
+        where u.tel= #{mobile} and user_type = '4'
+	</select>
+
+	<select id="getUserByOpenid" parameterType="String" resultType="com.ycjcjy.gene.model.CustomerUser">
+		select u.*
+		from customer_user u
+        where u.open_id= #{openId}
+	</select>
+
+	<select id="findCustomerUsers" parameterMap="customerUserParamMap" resultType="com.ycjcjy.gene.model.CustomerUser">
+		select
+		t.*
+		from customer_user t
+		<where>
+			<if test="tel !=null and tel!=''">
+				and t.tel like concat('%',#{tel},'%')
+			</if>
+		</where>
+		<if test="base_sort !=null and base_sort !=''">
+			order by ${base_orderBy}  ${base_sort}
+		</if>
+		<if test="base_pageSize !=null and base_pageSize !=''">
+			limit  ${base_offset},${base_pageSize}
+		</if>
+	</select>
+
+	<select id="getAllCount" parameterMap="customerUserParamMap" resultType="Integer">
+
+		select count(1) from (
+		select
+		t.*
+		from customer_user t
+		<where>
+			<if test="tel !=null and tel!=''">
+				and t.tel like concat('%',#{tel},'%')
+			</if>
+		</where>
+		)
+		faketable
+
+	</select>
+
+	<insert id="addPinCode" parameterType="hashmap">
+		INSERT into sys_pin_code (code,tel,update_time) VALUES (#{code},#{tel},#{nowTime})
+	</insert>
+
+	<select id="getPinCode" parameterType="hashmap" resultType="hashmap">
+		SELECT * from sys_pin_code WHERE tel = #{tel}
+		AND update_time &gt;= #{nowTime}
+		ORDER BY update_time DESC LIMIT 1
+	</select>
+
+	<select id="findActual_balanceById" parameterType="long" resultType="double">
+		select u.actual_balance
+		from customer_user u
+        where u.id= #{user_id}
+	</select>
+
+	<select id="findGift_balanceById" parameterType="long" resultType="double">
+		select u.gift_balance
+		from customer_user u
+        where u.id= #{user_id}
+	</select>
+
+	<update id="updateTelByOpenId" parameterType="string">
+		update customer_user
+		set tel = #{tel}
+		where open_id = #{openId}
+	</update>
+
+
+	<select id="findTotalAndNow" resultType="map">
+		SELECT (
+			SELECT count(1) from customer_user where DATE_FORMAT(create_time,'%Y%m%d') = DATE_FORMAT(now(),'%Y%m%d')
+		) nowday,
+		(
+		SELECT count(1) from customer_user
+			) total from dual
+	</select>
+
+</mapper>

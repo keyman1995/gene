@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.EvaluateDao" >
+
+	<resultMap id="evaluateMap" type="com.ycjcjy.gene.model.Evaluate">
+		<id column="id" property="id"/>
+		<result column="content" property="content"/>
+		<result column="score" property="score"/>
+		<result column="createtime_str" property="createtime_str"/>
+		<result column="customerName" property="customerName"/>
+		<collection property="evaluateImgList" column="id" select="getEvaluateImgs"></collection>
+	</resultMap>
+
+
+    <select id="getAllEvaluate" parameterType="com.ycjcjy.gene.model.Evaluate" resultType="com.ycjcjy.gene.model.Evaluate">
+        SELECT
+	a.id,
+	a.score,
+	a.type,
+	a.content,
+	b.name AS teacherName,
+	c.coursename as courseName,
+	d.username AS customerName,
+    a.create_time,
+	DATE_FORMAT( a.create_time, '%Y年%m月%d日 %H时%i分%s秒' ) createTimeStr
+FROM
+	evaluate a
+	LEFT JOIN teacher b ON a.target_id = b.id
+	AND a.type = '0'
+	LEFT JOIN course_manager c ON a.target_id = c.id
+	AND a.type = '1'
+	LEFT JOIN customer_user d ON a.customer_id = d.id
+		<where>
+			1=1
+			<if test="customerName != null and customerName!=''">
+				AND d.username like concat('%',#{customerName},'%')
+			</if>
+		</where>
+        <if test="base_sort !=null and base_sort !=''">
+            order by ${base_orderBy}  ${base_sort}
+        </if>
+        <if test="base_pageSize !=null and base_pageSize !=''">
+            limit  ${base_offset},${base_pageSize}
+        </if>
+    </select>
+	<select id="pageCount" parameterType="com.ycjcjy.gene.model.Evaluate" resultType="int">
+        select count(1) from(
+        SELECT
+	a.id,
+	a.score,
+	a.type,
+	a.content,
+	b.name AS teacherName,
+	c.coursename as courseName,
+	d.username AS customerName
+
+FROM
+	evaluate a
+	LEFT JOIN teacher b ON a.target_id = b.id
+	AND a.type = '0'
+	LEFT JOIN course_manager c ON a.target_id = c.id
+	AND a.type = '1'
+	LEFT JOIN customer_user d ON a.customer_id = d.id
+        )faketable
+    </select>
+
+	<select id="getDetail" parameterType="int" resultType="com.ycjcjy.gene.model.Evaluate">
+		SELECT
+	a.id,
+	a.score,
+	a.type,
+	a.content,
+	b.name AS teacherName,
+	c.coursename as courseName,
+	d.username AS customerName,
+    a.create_time,
+	DATE_FORMAT( a.create_time, '%Y年%m月%d日 %H时%i分%s秒' ) createTimeStr
+FROM
+	evaluate a
+	LEFT JOIN teacher b ON a.target_id = b.id
+	AND a.type = '0'
+	LEFT JOIN course_manager c ON a.target_id = c.id
+	AND a.type = '1'
+	LEFT JOIN customer_user d ON a.customer_id = d.id
+	WHERE a.id = #{id}
+	</select>
+
+	<select id="getEvaluatesForWeb" resultMap="evaluateMap" parameterType="com.ycjcjy.gene.model.Evaluate">
+			select e.*,cu.username as customerName,cu.icon as avatar_img,
+			DATE_FORMAT(e.create_time,'%Y-%m-%d') createtime_str
+
+			from evaluate e
+			left join customer_user cu on e.customer_id = cu.id
+			where e.target_id = #{target_id}
+			<if test="type!=null">
+				and e.type = #{type}
+			</if>
+			<if test="base_pageSize !=null and base_pageSize !=''">
+				limit  ${base_offset},${base_pageSize}
+			</if>
+	</select>
+
+	<select id="getAllCounts" resultType="integer" parameterType="com.ycjcjy.gene.model.Evaluate">
+		select count(1) from (
+			select e.*,cu.username as customerName
+			from evaluate e
+			left join customer_user cu on e.customer_id = cu.id
+			where e.target_id = #{target_id}
+		<if test="type!=null">
+			and e.type = #{type}
+		</if>
+		) faketable
+	</select>
+
+
+	<select id="getEvaluateImgs" parameterType="integer" resultType="com.ycjcjy.gene.model.EvaluateImg">
+		select ei.img_url from evaluate_img ei where ei.e_id = #{id}
+	</select>
+
+
+</mapper>

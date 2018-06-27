@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml"
+      xmlns:course="http://www.w3.org/1999/html" xmlns:caseField="http://www.w3.org/1999/html"
+      xmlns:field="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html">
+<head th:replace="/public/head :: onLoadHead(体验劵管理)">
+</head>
+<body ddata-type="widgets">
+
+<div class="am-g tpl-g">
+    <!-- 模态提示组件 -->
+    <div th:include="/public/tips :: Tips"></div>
+    <!-- 内容区域 -->
+    <div class="tpl-content-wrapper none-margin">
+        <div class="row-content am-cf">
+            <div class="row">
+                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+
+                            <div class="row">
+
+                                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                                    <div class="widget am-cf">
+                                        <div class="widget-head am-cf">
+                                            <div class="widget-title am-fl" th:if="${edit}">编辑卡券</div>
+                                        </div>
+                                        <div class="widget-body am-fr">
+
+                                            <form class="am-form tpl-form-border-form tpl-form-border-br" id="DataFrom">
+                                                <input type="hidden" name="id" th:value="${entity.id}">
+
+
+
+                                                <!--<div class="am-form-group">-->
+                                                    <!--<label for="org_id" class="am-u-sm-3 am-form-label">所属机构 <span class="tpl-form-line-small-title">:</span></label>-->
+                                                    <!--<div class="am-u-sm-9"  th:with="pid=(${entity.org_id} != null)?${entity.org_id}:1">-->
+                                                        <!--<input type="hidden" class="treeValue" name="org_id" id="org_id" th:value="${pid}">-->
+                                                        <!--<tree:org th:attr="disabled=${view},value=${entity.org_id},pid=${pid}"  th:unless="${add}"/>-->
+                                                        <!--<tree:org th:attr="pid=${pid}" th:if="${add}"/>-->
+                                                        <!--&lt;!&ndash;<small th:unless="${view}">从机构树上选择一个机构</small>&ndash;&gt;-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+
+
+
+                                                <div class="am-form-group">
+                                                    <label for="org_id" class="am-u-sm-3 am-form-label">案场 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <field:select name="org_id" id="org_id"   th:attr="value=${entity.org_id},disabled=${edit},name='org_id'" />
+                                                    </div>
+                                                </div>
+
+
+
+                                                <div class="am-form-group">
+                                                    <label for="ticket_type" class="am-u-sm-3 am-form-label">类型 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" name="ticket_type" id="ticket_type" placeholder="请输入渠道文案" th:disabled="${edit}" th:value="${entity.type_str}">
+                                                    </div>
+                                                </div>
+
+
+
+                                                <!--<div class="am-form-group" id="act">-->
+                                                    <!--<label for="act_id" class="am-u-sm-3 am-form-label">课程：<span class="tpl-form-line-small-title">:</span></label>-->
+                                                    <!--<div class="am-u-sm-9" >-->
+                                                        <!--<select id ="act_id" name="act_id" data-am-selected="{btnSize: 'sm'}"></select>-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+
+
+                                                <div class="am-form-group" id="targetId">
+                                                    <label for="target_id" class="am-u-sm-3 am-form-label">目标商品：<span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9" >
+                                                        <input type="text" class="tpl-form-input" name="channel_script" id="target_id" placeholder="请输入渠道文案" th:disabled="${edit}" th:value="${card}">
+                                                    </div>
+                                                </div>
+
+                                                <!--<div class="am-form-group" id="teacher">-->
+                                                    <!--<label for="goods_id" class="am-u-sm-3 am-form-label">私教：<span class="tpl-form-line-small-title">:</span></label>-->
+                                                    <!--<div class="am-u-sm-9" >-->
+                                                        <!--<select id ="teacher_id" name="teacher_id" data-am-selected="{btnSize: 'sm'}"></select>-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+
+
+                                                <div class="am-form-group">
+                                                    <label for="price" class="am-u-sm-3 am-form-label">价格 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="number" class="tpl-form-input" name="price" id="price" placeholder="请输入体验金额" th:value="${entity.price}" th:disabled="${edit}">
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group">
+                                                    <label for="price" class="am-u-sm-3 am-form-label">发送类型 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9" id="channels">
+                                                        <input type="text" class="tpl-form-input" th:disabled="${edit}" th:value="渠道">
+                                                    </div>
+                                                </div>
+                                                <div class="am-form-group" id="channel">
+                                                    <label for="channel_id" class="am-u-sm-3 am-form-label">渠道：<span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9" >
+                                                        <input type="text" class="tpl-form-input" name="channel_id" id="channel_id" th:disabled="${edit}" th:value="${channel}">
+                                                    </div>
+                                                </div>
+                                                <div class="am-form-group" id="video">
+                                                    <label for="icon" class="am-u-sm-3 am-form-label">视频 <span class="tpl-form-line-small-title">video</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <div class="am-form-group">
+                                                            <button type="button" class="am-btn am-btn-success am-btn-sm" onclick="uploadFile(uploadCompleteHandler,this)" th:disabled="${view}">
+                                                                <i class="am-icon-cloud-upload"></i>上传视频
+                                                            </button>
+                                                            <button type="button" class="am-btn am-btn-danger am-btn-sm" onclick="clearUploadImg(this)" th:disabled="${view}">
+                                                                <i class="am-icon-cloud-upload"></i>删除视频
+                                                            </button>
+                                                            <input id="icon" type="hidden" name="vedio_src" th:value="${entity.vedio_src}"><br>
+                                                            <span>视频不大于50MB且为.mp4格式(重新上传前请先删除)</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="am-form-group">
+                                                    <label for="icon" class="am-u-sm-3 am-form-label">图片 <span class="tpl-form-line-small-title">Images</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <div class="am-form-group">
+                                                            <div class="tpl-form-file-img onebean-upload-box" onclick="uploadFile(completeHandler,this)" th:disabled="${view}">
+                                                                <img class="onebean-upload-img" id="iconImgs" th:src="${entity.video_img}">
+                                                            </div>
+                                                            <button type="button" class="am-btn am-btn-success am-btn-sm" onclick="uploadFile(CompleteHandler,this)" th:disabled="${view}">
+                                                                <i class="am-icon-cloud-upload"></i>上传图片
+                                                            </button>
+                                                            <button type="button" class="am-btn am-btn-danger am-btn-sm" onclick="clearUploadImg(this)" th:disabled="${view}">
+                                                                <i class="am-icon-cloud-upload"></i>删除图片
+                                                            </button>
+                                                            <input id="icons" type="hidden" name="video_img" th:value="${entity.video_img}">
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group" id="contents">
+                                                    <label for="content" class="am-u-sm-3 am-form-label">使用说明 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <th:block th:if="${not #lists.isEmpty(entity.content)}">
+                                                            <textarea name="content" id="content"  placeholder="请输入使用说明 "  th:disabled="${view}" th:inline="text" maxlength="200">[[${entity.content}]]</textarea>
+                                                        </th:block>
+                                                        <th:block th:if="${#lists.isEmpty(entity.content)}">
+                                                            <textarea name="content" id="content"  placeholder="请输入使用说明 "  th:disabled="${view}" th:inline="text" maxlength="200"></textarea>
+                                                        </th:block>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="am-form-group" id="channel_sc">
+                                                    <label for="channel_script" class="am-u-sm-3 am-form-label">微信分享描述 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" name="channel_script" id="channel_script" placeholder="请输入微信分享描述" th:disabled="${view}" th:value="${entity.channel_script}">
+                                                    </div>
+                                                </div>
+
+
+
+
+                                                <div class="am-form-group">
+                                                    <label for="count" class="am-u-sm-3 am-form-label">体验劵数量 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="number" class="tpl-form-input" name="count" id="count" placeholder="请输入体验劵数量" th:value="${zs}" th:disabled="${edit}">
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="am-form-group">
+                                                    <div class="am-u-sm-9 am-u-sm-push-3">
+                                                        <button type="submit" class="am-btn am-btn-primary tpl-btn-bg-color-success" th:unless="${view}">提交</button>
+                                                        <button type="button" class="am-btn am-btn-danger" onClick="routingPage('/ticket/view/','卡券列表')">返回</button>
+                                                    </div>
+                                                </div>
+
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<css th:replace="/public/css :: onLoadCSS"></css>
+<js th:replace="/public/js :: onLoadJS"></js>
+<script  th:inline="javascript">
+
+
+
+
+
+    $(function () {
+        validateFrom();
+
+
+
+
+    });
+
+
+
+    var uploadCompleteHandler = function (arr) {
+        $('#upload-modal').modal('close');
+        if(arr.length == 1){
+            $('#icon').val(arr[0]);
+            $('#iconImg').attr("src",arr[0]);
+        }else{
+            $(".alert-modal-message").html("上传文件错误");
+            $(".alert-modal-title").html("只能上传一段视频!");
+            $(".alert-modal-button").html("额...好吧");
+            $('#alert-modal').modal('open');
+        }
+    }
+    var CompleteHandler = function (arr) {
+        $('#upload-modal').modal('close');
+        if(arr.length == 1){
+            $('#icons').val(arr[0]);
+            $('#iconImgs').attr("src",arr[0]);
+        }else{
+            $(".alert-modal-message").html("上传图片错误");
+            $(".alert-modal-title").html("只能上传一张图片!");
+            $(".alert-modal-button").html("额...好吧");
+            $('#alert-modal').modal('open');
+        }
+    }
+
+
+
+    /**
+     * 校验登录表单
+     * @returns void
+     */
+    function validateFrom(){
+
+        $("#DataFrom").validate({
+            rules: {
+                name: {
+                    required:true,
+                    maxlength: 50,
+                    roleName:true
+                },
+                price:{
+                    required:true,
+                    min:0
+                },
+                org_id:{
+                    requried:true
+                }
+                /*count:{
+                    requried:true,
+                    number:true,
+                    min:1
+                }*/
+            },
+            submitHandler: function(form) { //验证成功时调用
+                var count = $('#count').val();
+                var org = $('#org_id');
+                var type = $("input[name='to_type']:checked").val();
+                var content = $('#content').val();
+                var channel_id = $('#channel_id').val();
+                var channel_script = $('#channel_script').val();
+                if(type == 1){
+                    if(content == '' || null == content){
+                        alert('请输入渠道券描述');
+                        return
+                    }
+                    if(channel_id == '' || null == channel_id){
+                        alert('请选择渠道');
+                        return
+                    }
+                    if(channel_script == '' || null == channel_script){
+                        alert('请输入渠道文案');
+                    }
+                }
+
+                var param = $('#DataFrom').serializeJson();
+                var url = "/ticket/updateTicket";
+                var completeHandler =  function (data) {
+                    routingPage('/ticket/view','卡券列表');
+
+
+
+                }
+                doGet(url,param,completeHandler);
+
+
+            }
+        });
+    }
+
+
+
+
+
+
+</script>
+<!-- Pr树模态组件 -->
+<script id="tpl-PrTreeTempl" type="text/html"  th:replace="/sysrole/template :: PrTreeTempl"></script>
+<script id="tpl-uploadTips" type="text/html" th:replace="/public/upload :: uploadTipsTemp"></script>
+<div class="am-popup"  id="upload-modal"></div>
+<!-- 机构树模态组件 -->
+
+
+</body>
+</html>

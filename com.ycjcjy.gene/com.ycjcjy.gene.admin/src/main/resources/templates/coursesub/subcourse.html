@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="/public/head :: onLoadHead(日历)">
+</head>
+
+<body ddata-type="widgets">
+<input type="text" th:value="${date}" id="nowDate" style="display: none"/>
+<input type="text" th:value="${courseid}" id="courseid" style="display: none"/>
+
+<div class="am-g tpl-g">
+    <!-- 内容区域 -->
+    <div class="tpl-content-wrapper none-margin">
+
+        <div class="row-content am-cf">
+            <div class="tpl-calendar-box">
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 数据选择模态组件 -->
+<div th:include="/public/tips :: Tips" style="display: block;width:80%"></div>
+<div th:include="/coursesub/selectTime :: selectTime" class="am-popup"  id="time-select-modal" style="width:40%;left:50%"></div>
+<div th:include="/coursesub/courseList :: courseList" class="am-popup"  id="data-bind-modal" style="width:80%;left:30%;"></div>
+<div th:include="/coursesub/subdetail :: subDetail" class="am-popup"  id="data-bind-sub" style="width:80%;left:30%"></div>
+
+
+<css th:replace="/public/css :: onLoadCSS"></css>
+<link th:href="${oss_ctx}+@{system_assets/css/calendar/fullcalendar.min.css}" rel="stylesheet" type="text/css" />
+<link th:href="${oss_ctx}+@{system_assets/css/calendar/fullcalendar.print.css}" rel="stylesheet" type="text/css"  media='print'/>
+<js th:replace="/public/js :: onLoadJS"></js>
+<script th:src="${oss_ctx}+@{system_assets/js/calendar/moment.js}" type="text/javascript"></script>
+<script th:src="${oss_ctx}+@{system_assets/js/calendar/fullcalendar.min.js}" type="text/javascript"></script>
+
+
+<script>
+    $(document).ready(function() {
+
+
+        var editBox = $('#calendar-edit-box');
+       /* $('.edit-box-close').on('click', function() {
+            $('#calendar').fullCalendar('unselect');
+        })*/
+        $('#calendar').fullCalendar({
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: ''
+            },
+            defaultView:"month",
+            monthNames: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+            monthNamesShort: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+            dayNames: ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
+            dayNamesShort: ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
+            today: ["今天"],
+            firstDay: 1,
+            buttonText: {
+                //today: '本周',
+                today: '本月',
+//                month: '月',
+//                week: '周',
+//                day: '日',
+                prev: '上一月',
+                next: '下一月'
+//                prev: '上一周',
+//                next: '下一周'
+            },
+            defaultDate: $("#nowDate").val(),
+            lang: 'zh-cn',
+            //navLinks: true, // can click day/week names to navigate views
+            selectable: true,
+            selectHelper: true,
+            select: function(start, end) {
+                var startDate = timestampToTime(start._d);
+                //日历自带的时间控件会选到下一天的零点
+                end._d = end._d.setDate(end._d.getDate()-1);
+                var endDate = timestampToTime(end._d);
+                if($("#courseid").val()==""){
+                    $('#data-bind-modal').modal('open');
+                }
+                initAllCase($("#searchCase"),startDate,endDate);
+                var title;
+                var eventData;
+                if (title) {
+                    eventData = {
+                        title: title,
+                        start: start,
+                        end: end
+                    };
+                    $('#calendar').fullCalendar('renderEvent', eventData, true); // stick? = true
+                }
+                $('#calendar').fullCalendar('unselect');
+            },
+            editable: false,
+            eventLimit: false,
+            eventClick: function(event, jsEvent, view) {
+                $('#data-bind-sub').modal('open');
+                $.ajax({
+                    url:'[(${ctx})]/coursesub/findSubById',
+                    type:'post',
+                    dataType:'json',
+                    async:false,
+                    data:{id:event.id},
+                    success:function (result) {
+                        if(result.specialclass=='800'){
+                            $(".ishide").hide();
+                        }else{
+                            $(".ishide").show();
+                        }
+                        $("#subDetailInfor").html(template('tpl-subdetail',result));
+                        initDataPicker();
+                    }
+                })
+
+            },
+            events:function (start, end, timezone, callback) {
+                var date = this.getDate()._d.getFullYear()+"-"+(this.getDate()._d.getMonth()+1)+"-"+(this.getDate()._d.getDate());
+                var param = new Object();
+                $("#nowDate").val(date);
+                param.nowDate = date;
+                param.courseid = $("#courseid").val();
+                var subList = [];
+                $.ajax({
+                    url:"[(${ctx})]/coursesub/findAll",
+                    type:"post",
+                    dataType:"json",
+                    async:false,
+                    data:{paramDate:JSON.stringify(param)},
+                    success:function (result) {
+                        var events = [];
+                        var subCourses = result.subCourseManagers;
+                        if(subCourses.length!=0){
+                            for(var i=0;i<subCourses.length;i++){
+                                var sub = {};
+                                sub.id=subCourses[i].id;
+                                sub.title = subCourses[i].subcousename;
+                                events.push({
+                                    id: sub.id,
+                                    title: sub.title,
+                                    start: subCourses[i].substartline, // will be parsed,
+                                    end: subCourses[i].subendline,
+                                    allDay:true
+                                });
+                            }
+                        }
+                        callback(events);
+                    }
+                })
+            }
+        });
+
+    });
+    function initDataTable(){
+        var currentPage = $("#tpl-pagination").attr("currentPage");
+       var coursestartline = $("#startline").val();
+       var  courseendline  = $("#endline").val();
+       if($("#courseid").val()!=''){//从课程列表页进入时
+           var startLine =  $("#startline").val();
+           var endLine = $("#endline").val();
+           var $obj = new Object();
+           $obj.startDate = startLine;
+           $obj.endDate = endLine;
+           $obj.name = 'startlinetime';
+           $('#startline').html(template('tpl-select',$obj));
+           var $objend = new Object();
+           $objend.startDate = startLine;
+           $objend.endDate = endLine;
+           $objend.name = 'endlinetime';
+           $("#endline").html(template('tpl-select',$objend));
+           initDataPicker();
+           $.ajax({
+               url:"[(${ctx})]/coursesub/findByCouserid",
+               type:'get',
+               dataType:'json',
+               data:{id:$("#courseid").val()},
+               success:function(result){
+                   debugger;
+                    var data1 = new Date(result.coursestartline).getTime();
+                    var data2 = new Date(result.courseendline).getTime();
+                    var data3 = startLine.split('-');
+                    var data4 = new Date(data3[0],(data3[1]-1),data3[2]).getTime();
+                    if(data4>=data1 && data4<=data2){
+                        $('#time-select-modal').modal('open');
+                        $('.am-dimmer').addClass("am-active");
+                        $('.am-dimmer').show();
+                        $("#coursecount").val(result.coursecount);
+                        $("#courseids").val($("#courseid").val());
+                    }else{
+                       alert("请在课程有效期内排课");
+                        return;
+                    }
+               }
+           })
+
+       }else {
+           $.ajax({
+               url:"[(${ctx})]/coursesub/findByIsDate",
+               type:"post",
+               dataType:"json",
+               data:{"conditionParam":"0","currentPage":currentPage,"coursename":$("#coursename").val(),"caseid":$("#searchCase").val(),"coursetype":$("#searchCourseType").val(),"coursestartline_str":coursestartline,"courseendline_str":courseendline},
+               success:function (res) {
+                   $('#dataTable').html(template('tpl-coursesub', res.data));
+                   $("#pagination").html(template('tpl-pagination',res.pagination));
+               }
+           })
+       }
+    }
+    function timestampToTime(timestamp) {
+        var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+        Y = date.getFullYear() + '-';
+        M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+        D = (date.getDate()<10    ? '0'+(date.getDate()) : date.getDate()) + ' ';
+        return Y+M+D;
+    }
+    //初始化所有案场
+    function initAllCase(target,start,end) {
+        $.ajax({
+            type:'get',
+            dataType:'json',
+            url:'[(${ctx})]/syscasefield/findAllCase',
+            success:function (result) {
+                var values = result.data;
+                target.html('');
+                if(values.length!=0){
+                    var html = '<option value="  " >' +'请选择'+ '</option>';
+                    for(var i=0;i<values.length;i++){
+                        html+='<option value="'+values[i].id+'">'+values[i].casefieldname+'</option>';
+                    }
+                }
+                target.html(html);
+                $("#startline").val(start);
+                $("#endline").val(end);
+                initAllCourse($("#searchCourseType"));
+                initDataTable(start,end);
+            }
+        })
+    }
+    //初始化所有课程类型
+    function initAllCourse(target) {
+        $.ajax({
+            type:'get',
+            dataType:'json',
+            url:'[(${ctx})]/coursetype/findByParam?parentid=1',
+            success:function(result){
+                var values = result.data;
+                target.html('');
+                if(values.length!=0){
+                    var html = '<option value=" ">' +'请选择'+ '</option>';
+                    for(var i=0;i<values.length;i++){
+                        html+='<option value="'+values[i].id+'">'+values[i].name+'</option>';
+                    }
+                    target.html(html);
+                }
+            }
+        })
+    }
+    //监听课程的checkbox
+    function change () {
+        $("input[type='checkbox']").each(function () {
+            if($(this).is(":checked")) {
+               $("#inform").hide();
+            }
+        })
+    }
+    //添加课程
+    function addCourse() {
+        var courseids = new Array();
+        var coursecount = new Array();
+        //var coursecircles = new Array();
+        $("input[type='checkbox']").each(function(){
+            var $this = $(this);
+            if($this.is(":checked")) {
+                var ahidden = $this.parent().parent().find("input[type='hidden']").eq(0).val();
+                var cousecounts = $this.parent().parent().find("input[type='hidden']").eq(1).val();
+                courseids.push($this.val());
+                coursecount.push(cousecounts);
+                //coursecircles.push(ahidden);
+            }
+        });
+        if(courseids.length==0){
+           $("#inform").show();
+            return;
+        }
+        $('#data-bind-modal').modal('close');
+        $('#time-select-modal').modal('open');
+        var startLine =  $("#startline").val();
+        var endLine = $("#endline").val();
+        var $obj = new Object();
+        $obj.startDate = startLine;
+        $obj.endDate = endLine;
+        $obj.name = 'startlinetime';
+        $('#startline').html(template('tpl-select',$obj));
+
+        var $objend = new Object();
+        $objend.startDate = startLine;
+        $objend.endDate = endLine;
+        $objend.name = 'endlinetime';
+        $("#endline").html(template('tpl-select',$objend));
+        initDataPicker();
+        $("#courseids").val(courseids);
+        $("#coursecount").val(coursecount);
+    }
+    //确认添加
+    function confirmInfo() {
+        var startline = $("#startlinetime").val();
+        if(startline){
+            $("#startInfo").hide();
+        }else{
+            $("#startInfo").show();
+            return;
+        }
+
+        var endline = $("#endlinetime").val();
+        if(endline){
+            $("#endInfo").hide();
+        }else{
+            $("#endInfo").show();
+            return;
+        }
+
+        if(startline>endline){
+            $("#startError").show();
+            return;
+        }else {
+            $("#startError").hide();
+        }
+
+        var courseids = $("#courseids").val();
+        var coursecounts = $("#coursecount").val();
+        var subName = $("#subName").val();
+        var subDeatil =  $("#subDetail").val();
+        var param = {startTime:startline,endTime:endline,subName:subName,subDeatil:subDeatil,courseids:courseids,coursecounts:coursecounts};
+        $.ajax({
+            url:"[(${ctx})]/coursesub/saveCourse",
+            type:'post',
+            dataType:'json',
+            async:false,
+            data:{courseDetail:JSON.stringify(param)},
+            success:function (data) {
+                if(data.result){
+                    window.location.href="[(${ctx})]/coursesub/listsubCourse?nowDate="+$("#nowDate").val()+"&courseid="+$("#courseid").val();
+                }else{
+                    $('#time-select-modal').modal('close');
+                    alert("添加失败,排课已满");
+                }
+            }
+        })
+    }
+    //取消添加
+    function retureList() {
+        $('#time-select-modal').modal('close');
+        if($("#courseid").val()==''){
+            $('#data-bind-modal').modal('open');
+        }
+    }
+    //编辑课时开始时间
+    function changStart(){
+        $("#data-bind-sub").modal('close');
+        $("#time-single").modal('open');
+    }
+    function CompareDate(d1,d2)
+    {
+        var data1 = new Date(d1.replace(/-/g,"\/"));
+        var data2 = new Date(d2.replace(/-/g,"\/"));
+        if(data1>data2){
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+    //编辑子课程信息
+    function confirmChange() {
+        var param = $("#subDetailInfor").serializeJson();
+        var subCourse = new Object();
+        subCourse.subcousename = param.subcousename;
+        subCourse.id = param.id;
+        subCourse.subDeatil = param.subDeatil;
+        subCourse.substartline = param.substartline;
+        subCourse.subendline = param.subendline;
+        var flag = CompareDate(subCourse.substartline,subCourse.subendline);
+        if(flag){
+            $("#editError").show();
+            return;
+        }else {
+            $("#editError").hide();
+        }
+        $.ajax({
+            url:"[(${ctx})]/coursesub/editById",
+            type:'post',
+            dataType:'json',
+            data:{subCourseManager:JSON.stringify(subCourse)},
+            success:function (data) {
+                if(data){
+                    $('#data-bind-sub').modal('close');
+                    window.location.href="[(${ctx})]/coursesub/listsubCourse?nowDate="+$("#nowDate").val()+"&courseid="+$("#courseid").val();
+                }
+            }
+        })
+
+    }
+    //删除课时信息
+    function deleteSub() {
+        var id = $("#subid").val();
+        $.ajax({
+            url:"[(${ctx})]/coursesub/deleteById",
+            type:'post',
+            dataType:'json',
+            data:{id:id},
+            success:function (data) {
+               if(data){
+                   window.location.href="[(${ctx})]/coursesub/listsubCourse?nowDate="+$("#nowDate").val()+"&courseid="+$("#courseid").val();
+               }else{
+                   alert("删除失败","删除失败请稍后重试","确定");
+               }
+            }
+        })
+    }
+
+
+
+</script>
+<script id="tpl-coursesub" type="text/html" th:replace="/coursesub/subtemplate :: subCourse"></script>
+<script id="tpl-pagination" type="text/html" th:replace="/public/pagination :: paginationTemplate"></script>
+<script id="tpl-select" type="text/html" th:replace="/coursesub/selectplate :: selectTime"></script>
+<script id="tpl-subdetail" type="text/html" th:replace="/coursesub/detailtemplate :: subdetail"></script>
+
+</body>
+</html>

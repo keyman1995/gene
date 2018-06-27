@@ -1,0 +1,115 @@
+<script id="tpl-goodSale" type="text/html" th:fragment="goodSaleTemp" xmlns:th="http://www.w3.org/1999/xhtml"
+        xmlns:dic="http://www.w3.org/1999/xhtml">
+
+
+
+    <div class="am-popup-inner" style="position: relative">
+        <div class="am-popup-hd">
+            <h4 class="am-popup-title data-bind-title">商品售卖</h4>
+            <span data-am-modal-close
+                  class="am-close">&times;</span>
+        </div>
+        <div class="am-popup-bd" >
+            <div class="user-center" >
+                <style>
+                    .user-top {
+                        margin-bottom: 10px;
+                    }
+                    .user-info {
+                        width: 70%;
+                    }
+                    .am_g _pop_pad {
+                        padding: 0 19px;
+                        height: 400px;
+                    }
+                    .checkPop_box {
+                        position: absolute;
+                        top:0;
+                        left: 0;
+                        margin: 0!important;
+                    }
+                    .am-thumbnail-user {
+                        position: relative;
+                    }
+                    .user_conunt {
+                        text-align: center;
+                        padding-bottom: 10px;
+                        color: #000;
+                        font-size: 14px;
+                    }
+                    .user_conunt em, .user_conunt span {
+                        display: inline-block;
+                        -webkit-user-select:none;
+                        -moz-user-select:none;
+                        -ms-user-select:none;
+                        user-select:none;
+                    }
+                    .user_conunt  em {
+                        margin: 0 5px;
+                        font-style: normal;
+                    }
+                    .am_g_pop_pad {
+                        height: 400px!important;
+                    }
+                    .user_conunt span:nth-of-type(1), .user_conunt span:nth-of-type(2){
+                        width: 20px;
+                        height: 20px;
+                        color: #000;
+                        text-align: center;
+                        line-height:16px;
+                        border: 1px  solid #000;
+                        cursor: pointer;
+                    }
+                    .ng_cell {
+                        float: left;
+                        margin: 10px 2.5%;
+                        width: 20%;
+                    }
+                </style>
+                <div  class="user-top  am-container" id="userInfo" >
+                    <div class="user-name am-fl"  >
+                        <img id="userPic"  src="http://s.amazeui.org/media/i/demos/bw-2014-06-19.jpg" class="am-img-responsive am-radius" alt="" width="140" height="140"/>
+                    </div>
+                    <div class="user-info am-fr" >
+                        <!--<div class="am-input-group" style="margin-bottom: 10px;">-->
+                            <!--<span class="am-input-group-label"><i class="am-icon-user am-icon-fw"></i></span>-->
+                            <!--<input type="text" class="am-form-field" placeholder="Username">-->
+                        <!--</div>-->
+                        <!--<div class="am-input-group">-->
+                            <!--<span class="am-input-group-label"><i class="am-icon-lock am-icon-fw"></i></span>-->
+                            <!--<input type="text" class="am-form-field" placeholder="Password">-->
+                        <!--</div>-->
+                        <div  class="user_look">
+                            手机号: <span id="phone"></span>
+                        </div>
+                        <div class="user_look">
+                            余额: <span id="yue"></span>
+                        </div>
+                    </div>
+                </div>
+                <div  class="user-bottom">
+                    <div class="am-scrollable-vertical am_g_pop_pad"  id="hAo_counteR">
+
+
+
+                    </div>
+                </div>
+                <div class="user_price am-container " style="position: absolute;left: 0;bottom: 0;background-color: orange">
+                    <span class=" am-fl" style="vertical-align: middle;margin-top: 5px;" id="countMoney">￥10000</span>
+                    <button type="button" class="am-btn am-btn-success am-fr" onclick="goCutMoney()">确认消费</button>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" id="castType" />
+        <input type="hidden" id="castTicketId" />
+        <input type="hidden" id="castId" />
+        <input type="hidden" id="castSaleId" />
+        <input type="hidden" id="castNum" />
+    </div>
+
+
+
+
+
+
+</script>

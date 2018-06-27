@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/com.ycjcjy.gene/com.ycjcjy.gene.iml" filepath="$PROJECT_DIR$/com.ycjcjy.gene/com.ycjcjy.gene.iml" />
+      <module fileurl="file://$PROJECT_DIR$/com.ycjcjy.gene/com.ycjcjy.gene.action/com.ycjcjy.gene.action.iml" filepath="$PROJECT_DIR$/com.ycjcjy.gene/com.ycjcjy.gene.action/com.ycjcjy.gene.action.iml" />
+      <module fileurl="file://$PROJECT_DIR$/com.ycjcjy.gene/com.ycjcjy.gene.admin/com.ycjcjy.gene.admin.iml" filepath="$PROJECT_DIR$/com.ycjcjy.gene/com.ycjcjy.gene.admin/com.ycjcjy.gene.admin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/com.ycjcjy.gene/com.ycjcjy.gene.dao/com.ycjcjy.gene.dao.iml" filepath="$PROJECT_DIR$/com.ycjcjy.gene/com.ycjcjy.gene.dao/com.ycjcjy.gene.dao.iml" />
+      <module fileurl="file://$PROJECT_DIR$/com.ycjcjy.gene/com.ycjcjy.gene.security/com.ycjcjy.gene.security.iml" filepath="$PROJECT_DIR$/com.ycjcjy.gene/com.ycjcjy.gene.security/com.ycjcjy.gene.security.iml" />
+      <module fileurl="file://$PROJECT_DIR$/com.ycjcjy.gene/com.ycjcjy.gene.service/com.ycjcjy.gene.service.iml" filepath="$PROJECT_DIR$/com.ycjcjy.gene/com.ycjcjy.gene.service/com.ycjcjy.gene.service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/com.ycjcjy.gene/com.ycjcjy.gene.web/com.ycjcjy.gene.web.iml" filepath="$PROJECT_DIR$/com.ycjcjy.gene/com.ycjcjy.gene.web/com.ycjcjy.gene.web.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/gene.iml" filepath="$PROJECT_DIR$/.idea/gene.iml" />
+    </modules>
+  </component>
+</project>

@@ -1,0 +1,23 @@
+<script id="tpl-cardSales" type="text/html" th:fragment="cardSalesTemp" xmlns:th="http://www.w3.org/1999/xhtml">
+    {{each $data as data}}
+    <tr class={{if $index%2==0}} "gradeX" {{else}} "even gradeC" {{/if}}  style="color: black">
+    <td>{{data.lock_num}} </td>
+    <td>{{data.current_user_id}}</td>
+    <td>
+        {{if data.status == 1}}
+        无人
+        {{else}}
+        有人
+        {{/if}}
+    </td>
+    <td>
+        <div class="tpl-table-black-operation">
+
+            <a href="javascript:;" onclick="deleteKey({{data.id}})"  class="tpl-table-black-operation-del">
+                <i class="am-icon-trash" ></i> 删除
+            </a>
+        </div>
+    </td>
+    </tr>
+    {{/each}}
+</script>

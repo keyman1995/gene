@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml"
+      xmlns:course="http://www.w3.org/1999/html" xmlns:caseField="http://www.w3.org/1999/html">
+<head th:replace="/public/head :: onLoadHead(体验劵管理)">
+</head>
+<body ddata-type="widgets">
+
+<div class="am-g tpl-g">
+    <!-- 模态提示组件 -->
+    <div th:include="/public/tips :: Tips"></div>
+    <!-- 内容区域 -->
+    <div class="tpl-content-wrapper none-margin">
+        <div class="row-content am-cf">
+            <div class="row">
+                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+
+                            <div class="row">
+
+                                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                                    <div class="widget am-cf">
+                                        <div class="widget-head am-cf">
+                                            <div class="widget-title am-fl" >分发卡券</div>
+                                        </div>
+                                        <div class="widget-body am-fr">
+
+                                            <form class="am-form tpl-form-border-form tpl-form-border-br" id="DataFrom">
+                                                <input type="hidden" name="ticket_id" id="ticket_id" th:value="${ticket_id}">
+                                                <div class="am-form-group">
+                                                    <label for="tel" class="am-u-sm-3 am-form-label">手机号码 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" id="tel" name="tel" placeholder="请输入电话号码" maxlength="11">
+                                                        </input>
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group">
+                                                    <div class="am-u-sm-9 am-u-sm-push-3">
+                                                        <button type="submit" class="am-btn am-btn-primary tpl-btn-bg-color-success">提交</button>
+                                                        <button type="button" class="am-btn am-btn-danger" onClick="goUrl('/ticket/view/')">返回</button>
+                                                    </div>
+                                                </div>
+
+                                            </form>
+                                            <div class="row">
+                                                <div class="widget am-cf">
+                                                    <div class="widget-body am-fr">
+                                                        <form class="am-form tpl-form-border-form tpl-form-border-br" id="userInfo">
+
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<css th:replace="/public/css :: onLoadCSS"></css>
+<js th:replace="/public/js :: onLoadJS"></js>
+<script  th:inline="javascript">
+
+
+
+
+    $(function () {
+
+        validateFrom();
+
+
+    })
+
+
+    /**
+     * 校验登录表单
+     * @returns void
+     */
+    function validateFrom(){
+        $("#DataFrom").validate({
+            rules: {
+
+               /* tel:{
+                    maxLength:11,
+                    required: true,
+                    isMobile: true
+                }*/
+            },
+            submitHandler: function() { //验证成功时调用
+
+                    var tel = $('#tel').val();
+                    var param = {tel:tel}
+                    var url = "/ticket/findByTel"
+                    function completeHandler(res) {
+
+                        var ticket_id = $('#ticket_id').val();
+
+                        if(res.msg == '200'){
+                            $('#DataFrom').remove();
+                            var data = res.data;
+                            var csrmrId = data.id;
+                            var html = ''
+                            html+= '<div class="am-form-group"><label for="tel" class="am-u-sm-3 am-form-label">用户姓名 <span class="tpl-form-line-small-title">:</span></label><div class="am-u-sm-9"><input type="text" value="'+data.username+'" class="tpl-form-input"  disabled="disabled"/></div></div>';
+                            html+='<div class="am-form-group"><label for="tel" class="am-u-sm-3 am-form-label">用户电话 <span class="tpl-form-line-small-title">:</span></label><div class="am-u-sm-9"><input type="text" value="'+data.tel+'" class="tpl-form-input"  disabled="disabled"/></div></div>';
+
+                            html+='<div class="am-form-group"><div class="am-u-sm-9 am-u-sm-push-3" id="send"><button type="button">分发</button><span>&nbsp;&nbsp;</span><a href="/ticket/view"><i class="am-icon-refresh"></i> 返回</a></div></div>';
+                            $('#userInfo').html(html)
+                        }else if(res.msg == '401'){
+                            alert('无效客户')
+                            return;
+                        }
+                        $('#send').on('click','button',function () {
+                            sendCard(ticket_id,csrmrId)
+                        })
+
+                    }
+                    doGet(url,param,completeHandler)
+
+            }
+        });
+    }
+    function sendCard(ticket_id,csrmrId) {
+        var param = {ticket_id:ticket_id,csrmrId:csrmrId};
+        var url = '/ticket/sendCard'
+        function completeHandler(res) {
+            if(res.msg == '200'){
+                alert('分发成功')
+                setTimeout(function () {
+                    location.href = "/ticket/view"
+                },3000)
+
+            }else if(res.msg == '401'){
+                alert('分发失败')
+                return;
+            }
+
+        }
+
+        doPost(url,param,completeHandler)
+    }
+
+
+
+
+
+
+</script>
+
+</body>
+</html>

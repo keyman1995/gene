@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="/public/head :: onLoadHead(专题课程管理)">
+</head>
+<body ddata-type="widgets">
+<div class="am-g tpl-g">
+    <!--引用通用样式-->
+    <css th:replace="/public/css :: onLoadCSS"></css>
+    <!--引用通用js-->
+    <js th:replace="/public/js :: onLoadJS"></js>
+    <!-- 模态提示组件 -->
+    <div th:include="/public/tips :: Tips"></div>
+    <!-- 内容区域 -->
+    <div class="tpl-content-wrapper none-margin">
+        <div class="row-content am-cf">
+            <div class="row">
+                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                    <div class="row">
+                        <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                            <div class="widget am-cf">
+                                <div class="widget-head am-cf">
+                                    <th:block th:include="/public/breadCrumbs :: breadCrumbsTempl"/>
+                                </div>
+                                <div class="widget-body am-fr">
+
+                                    <form class="am-form tpl-form-border-form tpl-form-border-br" id="DataFrom">
+                                                <input type="hidden" name="id" th:value="${entity.id}">
+                                                <input type="hidden" name="serverid" th:value="${entity.serverid}">
+                                                <div class="am-form-group">
+                                                    <label for="title" class="am-u-sm-3 am-form-label">标题 <span class="tpl-form-line-small-title">Text</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" name="title" id="title" placeholder="请输入" th:disabled="${view}" th:value="${entity.title}">
+                                                        <small>如:6.10-6.15</small>
+                                                    </div>
+                                                </div>
+                                                 <div class="am-form-group"  >
+                                                    <label for="courseids" class="am-u-sm-3 am-form-label">课程<span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                    <select  th:disabled="${view}"  data-placeholder="选择课程"    id="courseidsEdit"  style="min-width:300px;" multiple class="chosen-select" tabindex="8">
+                                                        <th:block th:each="c : ${courses}">
+                                                            <option  th:value="${c.id}" th:text="${c.coursename}+'('+${c.casefieldname}+'/'+${c.startline}+')'"></option>
+                                                        </th:block>
+                                                    </select>
+                                                    <input  type="hidden" th:value="${entity.courseids}" id="courseids"   name="courseids"  />
+                                                    </div>
+                                                </div>
+                                          <!--      <div class="am-form-group">
+                                                    <label for="courseids" class="am-u-sm-3 am-form-label">课程 <span class="tpl-form-line-small-title">Text</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" name="courseids" id="courseids" placeholder="请输入" th:disabled="${view}" th:value="${entity.courseids}">
+                                                        <small th:unless="${view}"></small>
+                                                    </div>
+                                                </div>-->
+                                        <div class="am-form-group">
+                                            <div class="am-u-sm-9 am-u-sm-push-3">
+                                               <!-- <th:block sec:authorize="hasPermission('$everyone','PERM_SERVER_LINK_SAVE')">-->
+                                                    <button type="submit" class="am-btn am-btn-primary tpl-btn-bg-color-success" th:unless="${view}">提交</button>
+                                               <!-- </th:block>-->
+
+                                                <!--<th:block sec:authorize="hasPermission('$everyone','PERM_SERVER_LINK_SAVE')">-->
+                                                    <button type="button" class="am-btn am-btn-warning" th:onclick="'routingPage(\'/serverlinkcourse/edit/'+${entity.id}+'\')',\'编辑\'" th:if="${view}">编辑</button>
+                                               <!-- </th:block>-->
+                                                <button type="button" class="am-btn am-btn-danger" onClick="returnList()">返回</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<link th:href="${oss_ctx}+@{system_assets/css/chosen/amazeui.chosen.css}" rel="stylesheet" type="text/css" />
+<script th:src="${oss_ctx}+@{system_assets/js/chosen/amazeui.chosen.js}" type="text/javascript"></script>
+<script th:inline="javascript">
+    $(function () {
+        validateFrom();
+        initCourse();
+    });
+
+    function returnList() {
+        var serverId = $("input[name='serverid']").val();
+        routingPage('/servermanager/addlink/'+serverId,'专题课程管理');
+    }
+
+    /**
+     * 校验登录表单
+     * @returns void
+     */
+    function validateFrom(){
+        $("#DataFrom").validate({
+            rules: {
+            title:{
+                required:true
+            },
+            courseids:{
+            }
+
+            },
+            submitHandler: function(form) { //验证成功时调用
+                if($("#courseidsEdit").val()!=null){
+                    $("#courseids").val($("#courseidsEdit").val().join(','));
+                }else{
+                    return alert("请先选择课程");
+                }
+                var param = $('#DataFrom').serializeJson();
+                var serverId = param.serverid;
+                var url = "/servermanager/savelink";
+                var completeHandler = function (data) {
+                    routingPage('/servermanager/addlink/'+serverId,'专题课程管理');
+                };
+                doPost(url,param,completeHandler);
+            }
+        });
+    }
+    function initCourse() {
+        var caseList = $("#courseids").val();
+        if (caseList != "") {
+            var arr = new Array();
+            arr = caseList.split(',');
+            for (var i = 0; i < arr.length; i++) {
+                $("#courseidsEdit option[value='" + arr[i] + "']").attr("selected", true);
+            }
+        }
+        $("#courseidsEdit").chosen();
+    }
+
+</script>
+</body>
+</html>

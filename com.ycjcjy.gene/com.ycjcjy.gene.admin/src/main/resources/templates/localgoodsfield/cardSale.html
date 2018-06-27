@@ -1,0 +1,76 @@
+<script id="card-bind-modal" type="text/html" th:fragment="cardSaleTemp" xmlns:th="http://www.w3.org/1999/xhtml"
+        xmlns:dic="http://www.w3.org/1999/xhtml">
+
+
+
+    <div class="am-popup-inner" style="position: relative">
+        <div class="am-popup-hd">
+            <h4 class="am-popup-title data-bind-title">VIP卡开卡</h4>
+            <span data-am-modal-close
+                  class="am-close">&times;</span>
+        </div>
+        <div class="am-popup-bd" >
+            <div class="user-center" >
+                <div  class="user-top  am-container" >
+                    <div class="user-info am-fr" >
+                        <input id="cardNoInput" type="hidden"/>
+                        <div  class="user_look">
+                            卡号: <span id="cardNo"></span>
+                        </div>
+                        <div class="user_look">
+                            金额: <span id="money"></span>
+                        </div>
+                        <div class="user_look">
+                           状态: <span id="state"></span>
+                        </div>
+                        <div class="user_look">
+                            销售: <span id="saler"></span>
+                        </div>
+                    </div>
+                </div>
+                <div  class="user-bottom">
+                    <div class="am-scrollable-vertical am_g_pop_pad">
+                        <input type="hidden" id="saleId"/>
+                        <input type="hidden" id="userId"/>
+                        <div class="user_look" id="ErrMessage" style="font-weight: bolder;color: red">
+
+                        </div>
+                        <div class="user_look kaika">
+                            绑定销售: <input type="text" id="saleTel" />&nbsp;&nbsp;&nbsp;<button class="am-icon-search am-btn am-btn-default am-btn-secondary " value="查验" onclick="checkSaler()">查验</button>
+                        </div>
+                        <div class="user_look kaika">
+                            销售:  <span id="saleName"></span>
+                        </div>
+                        <div class="user_look kaika">
+                            所在案场:  <span id="filedName"></span>
+                        </div>
+
+                        <button class="kaika am-btn am-btn-default am-btn-success" value="绑定" id="bangdingSale">绑定</button>
+
+                        <div class="user_look jihuo">
+                            绑定用户: <input type="text" id="userTel" />&nbsp;&nbsp;&nbsp;<button class="am-icon-search am-btn am-btn-default am-btn-secondary " value="查验" onclick="checkUser()">查验</button>
+                        </div>
+                        <div class="user_look jihuo">
+                            用户名:  <span id="userName"></span>
+                        </div>
+
+
+                        <button class="jihuo am-btn am-btn-default am-btn-success" value="绑定" id="bangdingUser">绑定</button>
+
+
+
+                    </div>
+                </div>
+
+
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+</script>

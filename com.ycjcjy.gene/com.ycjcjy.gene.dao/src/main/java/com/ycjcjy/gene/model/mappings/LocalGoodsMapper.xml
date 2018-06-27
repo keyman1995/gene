@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.LocalGoodsDao" >
+
+    <select id="findCardGoods" parameterType="long" resultType="com.ycjcjy.gene.model.LocalGoods">
+        SELECT s.* FROM local_goods s WHERE s.id =
+        (select c.goods_id from card_goods_basic c where c.id = #{targetId})
+    </select>
+    <select id="hasCard" parameterType="long" resultType="int">
+        SELECT count(1) FROM card_goods_basic where goods_id = #{id}
+    </select>
+
+    <select id="findAllGoods" parameterType="long" resultType="com.ycjcjy.gene.model.LocalGoods">
+         SELECT
+         id,
+        goods_name,
+        if( img_url!='',img_url, 'http://jingcheng-resourceplat.oss-cn-shanghai.aliyuncs.com/upload/182138443641.jpg' ) AS img_url,
+        type,
+        case_field_id,
+        price,
+        create_time,
+        update_time
+
+         FROM local_goods s WHERE s.case_field_id = #{caseId}
+         and is_show = '1'
+         order by s.type
+    </select>
+</mapper>

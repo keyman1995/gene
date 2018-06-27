@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="/public/head :: onLoadHead(首页)">
+
+</head>
+<body data-type="widgets">
+<div class="am-g tpl-g">
+    <!-- 模态提示组件 -->
+    <div th:include="/public/tips :: Tips"></div>
+
+    <!-- 数据选择模态组件 -->
+    <div th:include="/public/dataBind :: RuBindTips" class="am-popup"  id="data-bind-modal"></div>
+    <!-- 内容区域 -->
+    <div class="tpl-content-wrapper none-margin">
+        <div class="row-content am-cf">
+            <div class="row">
+                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                    <div class="widget am-cf">
+                        <div class="widget-head am-cf">
+                            <div class="widget-title  am-cf">月订单列表</div>
+                        </div>
+                        <div class="widget-body am-fr">
+                            <form class="am-form tpl-form-border-form tpl-form-border-br paramFrom" data-flush="1">
+                                <div class="am-form-group">
+
+
+
+
+
+
+                                </div>
+
+
+                                <!--<label class="am-u-sm-1 am-u-md-1 am-form-label line-hight-10">每页数量/条 :</label>
+                                <div class="am-u-sm-1 am-u-md-1 am-u-lg-1">
+                                    <div class="am-form-group tpl-table-list-select">
+                                        <select data-am-selected="{btnSize: 'sm'}" id="limitSelector">
+                                            <option value="5">5</option>
+                                            <option value="10" selected>10</option>
+                                            <option value="30">30</option>
+                                            <option value="50">50</option>
+                                        </select>
+                                    </div>
+                                </div>-->
+
+                                <div class="am-u-sm-12 am-u-md-6 am-u-lg-2">
+                                    <div class="am-form-group" style="float: right">
+                                        <div class="am-btn-toolbar">
+                                            <div class="am-btn-group am-btn-group-xs">
+                                                <!--<button type="button" class="am-btn am-btn-default am-btn-secondary query-button"><span class="am-icon-search"></span> 查询</button>
+                                                <button type="button"  class="am-btn am-btn-default am-btn-warning reset-button"><span class="am-icon-archive"></span> 重置</button>-->
+                                                <!--<button type="button" class="am-btn am-btn-default am-btn-danger"><span class="am-icon-trash-o"></span> 删除</button>-->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <div class="am-u-sm-12">
+                                <table width="100%" class="am-table am-table-compact am-table-bordered am-table-radius am-table-striped tpl-table-black "
+                                       id="example-r">
+                                    <thead>
+                                    <tr>
+                                        <th>月份</th>
+                                        <th>规定次数</th>
+                                        <th>实际次数</th>
+                                        <th>超出次数</th>
+                                        <th>剩余次数</th>
+                                        <th>操作</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="dataTable">
+
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="am-u-lg-12 am-cf">
+                                <div class="am-fr" id="pagination">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <css th:replace="/public/css :: onLoadCSS"></css>
+    <js th:replace="/public/js :: onLoadJS"></js>
+    <script type="text/javascript" >
+        $(function () {
+            initDataTable();
+        })
+
+
+
+
+        function initDataTable(){
+            var pageSize = $("#limitSelector").val();
+            var currentPage = $("#tpl-pagination").attr("currentPage")
+            var orderBy = ""
+            var sort = ""
+            var param = {orderBy: orderBy, sort: sort, currentPage: currentPage, pageSize: pageSize, conditionList: formatQueryFromParam()}
+            doGet("/goodsordersub/lists",param,function (res) {
+                $('#dataTable').html(template('tpl-order', res.data));
+                $('#pagination').html(template('tpl-pagination', res.pagination))
+            })
+        }
+        function exportExcels(option){
+
+            var s = "/goodsordersub/toExcel/?monthTime="+JSON.stringify(option);
+            s=encodeURI(s);
+            routingPage(s,"导出Excel表格");
+            //location.href=s;
+        }
+
+    </script>
+    <script id="tpl-order" type="text/html">
+        {{each $data as data}}
+        <tr  class={{if $index%2==0}} "gradeX" {{else}} "even gradeC" {{/if}} >
+        <td> {{data.months}}</td>
+        <td>
+            {{data.total}}
+        </td>
+        <td>{{data.used}}</td>
+        <td>
+            {{if data.overused < 0 }}
+                0
+            {{else}}
+            {{data.overused}}
+            {{/if}}
+        </td>
+        <td>
+            {{if data.leftnum < 0}}
+                0
+            {{else}}
+            {{data.leftnum}}
+            {{/if}}
+        </td>
+        <td>
+            <a href="javascript:;" onclick="exportExcels({months:'{{data.months}}',total:'{{data.total}}',used:'{{data.used}}'})"  class="tpl-table-black-operation-del">
+                 导出excel
+            </a>
+        </td>
+
+
+        </tr>
+        {{/each}}
+    </script>
+    <script id="tpl-pagination" type="text/html" th:replace="/public/pagination :: paginationTemplate"></script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="/public/head :: onLoadHead(案场区域管理管理)">
+</head>
+<body ddata-type="widgets">
+<div class="am-g tpl-g">
+    <!--引用通用样式-->
+    <css th:replace="/public/css :: onLoadCSS"></css>
+    <!--引用通用js-->
+    <js th:replace="/public/js :: onLoadJS"></js>
+    <!-- 模态提示组件 -->
+    <div th:include="/public/tips :: Tips"></div>
+    <!-- 内容区域 -->
+    <div class="tpl-content-wrapper none-margin">
+        <div class="row-content am-cf">
+            <div class="row">
+                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                    <div class="row">
+                        <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                            <div class="widget am-cf">
+                                <div class="widget-head am-cf">
+                                    <th:block th:include="/public/breadCrumbs :: breadCrumbsTempl"/>
+                                </div>
+                                <div class="widget-body am-fr">
+
+                                    <form class="am-form tpl-form-border-form tpl-form-border-br" id="DataFrom">
+                                                <input type="hidden" name="id" th:value="${entity.id}">
+                                                <input type="hidden" name="case_field_id" th:value="${field_id}">
+                                                <input type="hidden" name="is_show" th:value="1">
+
+                                                <div class="am-form-group">
+                                                    <label for="area_name" class="am-u-sm-3 am-form-label">区域名 <span class="tpl-form-line-small-title">Text</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" name="area_name" id="area_name" placeholder="请输入区域名" th:disabled="${view}" th:value="${entity.area_name}">
+                                                        <small th:unless="${view}">区域名</small>
+                                                    </div>
+                                                </div>
+                                        <div class="am-form-group">
+                                        <label for="icon" class="am-u-sm-3 am-form-label">图片 <span class="tpl-form-line-small-title">Images</span></label>
+                                        <div class="am-u-sm-9">
+                                            <div class="am-form-group">
+                                                <div class="tpl-form-file-img onebean-upload-box" onclick="uploadFile(completeHandler,this)" th:disabled="${view}">
+                                                    <img class="onebean-upload-img" id="iconImg" th:src="${entity.img_url}">
+                                                </div>
+                                                <button type="button" class="am-btn am-btn-success am-btn-sm" onclick="uploadFile(uploadCompleteHandler,this)" th:disabled="${view}">
+                                                    <i class="am-icon-cloud-upload"></i>上传图片
+                                                </button>
+                                                <button type="button" class="am-btn am-btn-danger am-btn-sm" onclick="clearUploadImg(this)" th:disabled="${view}">
+                                                    <i class="am-icon-cloud-upload"></i>删除图片
+                                                </button>
+                                                <input id="icon" type="hidden" name="img_url" th:value="${entity.img_url}">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                        <div class="am-form-group">
+                                            <label for="icon" class="am-u-sm-3 am-form-label">黑白图片 <span class="tpl-form-line-small-title">Images</span></label>
+                                            <div class="am-u-sm-9">
+                                                <div class="am-form-group">
+                                                    <div class="tpl-form-file-img onebean-upload-box" onclick="uploadFile(completeHandler,this)" th:disabled="${view}">
+                                                        <img class="onebean-upload-img" id="iconImgs" th:src="${entity.img_url_mono}">
+                                                    </div>
+                                                    <button type="button" class="am-btn am-btn-success am-btn-sm" onclick="uploadFile(uploadCompleteHandlers,this)" th:disabled="${view}">
+                                                        <i class="am-icon-cloud-upload"></i>上传图片
+                                                    </button>
+                                                    <button type="button" class="am-btn am-btn-danger am-btn-sm" onclick="clearUploadImg(this)" th:disabled="${view}">
+                                                        <i class="am-icon-cloud-upload"></i>删除图片
+                                                    </button>
+                                                    <input id="icons" type="hidden" name="img_url_mono" th:value="${entity.img_url_mono}">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="am-form-group">
+                                            <div class="am-u-sm-9 am-u-sm-push-3">
+                                                <th:block sec:authorize="hasPermission('$everyone','PERM_CASE_FIELD_AREA_SAVE')">
+                                                    <button type="submit" class="am-btn am-btn-primary tpl-btn-bg-color-success" th:unless="${view}">提交</button>
+                                                </th:block>
+
+                                                <th:block sec:authorize="hasPermission('$everyone','PERM_CASE_FIELD_AREA_SAVE')">
+                                                    <button type="button" class="am-btn am-btn-warning" th:onclick="'routingPage(\'/syscasefieldarea/edit/'+${entity.id}+'\')',\'编辑\'" th:if="${view}">编辑</button>
+                                                </th:block>
+                                                <button type="button" class="am-btn am-btn-danger" onClick="routingPage('/syscasefieldarea/preview/')">返回</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script th:inline="javascript">
+    $(function () {
+        validateFrom();
+    });
+    var uploadCompleteHandler = function (arr) {
+        $('#upload-modal').modal('close');
+        if(arr.length == 1){
+            $('#icon').val(arr[0]);
+            $('#iconImg').attr("src",arr[0]);
+        }else if(arr.length > 1){
+            $(".alert-modal-message").html("只能上传一张图片");
+            $(".alert-modal-title").html("错误");
+            $(".alert-modal-button").html("额...好吧");
+            $('#alert-modal').modal('open');
+        }else if(arr.length == 0) {
+            $(".alert-modal-message").html("必须上传一张图片");
+            $(".alert-modal-title").html("错误");
+            $(".alert-modal-button").html("额...好吧");
+            $('#alert-modal').modal('open');
+        }else {
+            $(".alert-modal-message").html("上传图片错误");
+            $(".alert-modal-title").html("错误");
+            $(".alert-modal-button").html("额...好吧");
+            $('#alert-modal').modal('open');
+        }
+    }
+    var uploadCompleteHandlers = function (arr) {
+        $('#upload-modal').modal('close');
+        if(arr.length == 1){
+            $('#icons').val(arr[0]);
+            $('#iconImgs').attr("src",arr[0]);
+        }else if(arr.length > 1){
+            $(".alert-modal-message").html("只能上传一张图片");
+            $(".alert-modal-title").html("错误");
+            $(".alert-modal-button").html("额...好吧");
+            $('#alert-modal').modal('open');
+        }else if(arr.length == 0) {
+            $(".alert-modal-message").html("必须上传一张图片");
+            $(".alert-modal-title").html("错误");
+            $(".alert-modal-button").html("额...好吧");
+            $('#alert-modal').modal('open');
+        }else {
+            $(".alert-modal-message").html("上传图片错误");
+            $(".alert-modal-title").html("错误");
+            $(".alert-modal-button").html("额...好吧");
+            $('#alert-modal').modal('open');
+        }
+    }
+
+    /**
+     * 校验登录表单
+     * @returns void
+     */
+    function validateFrom(){
+
+
+        $("#DataFrom").validate({
+            rules: {
+            area_name:{
+                required:true
+            },
+            case_field_id:{
+                required:true
+            },
+            icon:{
+                required:true
+            },
+            icons:{
+                required:true
+            }
+
+            },
+            submitHandler: function(form) { //验证成功时调用
+                if ($('#icon').val() == '' || $('#icon').val() == null){
+                    alert('请上传区域图标')
+                    return
+                }
+                if ($('#icons').val() == '' || $('#icons').val() == null){
+                    alert('请上传区域黑白图标')
+                    return
+                }
+
+                var param = $('#DataFrom').serializeJson();
+                var url = "/syscasefieldarea/save";
+                var completeHandler = function (data) {
+                    routingPage('/syscasefieldarea/preview/','案场区域管理管理');
+                };
+                doPost(url,param,completeHandler);
+            }
+        });
+    }
+
+</script>
+<script id="tpl-uploadTips" type="text/html" th:replace="/public/upload :: uploadTipsTemp"></script>
+<div class="am-popup"  id="upload-modal"></div>
+</body>
+</html>

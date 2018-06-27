@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.CourseMakeupManagerDao" >
+    <select id="findMakeupCourseList" parameterType="com.ycjcjy.gene.model.SubCourseManager" resultType="com.ycjcjy.gene.model.SubCourseManager" >
+ SELECT
+	t1.id,
+	t1.subcousename,
+	t1.substartline,
+	t1.subendline,
+	t2.coursename AS pName,
+	t4.casefieldname AS fieldName,
+	COUNT(t3.id) AS makeupCount
+FROM
+	course_sub_manager t1
+LEFT JOIN course_manager t2 ON t1.pcourseid = t2.id
+LEFT JOIN course_makeup_manager t3 ON t1.id = t3.course_id AND t3.status = 1
+LEFT JOIN sys_case_field t4 ON t2.caseid = t4.id
+AND t3. STATUS = 1
+		<where>
+
+			<if test="fieldName !=null and fieldName!=''">
+				AND t4.casefieldname like concat('%',#{fieldName},'%')
+			</if>
+			<if test="subcousename !=null and subcousename!=''">
+				and t1.subcousename like concat('%',#{subcousename},'%')
+			</if>
+				AND t1.id IN (
+			SELECT
+			course_id
+			FROM
+			course_makeup_manager
+			)
+		</where>
+GROUP BY
+	t1.id
+	HAVING SUM(t3.id) &gt; 0
+		<if test="base_sort !=null and base_sort !=''">
+			order by ${base_orderBy}  ${base_sort}
+		</if>
+		<if test="base_pageSize !=null and base_pageSize !=''">
+			limit  ${base_offset},${base_pageSize}
+		</if>
+    </select>
+	<select id="pageCount" parameterType="com.ycjcjy.gene.model.SubCourseManager" resultType="int">
+		SELECT count(1) FROM (
+		SELECT
+		t1.id,
+		t1.subcousename,
+		t1.substartline,
+		t1.subendline,
+		t2.coursename AS pName,
+		t4.casefieldname AS fieldName,
+		COUNT(t3.id) AS makeupCount
+		FROM
+		course_sub_manager t1
+		LEFT JOIN course_manager t2 ON t1.pcourseid = t2.id
+		LEFT JOIN course_makeup_manager t3 ON t1.id = t3.course_id AND t3.status = 1
+		LEFT JOIN sys_case_field t4 ON t2.caseid = t4.id
+		AND t3. STATUS = 1
+		<where>
+
+			<if test="fieldName !=null and fieldName!=''">
+				AND t4.casefieldname like concat('%',#{fieldName},'%')
+			</if>
+			<if test="subcousename !=null and subcousename!=''">
+				and t1.subcousename like concat('%',#{subcousename},'%')
+			</if>
+			AND t1.id IN (
+			SELECT
+			course_id
+			FROM
+			course_makeup_manager
+			)
+		</where>
+		GROUP BY
+		t1.id
+		HAVING SUM(t3.id) &gt; 0
+		)
+		faketable
+	</select>
+    <select id="findMakeupCustomer" parameterType="com.ycjcjy.gene.model.CustomerUser" resultType="com.ycjcjy.gene.model.CustomerUser">
+        SELECT
+	t1.id,
+	t1.username,
+	t1.tel,
+	t3.subcousename,
+	t4.coursename,
+	t2.id AS makeupId,
+	t2.create_time
+FROM
+	customer_user t1
+LEFT JOIN course_makeup_manager t2 ON t1.id = t2.user_id AND t2.status = 1
+LEFT JOIN course_sub_manager t3 ON t2.course_id = t3.id
+LEFT JOIN course_manager t4 ON t3.pcourseid = t4.id
+		<where>
+
+			<if test="username !=null and username!=''">
+				AND t1.username like concat('%',#{username},'%')
+			</if>
+			<if test="tel !=null and tel!=''">
+				and t1.tel like concat('%',#{tel},'%')
+			</if>
+			and t1.id IN (
+			SELECT
+			user_id
+			FROM
+			course_makeup_manager
+			)
+			AND course_id = #{courseId}
+		</where>
+		ORDER BY t2.create_time DESC
+		<if test="base_pageSize !=null and base_pageSize !=''">
+			limit  ${base_offset},${base_pageSize}
+		</if>
+    </select>
+	<select id="findCustomerDetail" parameterType="int" resultType="com.ycjcjy.gene.model.CustomerUser">
+		    SELECT
+	t1.id,
+	t1.username,
+	t1.tel,
+	t3.subcousename AS subCourseId,
+	t4.coursename AS courseName,
+	t2.id AS makeupId,
+	t2.course_id AS courseId,
+	t2.create_time
+FROM
+	customer_user t1
+LEFT JOIN course_makeup_manager t2 ON t1.id = t2.user_id AND t2.status = 1
+LEFT JOIN course_sub_manager t3 ON t2.course_id = t3.id
+LEFT JOIN course_manager t4 ON t3.pcourseid = t4.id
+WHERE
+	t1.id IN (
+		SELECT
+			user_id
+		FROM
+			course_makeup_manager
+	)
+	AND t1.id = #{userId}
+AND course_id = #{courseId}
+
+
+	</select>
+
+</mapper>

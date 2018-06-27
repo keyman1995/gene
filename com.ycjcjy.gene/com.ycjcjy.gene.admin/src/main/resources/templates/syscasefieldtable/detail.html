@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="/public/head :: onLoadHead(案场桌位管理管理)">
+</head>
+<body ddata-type="widgets">
+<div class="am-g tpl-g">
+    <!--引用通用样式-->
+    <css th:replace="/public/css :: onLoadCSS"></css>
+    <!--引用通用js-->
+    <js th:replace="/public/js :: onLoadJS"></js>
+    <!-- 模态提示组件 -->
+    <div th:include="/public/tips :: Tips"></div>
+    <!-- 内容区域 -->
+    <div class="tpl-content-wrapper none-margin">
+        <div class="row-content am-cf">
+            <div class="row">
+                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                    <div class="row">
+                        <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                            <div class="widget am-cf">
+                                <div class="widget-head am-cf">
+                                    <th:block th:include="/public/breadCrumbs :: breadCrumbsTempl"/>
+                                </div>
+                                <div class="widget-body am-fr">
+
+                                    <form class="am-form tpl-form-border-form tpl-form-border-br" id="DataFrom">
+                                                <input type="hidden" name="id" th:value="${entity.id}">
+                                                <input type="hidden" name="is_show" th:value="1">
+                                                <input type="hidden" name="case_field_id" th:value="${field_id}">
+                                                <input type="hidden" id="areas" th:value="${entity.area}">
+
+                                                <div class="am-form-group">
+                                                    <label for="num" class="am-u-sm-3 am-form-label">桌编号 <span class="tpl-form-line-small-title">Text</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" name="num" id="num" placeholder="请输入桌编号" th:disabled="${view}" th:value="${entity.num}">
+                                                        <small th:unless="${view}">桌编号</small>
+                                                    </div>
+                                                </div>
+                                                <!--<div class="am-form-group">
+                                                    <label for="area" class="am-u-sm-3 am-form-label">区域id <span class="tpl-form-line-small-title">Text</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" name="area" id="area" placeholder="请输入区域id" th:disabled="${view}" th:value="${entity.area}">
+                                                        <small th:unless="${view}">区域id</small>
+                                                    </div>
+                                                </div>-->
+                                        <div class="am-form-group">
+                                            <label for="area" class="am-u-sm-3 am-form-label">区域 <span class="tpl-form-line-small-title">:</span></label>
+                                            <div class="am-u-sm-9">
+                                                <select id ="area" name="area" data-am-selected="{btnSize: 'sm'}"></select>
+                                                <small th:unless="${view}">区域</small>
+                                            </div>
+                                        </div>
+                                        <div class="am-form-group">
+                                            <div class="am-u-sm-9 am-u-sm-push-3">
+                                                <th:block sec:authorize="hasPermission('$everyone','PERM_CASE_FIELD_TABLE_SAVE')">
+                                                    <button type="submit" class="am-btn am-btn-primary tpl-btn-bg-color-success" th:unless="${view}">提交</button>
+                                                </th:block>
+
+                                                <th:block sec:authorize="hasPermission('$everyone','PERM_CASE_FIELD_TABLE_SAVE')">
+                                                    <button type="button" class="am-btn am-btn-warning" th:onclick="'routingPage(\'/syscasefieldtable/edit/'+${entity.id}+'\')',\'编辑\'" th:if="${view}">编辑</button>
+                                                </th:block>
+                                                <button type="button" class="am-btn am-btn-danger" onClick="routingPage('/syscasefieldtable/preview/')">返回</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script th:inline="javascript">
+    $(function () {
+        validateFrom();
+        goodslist();
+    });
+    function goodslist() {
+        var url = '/syscasefieldarea/areaList';
+        var id = '#area';
+        var param = '';
+        var target_id = $('#areas').val();
+        doPost(url,param,function (result) {
+            var data = result.data;
+            $(id).html('');
+            for (var i=0;i<data.length;i++){
+                if(data[i].id == target_id){
+                    $(id).append("<option selected value="+data[i].id+">"+data[i].area_name+"</option>");
+                }else {
+                    $(id).append("<option value="+data[i].id+">"+data[i].area_name+"</option>");
+                }
+            }
+            $(id).selected('destroy');
+            $(id).selected();
+        });
+    }
+
+    /**
+     * 校验登录表单
+     * @returns void
+     */
+    function validateFrom(){
+        $("#DataFrom").validate({
+            rules: {
+            num:{
+                required:true
+            },
+            area:{
+                required:true
+            }
+
+            },
+            submitHandler: function(form) { //验证成功时调用
+                var param = $('#DataFrom').serializeJson();
+                var url = "/syscasefieldtable/save";
+                var completeHandler = function (data) {
+                    routingPage('/syscasefieldtable/preview/','案场桌位管理管理');
+                };
+                doPost(url,param,completeHandler);
+            }
+        });
+    }
+
+</script>
+</body>
+</html>

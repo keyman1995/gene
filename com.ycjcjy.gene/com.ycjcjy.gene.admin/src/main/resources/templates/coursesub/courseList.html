@@ -1,0 +1,63 @@
+
+<div class="am-popup" id="img-bind-modal"  th:fragment="courseList" xmlns:th="http://www.w3.org/1999/xhtml">
+
+
+    <div class="am-popup-inner sexyInner">
+        <div class="am-popup-hd">
+            <h4 class="am-popup-title data-bind-title">请选择需要排课的课</h4>
+            <span data-am-modal-close
+                  class="am-close">&times;</span>
+        </div>
+        <input type="hidden"  id="startline"/>
+        <input type="hidden" id="endline"/>
+        <form class="am-form tpl-form-border-form tpl-form-border-br paramFrom" data-flush="1">
+            <label class="am-u-sm-1 am-form-label line-hight-10">课程名称 :</label>
+            <div class="am-u-sm-3 am-u-end line-hight-10">
+                <input type="text" id="coursename" class="tpl-form-input paramInput" param-pattern="coursename"  placeholder="课程名称">
+            </div>
+
+            <label class="am-u-sm-1 am-form-label line-hight-10">所属案场 :</label>
+            <div class="am-u-sm-3 am-u-end line-hight-10">
+                <select  class="paramInput  onebean-param-select-box" data-am-selected  param-pattern="caseid" id="searchCase">
+                </select>
+            </div>
+
+          <!--  <label class="am-u-sm-1 am-form-label line-hight-10">课程类型 :</label>
+            <div class="am-u-sm-3 am-u-end line-hight-10">
+                <select  class="paramInput  onebean-param-select-box" data-am-selected  param-pattern="coursetype" id="searchCourseType">
+                </select>
+            </div>-->
+
+            <div class="am-u-sm-12 am-u-md-6 am-u-lg-2">
+                <div class="am-form-group" style="float: right">
+                    <div class="am-btn-toolbar">
+                        <div class="am-btn-group am-btn-group-xs">
+                            <button type="button" class="am-btn am-btn-default am-btn-secondary query-button"><span class="am-icon-search"></span> 查询</button>
+                            <button type="button"  class="am-btn am-btn-default am-btn-warning reset-button"><span class="am-icon-archive"></span> 重置</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <!--在这一天添加课程-->
+        <button type="button" class="am-btn am-btn-primary am-radius" onclick="addCourse()">设置选中课程的时间</button><span id="inform" style="color: red;display: none">请先选择需要课程</span>
+        <div class="am-u-sm-12">
+            <table width="100%" class="am-table am-table-compact am-table-bordered am-table-radius am-table-striped tpl-table-black "
+                   id="example-r">
+                <tbody id="dataTable">
+
+                </tbody>
+            </table>
+        </div>
+        <div class="am-u-lg-12 am-cf">
+            <div class="am-fr" id="pagination">
+
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+
+
+
+<!-- role-user数据绑定 -->

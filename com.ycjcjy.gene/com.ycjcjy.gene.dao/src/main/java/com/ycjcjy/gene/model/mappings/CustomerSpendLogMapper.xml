@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.CustomerSpendLogDao" >
+
+    <parameterMap id="customerSpendLogParamMap" type="com.ycjcjy.gene.model.CustomerSpendLog"></parameterMap>
+
+    <resultMap type="com.ycjcjy.gene.model.CustomerSpendLog" id="customerSpendLogMap">
+
+    </resultMap>
+
+    <select id="findByUserId" parameterType="com.ycjcjy.gene.model.CustomerSpendLog" resultType="com.ycjcjy.gene.model.CustomerSpendLog">
+        SELECT
+	a.*
+FROM
+	(
+		(
+			SELECT
+			t.*,    (SELECT group_concat(c.goods_name) from local_goods c where  FIND_IN_SET(id,t.goods_id  )  )  AS goods_name,
+			cu.casefieldname AS casefield_name
+			FROM
+			customer_spend_log t
+			LEFT JOIN sys_case_field cu ON t.casefield_id = cu.id
+			WHERE
+			t.customer_id = #{customer_id}
+			AND t.type = 0
+		)
+		UNION ALL
+			(
+				SELECT
+					t.*, m.coursename AS goods_name,
+					cu.casefieldname AS casefieldname
+				FROM
+					customer_spend_log t,
+					(
+						SELECT
+							o.id,
+							o.actual_price,
+							c.coursename
+						FROM
+							order_main o
+						LEFT JOIN course_manager c ON o.course_id = c.id
+						WHERE
+							o.order_state in (1,2)
+					) m,
+					sys_case_field cu
+				WHERE
+					t.customer_id = #{customer_id}
+				AND t.type = 1
+				AND t.goods_id = m.id
+				AND t.casefield_id = cu.id
+			)
+	) AS a
+ORDER BY
+	a.create_time DESC
+        <if test="base_pageSize !=null and base_pageSize !=''">
+            limit  ${base_offset},${base_pageSize}
+        </if>
+
+    </select>
+
+    <select id="getAllCountByCustomerId" parameterType="com.ycjcjy.gene.model.CustomerSpendLog" resultType="Integer">
+        select count(1)
+        from(
+        	SELECT
+	a.*
+FROM
+	(
+		(
+			SELECT
+				t.*,    (SELECT group_concat(c.goods_name) from local_goods c where  FIND_IN_SET(id,t.goods_id  )  )  AS goods_name,
+				cu.casefieldname AS casefield_name
+			  FROM
+				customer_spend_log t
+			  LEFT JOIN sys_case_field cu ON t.casefield_id = cu.id
+			  WHERE
+				t.customer_id = #{customer_id}
+			  AND t.type = 0
+		)
+		UNION ALL
+			(
+				SELECT
+					t.*, m.coursename AS goods_name,
+					cu.casefieldname AS casefieldname
+				FROM
+					customer_spend_log t,
+					(
+						SELECT
+							o.id,
+							o.actual_price,
+							c.coursename
+						FROM
+							order_main o
+						LEFT JOIN course_manager c ON o.course_id = c.id
+						WHERE
+							o.order_state in (1,2)
+					) m,
+					sys_case_field cu
+				WHERE
+					t.customer_id = #{customer_id}
+				AND t.type = 1
+				AND t.goods_id = m.id
+				AND t.casefield_id = cu.id
+			)
+	) AS a
+ORDER BY
+	a.create_time DESC
+        ) faketable
+    </select>
+</mapper>

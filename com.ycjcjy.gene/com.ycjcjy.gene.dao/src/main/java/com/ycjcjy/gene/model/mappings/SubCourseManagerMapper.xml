@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.SubCourseManagerDao" >
+
+
+
+    <select id="findSubCourses" resultType="com.ycjcjy.gene.model.SubCourseManager">
+       select s.* from course_sub_manager s
+        left join course_manager c on s.pcourseid = c.id
+        <where>
+            and c.specialclass in ('800','802','804')
+            <if test="date!=null"  >
+                and
+                date_format(#{date},'%Y-%c') =  date_format(s.substartline,'%Y-%c')
+                and
+                date_format(#{date},'%Y-%c') =  date_format(s.subendline,'%Y-%c')
+            </if>
+            <if test="courseid!=null and courseid!='' ">
+               and s.pcourseid = #{courseid}
+            </if>
+        </where>
+        order by s.createtime desc
+    </select>
+
+
+
+
+    <select id="findCountByCircle" resultType="int">
+        select count(*) from course_sub_manager
+          <where>
+              <if test="id!=null and id!=null">
+                and pcourseid = #{id}
+              </if>
+          </where>
+    </select>
+
+
+
+    <select id="findSubCourse" parameterType="integer" resultType="map">
+        SELECT c.id,c.subcousename,date_format(c.substartline,'%Y-%c-%d %H:%i:%s') substartline,
+        date_format(c.subendline,'%Y-%c-%d %H:%i:%s') subendline,
+         c.subDeatil,m.coursename,m.caseid,ca.casefieldname,ca.address,m.specialclass
+        from course_sub_manager c
+        LEFT JOIN course_manager m on c.pcourseid = m.id
+        LEFT JOIN sys_case_field ca on m.caseid = ca.id
+        where c.id = #{id}
+    </select>
+
+    <delete id="deleteByCourseId" parameterType="integer">
+        delete from course_sub_manager where id=#{id}
+    </delete>
+
+    <delete id="deleteByPid">
+        delete from course_sub_manager where pcourseid = #{pcourseid}
+    </delete>
+
+    <update id="updateBySubId" parameterType="com.ycjcjy.gene.model.SubCourseManager">
+        update course_sub_manager
+        set subcousename = #{subcousename},
+        substartline = #{substartline},
+        subendline = #{subendline},
+        subDeatil =#{subDeatil}
+        where
+        <choose>
+            <when test="id!=null">
+                id = #{id}
+            </when>
+            <otherwise>
+                pcourseid =#{pcourseid}
+            </otherwise>
+        </choose>
+    </update>
+
+
+    <select id="getCountFromNow" resultType="int">
+        select count(*) from course_sub_manager
+        where  pcourseid = #{id} and substartline >=#{nowDay}
+    </select>
+    
+    <select id="getSubCourseById" parameterType="int" resultType="com.ycjcjy.gene.model.SubCourseManager">
+        select * FROM course_sub_manager where pcourseid = #{id}
+    </select>
+
+    <select id="findCountByMon" resultType="map">
+        SELECT /*(select COUNT(1)
+    from  course_sub_manager s
+    LEFT JOIN course_manager m on s.pcourseid = m.id
+    where m.coursetype = 3
+    and m.specialclass = '804'
+    and DATE_FORMAT( s.substartline, '%Y%m' ) = DATE_FORMAT(now(),'%Y%m' )
+      ) fit,*/
+    (
+    select COUNT(1)
+    from  course_sub_manager s
+    LEFT JOIN course_manager m on s.pcourseid = m.id
+    where m.coursetype = 2 and m.specialclass = '802'
+    and DATE_FORMAT( s.substartline, '%Y%m' ) = DATE_FORMAT(now(),'%Y%m' )
+      ) shares from DUAL
+    </select>
+
+    <select id="findCountByMonth" resultType="int">
+
+    select COUNT(1)
+    from  course_sub_manager s
+    LEFT JOIN course_manager m on s.pcourseid = m.id
+    where  m.ispublic = 1
+    and m.coursestatus = 0
+    and DATE_FORMAT( s.substartline, '%Y%m' ) = DATE_FORMAT(now(),'%Y%m' )
+    <if test="case_id != '' and case_id != null">
+        AND m.caseid = #{case_id}
+    </if>
+
+    </select>
+
+    <select id="delayList" parameterType="com.ycjcjy.gene.model.SubCourseManager" resultType="com.ycjcjy.gene.model.SubCourseManager">
+        SELECT
+        a.id,
+	a.subcousename,
+	a.subDeatil,
+	a.subendline,
+	DATE_FORMAT( CASE b.is_delay WHEN 0 THEN b.appointment_start_time WHEN 1 THEN b.delay_start_time END, '%Y年%m月%d日 %H时%i分' ) AS startStr,
+	DATE_FORMAT( CASE b.is_delay WHEN 0 THEN b.appointment_end_time WHEN 1 THEN b.delay_end_time END, '%Y年%m月%d日 %H时%i分' ) AS endStr,
+    IFNULL(DATE_FORMAT( CASE b.is_delay WHEN 0 THEN b.appointment_start_time WHEN 1 THEN b.delay_start_time END, '%Y年%m月%d日 %H时%i分' ),DATE_FORMAT(a.substartline, '%Y年%m月%d日 %H时%i分' ))AS startStrb,
+    IFNULL(DATE_FORMAT( CASE b.is_delay WHEN 0 THEN b.appointment_end_time WHEN 1 THEN b.delay_end_time END, '%Y年%m月%d日 %H时%i分' ),DATE_FORMAT( a.subendline, '%Y年%m月%d日 %H时%i分' ))AS endStrb
+        FROM
+	course_sub_manager a
+	LEFT JOIN order_sub b ON a.id = b.course_sub_id
+    <where>
+        1=1
+        <if test="pcourseid !=null and pcourseid != ''">
+            and a.pcourseid = #{pcourseid}
+        </if>
+    </where>
+    group by a.id
+    order by a.subendline desc
+        <if test="base_pageSize !=null and base_pageSize !=''">
+            limit  ${base_offset},${base_pageSize}
+        </if>
+    </select>
+
+    <select id="delayListCount" parameterType="com.ycjcjy.gene.model.SubCourseManager" resultType="int">
+        select count(1) from(
+        SELECT
+	a.subcousename,
+	a.subDeatil,
+	DATE_FORMAT( CASE b.is_delay WHEN 0 THEN b.appointment_start_time WHEN 1 THEN b.delay_start_time END, '%Y年%m月%d日 %H时%i分' ) AS startline_str,
+	DATE_FORMAT( CASE b.is_delay WHEN 0 THEN b.appointment_end_time WHEN 1 THEN b.delay_end_time END, '%Y年%m月%d日 %H时%i分' ) AS endline_str
+FROM
+	course_sub_manager a
+	LEFT JOIN order_sub b ON a.id = b.course_sub_id
+	where a.pcourseid = #{pcourseid}
+	group by a.id
+        )faketable
+    </select>
+
+    <select id="selectSubCountByDay" resultType="map">
+        SELECT
+        (
+        SELECT
+        COUNT(1)
+        FROM
+        course_sub_manager s
+        LEFT JOIN course_manager m on s.pcourseid = m.id
+        WHERE
+        m.coursestatus=0 and m.ispublic =1
+        and
+        TO_DAYS(s.substartline) - TO_DAYS(now()) = 0
+        <if test="caseid!=null and caseid!=''">
+         and   m.caseid=#{caseid}
+        </if>
+        ) nowday,
+        (
+        SELECT
+        count(1)
+        FROM
+        course_sub_manager s
+        LEFT JOIN course_manager m on s.pcourseid = m.id
+        WHERE
+        m.coursestatus=0 and m.ispublic =1
+        and
+        TO_DAYS(s.substartline) - TO_DAYS(NOW()) = 1
+        <if test="caseid!=null and caseid!=''">
+          and  m.caseid=#{caseid}
+        </if>
+        ) tomorrowday
+        FROM
+        DUAL
+    </select>
+
+
+    <select id="findAllNum" parameterType="com.ycjcjy.gene.model.SubCourseManager" resultType="java.util.Map">
+        select ttt.*,ifnull(CONCAT(ROUND((ttt.vfnum/ttt.allnum)*100,2),"%"),'0.00%') as ppp from (
+        select
+        temp.date,coalesce(c.coursenum,0) as coursenum,coalesce(o.ordernum,0) as ordernum,coalesce(v.vfnum,0) as vfnum,coalesce(a.allnum,0) as allnum
+        from (
+        SELECT
+        ADDDATE(#{start_time}, numlist.id) AS 'date'
+        FROM
+        (
+        SELECT
+        n1.i + n10.i * 10 + n100.i * 100 AS id
+        FROM
+        num n1
+        CROSS JOIN num AS n10
+        CROSS JOIN num AS n100
+        ) AS numlist
+        WHERE
+        ADDDATE(#{start_time}, numlist.id) &lt;= #{end_time}
+        ) temp
+        left join (
+        select COUNT(*) coursenum,DATE_FORMAT( s.substartline, '%Y-%m-%d') date_time1
+        from course_sub_manager s
+        LEFT JOIN course_manager m on s.pcourseid = m.id
+        where m.ispublic = '1' and m.coursestatus = '0'
+        and s.substartline &lt; DATE_FORMAT(#{end_time},'%Y-%m-%d')
+        and s.substartline > DATE_FORMAT(#{start_time},'%Y-%m-%d')
+        <if test="caseId !=null and caseId != '' and caseId != '-1'">and m.caseId = #{caseId}
+        </if>
+        group by
+        DATE_FORMAT( s.substartline, '%Y-%m-%d')
+        ) c on c.date_time1 = temp.date
+        left join (
+        select COUNT(*) ordernum,DATE_FORMAT( om.create_time, '%Y-%m-%d') date_time2
+        from order_main om
+        left join course_manager m
+        on om.course_id = m.id
+        where om.order_state in ('1','2')
+        and om.create_time &lt; DATE_FORMAT(#{end_time},'%Y-%m-%d')
+        and om.create_time > DATE_FORMAT(#{start_time},'%Y-%m-%d')
+        <if test="caseId !=null and caseId != '' and caseId != '-1'">
+                and m.caseid = #{caseId}
+            </if>
+            group by DATE_FORMAT( om.create_time, '%Y-%m-%d')
+        ) o on o.date_time2 = temp.date
+        left join (
+            select COUNT(*) vfnum,DATE_FORMAT( os.verification_time, '%Y-%m-%d') date_time3
+            from order_sub os
+            where os.order_state in ('1','3')
+            and os.verification_time &lt; DATE_FORMAT(#{end_time},'%Y-%m-%d')
+            and os.verification_time > DATE_FORMAT(#{start_time},'%Y-%m-%d')
+            <if test="caseId !=null and caseId != '' and caseId != '-1'">
+                and os.case_field_id = #{caseId}
+            </if>
+            group by DATE_FORMAT( os.verification_time, '%Y-%m-%d')
+        )v on v.date_time3 = temp.date
+        left join (
+        SELECT COUNT(u.id) allnum,DATE_FORMAT(u.course_time, '%Y-%m-%d') date_time4
+        FROM ((
+            SELECT
+            os.id,
+            os.appointment_start_time AS course_time
+            FROM
+            order_sub os
+            LEFT JOIN order_main om ON om.id = os.order_id
+            WHERE
+            os.order_state IN ('0', '1', '3')
+            AND om.order_state IN ('1', '2')
+            AND os.is_delay = 0
+            AND os.appointment_start_time &lt; DATE_FORMAT(#{end_time}, '%Y-%m-%d')
+            AND os.appointment_start_time > DATE_FORMAT(#{start_time}, '%Y-%m-%d')
+            <if test="caseId !=null and caseId != '' and caseId != '-1'">
+                and os.case_field_id = #{caseId}
+            </if>
+            )
+            UNION ALL
+            (
+            SELECT
+            os.id,
+            os.delay_start_time AS course_time
+            FROM
+            order_sub os
+            LEFT JOIN order_main om ON om.id = os.order_id
+            WHERE
+            os.order_state IN ('0', '1', '3')
+            AND om.order_state IN ('1', '2')
+            AND os.is_delay = 1
+            AND os.delay_start_time &lt; DATE_FORMAT(#{end_time}, '%Y-%m-%d')
+            AND os.delay_start_time > DATE_FORMAT(#{start_time}, '%Y-%m-%d')
+            <if test="caseId !=null and caseId != '' and caseId != '-1'">
+                and os.case_field_id = #{caseId}
+            </if>
+            )
+            ) AS u
+            GROUP BY DATE_FORMAT(u.course_time, '%Y-%m-%d')
+        )a on a.date_time4 = temp.date
+        group by temp.date
+        ) ttt
+    </select>
+
+
+
+
+
+
+
+
+
+
+</mapper>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="/public/head :: onLoadHead(游泳健身卡管理)">
+</head>
+<body ddata-type="widgets">
+<div class="am-g tpl-g">
+    <css th:replace="/public/css :: onLoadCSS"></css>
+    <js th:replace="/public/js :: onLoadJS"></js>
+
+    <!-- 模态提示组件 -->
+    <div th:include="/public/tips :: Tips"></div>
+    <!-- 内容区域 -->
+    <div class="tpl-content-wrapper none-margin">
+        <div class="row-content am-cf">
+            <div class="row">
+                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                    <div class="widget am-cf">
+                        <div class="widget-head am-cf">
+                            <div class="widget-title am-fl" th:if="${add}">新增游泳健身卡</div>
+                            <div class="widget-title am-fl" th:if="${view}">查看游泳健身卡</div>
+                            <div class="widget-title am-fl" th:if="${edit}">编辑游泳健身卡</div>
+                            <div class="widget-function am-fr" th:unless="${view}">
+                            </div>
+                        </div>
+                        <div class="widget-body am-fr">
+
+                            <form class="am-form tpl-form-border-form tpl-form-border-br" id="DataFrom">
+                                <input type="hidden" name="id" th:value="${entity.id}">
+
+                                <div class="am-form-group">
+                                    <label for="sys_user_id" class="am-u-sm-3 am-form-label">销售 <span class="tpl-form-line-small-title">Tree</span></label>
+                                    <div class="am-u-sm-9">
+                                        <input type="hidden" name="sys_user_id" id="sys_user_id" th:value="${entity.sys_user_id}">
+                                        <input type="hidden" name="sys_user_name" id="sys_user_name" th:value="${entity.sys_user_name}">
+                                        <tree:org-user th:attr="disabled=${view},value=${entity.sys_user_id},businessIputId='sys_user_id'"/>
+                                        <small th:unless="${view}">从机构树上选择一个销售</small>
+                                    </div>
+                                </div>
+
+                                 <div class="am-form-group">
+                                    <label for="sys_user_id" class="am-u-sm-3 am-form-label">客户 <span class="tpl-form-line-small-title">Tree</span></label>
+                                    <div class="am-u-sm-9">
+                                        <input id="customer_user_id" name="customer_user_id" type="text" th:disabled="${view}"/>
+                                        <input id="customer_user_name" name="customer_user_name" type="hidden" th:value="${entity.customer_user_name}"/>
+                                        <small th:unless="${view}">输入客户手机号精准搜索或客户姓名模糊搜索</small>
+                                    </div>
+                                </div>
+
+                                <div class="am-form-group">
+                                    <label for="card_id" class="am-u-sm-3 am-form-label">卡类型 <span class="tpl-form-line-small-title">SelectBox</span></label>
+                                    <div class="am-u-sm-9">
+                                        <select data-am-selected name="card_id" id="card_id" th:disabled="${view}">
+                                            <th:block th:each="c : ${cardList}">
+                                                <option  th:value="${c.id}" th:text="${c.description}" th:selected="${c.id==entity.card_id}"></option>
+                                            </th:block>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="am-form-group">
+                                    <label for="sys_user_id" class="am-u-sm-3 am-form-label">游泳健身卡价格 <span class="tpl-form-line-small-title">Tree</span></label>
+                                    <div class="am-u-sm-9">
+                                        <input id="price" type="number" disabled="disabled" th:value="${entity.price}"/>
+                                        <input id="card_name" name="card_name" type="hidden" th:value="${entity.card_name}"/>
+                                        <small th:unless="${view}">选择卡类型预览价格</small>
+                                    </div>
+                                </div>
+
+                                <div class="am-form-group" id="fieldEndCradTime">
+                                    <label for="end_crad_time" class="am-u-sm-3 am-form-label">失效日期 <span class="tpl-form-line-small-title">Data</span></label>
+                                    <div class="am-u-sm-9">
+                                        <input type="text"  id="end_crad_time" class="am-form-field" name="end_crad_time" placeholder="请选择日期" th:value="${entity.end_crad_time}" th:disabled="${entity.end_crad_time != null}">
+                                        <small th:unless="${view}">点击选择一个日期,返回Timestamp</small>
+                                    </div>
+                                </div>
+
+                                <div class="am-form-group" id="fieldNum">
+                                    <label for="sys_user_id" class="am-u-sm-3 am-form-label">卡次数 <span class="tpl-form-line-small-title">Tree</span></label>
+                                    <div class="am-u-sm-9">
+                                        <input id="card_num" name="card_num" type="text" disabled="disabled" th:value="${entity.card_num}"/>
+                                        <small th:unless="${view}">选择卡类型预览卡次数</small>
+                                    </div>
+                                </div>
+
+
+                                <div class="am-form-group">
+                                    <div class="am-u-sm-9 am-u-sm-push-3">
+                                        <button type="submit" class="am-btn am-btn-primary tpl-btn-bg-color-success" th:unless="${view}">确认充值</button>
+                                        <button type="button" class="am-btn am-btn-danger" onClick="goUrl('/swimingfitnessbind/preview/')">返回</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script th:src="@{/assets/js/swimingfitnessbind/swimingfitnessbind.js}" type="text/javascript"></script>
+<script th:inline="javascript">
+
+    $(function () {
+        validateFrom();
+        initPrice();
+        initTagInput([[${view}]],[[${edit}]],[[${entity.customer_user_id}]],[[${entity.customer_user_name}]]);
+
+    })
+    $(function() {
+        var nowTemp = new Date();
+        var nowDay = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0).valueOf();
+        var nowMoth = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), 1, 0, 0, 0, 0).valueOf();
+        var nowYear = new Date(nowTemp.getFullYear(), 0, 1, 0, 0, 0, 0).valueOf();
+        var $myStart2 = $('#end_crad_time');
+
+        var checkin = $myStart2.datepicker({
+            onRender: function(date, viewMode) {
+                // 默认 days 视图，与当前日期比较
+                var viewDate = nowDay;
+
+                switch (viewMode) {
+                    // moths 视图，与当前月份比较
+                    case 1:
+                        viewDate = nowMoth;
+                        break;
+                    // years 视图，与当前年份比较
+                    case 2:
+                        viewDate = nowYear;
+                        break;
+                }
+
+                return date.valueOf() < viewDate ? 'am-disabled' : '';
+            }
+        }).on('changeDate.datepicker.amui', function(ev) {
+            if (ev.date.valueOf() > checkout.date.valueOf()) {
+                var newDate = new Date(ev.date)
+                newDate.setDate(newDate.getDate() + 1);
+                checkout.setValue(newDate);
+            }
+            checkin.close();
+            $('#my-end-2')[0].focus();
+        }).data('amui.datepicker');
+        var checkout = $('#my-end-2').datepicker({
+            onRender: function(date, viewMode) {
+                var inTime = checkin.date;
+                var inDay = inTime.valueOf();
+                var inMoth = new Date(inTime.getFullYear(), inTime.getMonth(), 1, 0, 0, 0, 0).valueOf();
+                var inYear = new Date(inTime.getFullYear(), 0, 1, 0, 0, 0, 0).valueOf();
+
+                // 默认 days 视图，与当前日期比较
+                var viewDate = inDay;
+
+                switch (viewMode) {
+                    // moths 视图，与当前月份比较
+                    case 1:
+                        viewDate = inMoth;
+                        break;
+                    // years 视图，与当前年份比较
+                    case 2:
+                        viewDate = inYear;
+                        break;
+                }
+
+                return date.valueOf() <= viewDate ? 'am-disabled' : '';
+            }
+        }).on('changeDate.datepicker.amui', function(ev) {
+            checkout.close();
+        }).data('amui.datepicker');
+    });
+
+    /**
+     * 校验登录表单
+     * @returns void
+     */
+    function validateFrom(){
+
+        $("#DataFrom").validate({
+            ignore: "",
+            rules: {
+                orgUserTree:{
+                    treeRequired:true
+                },
+                customer_user_name:{
+                    required:true
+                },
+                end_crad_time:{
+                    required:true
+
+                }
+
+            },
+            submitHandler: function(form) { //验证成功时调用
+                $('#card_num').removeAttr('disabled');
+                var param = $('#DataFrom').serializeJson();
+                var url = "/swimingfitnessbind/saves"
+                var completeHandler = function (data) {
+                    location.href = "/swimingfitnessbind/preview/"
+                }
+                doPost(url,param,completeHandler)
+            }
+        });
+    }
+</script>
+</body>
+</html>

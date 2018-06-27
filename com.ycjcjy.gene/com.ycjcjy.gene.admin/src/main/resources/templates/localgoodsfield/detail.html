@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="/public/head :: onLoadHead(用户管理)">
+</head>
+<body data-type="widgets">
+<div class="am-g tpl-g">
+    <!-- 模态提示组件 -->
+    <div th:include="/public/tips :: Tips"></div>
+    <!-- 数据选择模态组件 -->
+    <div th:include="/public/dataBind :: RuBindTips" class="am-popup"  id="data-bind-modal"></div>
+    <!-- 内容区域 -->
+    <div class="tpl-content-wrapper none-margin">
+        <div class="row-content am-cf">
+            <div class="row">
+                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                            <div class="row">
+                                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                                    <div class="widget am-cf">
+                                        <div class="widget-head am-cf">
+                                            <div class="widget-title am-fl" th:if="${add}">新增商品
+                                                <input type="hidden" name="createtime" value="">
+                                            </div>
+                                            <div class="widget-title am-fl" th:if="${view}">查看商品</div>
+                                            <div class="widget-title am-fl" th:if="${edit}">编辑商品</div>
+                                        </div>
+                                        <div class="widget-body am-fr">
+
+                                            <form class="am-form tpl-form-border-form tpl-form-border-br" id="DataFrom">
+                                                <input type="hidden" name="id" th:value="${entity.id}">
+                                                <input type="hidden" id="goods_type" th:value="${entity.type}">
+                                                <input type="hidden" name="case_field_id" th:value="${field_id}">
+                                                <input type="hidden" name="is_show" th:value="1">
+                                                <div class="am-form-group">
+                                                    <label for="goods_name" class="am-u-sm-3 am-form-label">商品名 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" name="goods_name" id="goods_name" placeholder="请输入商品名" th:disabled="${view}" th:value="${entity.goods_name}">
+                                                        <small th:unless="${view}"></small>
+                                                    </div>
+                                                </div>
+
+
+
+                                                <div class="am-form-group">
+                                                    <label for="icon" class="am-u-sm-3 am-form-label">图片 <span class="tpl-form-line-small-title">Images</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <div class="am-form-group">
+                                                            <div class="tpl-form-file-img onebean-upload-box" onclick="uploadFile(completeHandler,this)" th:disabled="${view}">
+                                                                <img class="onebean-upload-img" id="iconImg" th:src="${entity.img_url}">
+                                                            </div>
+                                                            <button type="button" class="am-btn am-btn-success am-btn-sm" onclick="uploadFile(uploadCompleteHandler,this)" th:disabled="${view}">
+                                                                <i class="am-icon-cloud-upload"></i>上传图片
+                                                            </button>
+                                                            <button type="button" class="am-btn am-btn-danger am-btn-sm" onclick="clearUploadImg(this)" th:disabled="${view}">
+                                                                <i class="am-icon-cloud-upload"></i>删除图片
+                                                            </button>
+                                                            <input id="icon" type="hidden" name="img_url" th:value="${entity.img_url}">
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+
+                                                <div class="am-form-group">
+                                                    <label for="price" class="am-u-sm-3 am-form-label">价格 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="number"  class="tpl-form-input" name="price" id="price" placeholder="请输入价格" th:disabled="${view}" th:value="${entity.price}">
+                                                        <small th:unless="${view}">商品价格</small>
+                                                    </div>
+                                                </div>
+                                                <div class="am-form-group">
+                                                    <label for="type" class="am-u-sm-3 am-form-label">商品类别 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <select id ="type" name="type" data-am-selected="{btnSize: 'sm'}"></select>
+                                                        <small th:unless="${view}">商品类别</small>
+                                                    </div>
+                                                </div>
+                                                <!--<div class="am-form-group">
+                                                    <label for="case_field_id" class="am-u-sm-3 am-form-label">案场 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <field:select name="case_field_id" id="case_field_id"   th:attr="value=${entity.case_field_id},disabled=${view},name='case_field_id'" />
+                                                    </div>
+                                                </div>-->
+
+
+
+
+                                               <!-- <div class="am-form-group">
+                                                    <label for="user_type" class="am-u-sm-3 am-form-label">用户类型 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <dic:code name="user_type" id="user_type" code="YHLX" th:attr="value=${entity.user_type},disabled=${view}"/>
+                                                    </div>
+                                                </div>-->
+
+
+
+
+                                                <div class="am-form-group">
+                                                    <div class="am-u-sm-9 am-u-sm-push-3">
+                                                        <button type="submit" class="am-btn am-btn-primary tpl-btn-bg-color-success" th:unless="${view}">提交</button>
+                                                        <button type="button" class="am-btn am-btn-warning" th:onclick="'routingPage(\'/localgoodsfield/edit/'+${entity.id}+'\',\'编辑角色\')'" th:if="${view}">编辑</button>
+                                                        <button type="button" class="am-btn am-btn-danger" onClick="routingPage('/localgoodsfield/previews/','商品列表')">返回</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<css th:replace="/public/css :: onLoadCSS"></css>
+<js th:replace="/public/js :: onLoadJS"></js>
+<script th:inline="javascript">
+    $(function () {
+        validateFrom();
+        goodslist();
+        /*initModalRU();*/
+    })
+    var uploadCompleteHandler = function (arr) {
+        $('#upload-modal').modal('close');
+        if(arr.length == 1){
+            $('#icon').val(arr[0]);
+            $('#iconImg').attr("src",arr[0]);
+        }else if(arr.length > 1){
+            $(".alert-modal-message").html("只能上传一张图片");
+            $(".alert-modal-title").html("错误");
+            $(".alert-modal-button").html("额...好吧");
+            $('#alert-modal').modal('open');
+        }else if(arr.length == 0) {
+            $(".alert-modal-message").html("必须上传一张图片");
+            $(".alert-modal-title").html("错误");
+            $(".alert-modal-button").html("额...好吧");
+            $('#alert-modal').modal('open');
+        }else {
+            $(".alert-modal-message").html("上传图片错误");
+            $(".alert-modal-title").html("错误");
+            $(".alert-modal-button").html("额...好吧");
+            $('#alert-modal').modal('open');
+        }
+    }
+
+    /*var completeHandler = function (arr) {
+        $('#upload-modal').modal('close');
+        if(arr.length == 1){
+            $('#icon').val(arr[0]);
+            $('#iconImg').attr("src",arr[0]);
+        }else{
+            $(".alert-modal-message").html("上传文件错误");
+            $(".alert-modal-title").html("只能上传一张图片!");
+            $(".alert-modal-button").html("额...好吧");
+            $('#alert-modal').modal('open');
+        }
+    }*/
+    function goodslist() {
+        var url = '/localgoodstype/allGoodsType';
+        var id = '#type';
+        var param = '';
+        var target_id = $('#goods_type').val();
+        doPost(url,param,function (result) {
+            var data = result.data;
+            $(id).html('');
+            for (var i=0;i<data.length;i++){
+                if(data[i].id == target_id){
+                    $(id).append("<option selected value="+data[i].id+">"+data[i].type+"</option>");
+                }else {
+                    $(id).append("<option value="+data[i].id+">"+data[i].type+"</option>");
+                }
+            }
+            $(id).selected('destroy');
+            $(id).selected();
+        });
+    }
+
+    /**
+     * 校验登录表单
+     * @returns void
+     */
+    function validateFrom(){
+
+        $("#DataFrom").validate({
+            rules: {
+                goods_name: {
+                    required:true,
+                    minlength: 2,
+                    maxlength:15,
+                    noChinese:false
+                },
+                img_url: {
+                    required:true
+                },
+                price:{
+                    required:true,
+                    noChinese:true,
+                    number:true,
+                    min:0
+
+                },
+                case_field_id:{
+                    required:true
+                }
+
+            },
+            submitHandler: function(form) { //验证成功时调用
+                var param = $('#DataFrom').serializeJson();
+                if(param.case_field_id == ''){
+                    alert('请选择案场')
+                    return
+                }
+                var url = "/localgoodsfield/save";
+                var completeHandler = function (data) {
+                    routingPage('/localgoodsfield/previews/','商品列表')
+                }
+
+
+                doPost(url,param,completeHandler)
+            }
+        });
+    }
+
+</script>
+<script id="tpl-uploadTips" type="text/html" th:replace="/public/upload :: uploadTipsTemp"></script>
+<div class="am-popup"  id="upload-modal"></div>
+</body>
+</html>

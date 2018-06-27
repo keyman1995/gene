@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.RechargeSettingDao" >
+
+    <parameterMap id="rechargeSettingParamMap" type="com.ycjcjy.gene.model.RechargeSetting"></parameterMap>
+
+    <select id="findAllSetting" resultType="com.ycjcjy.gene.model.RechargeSetting">
+		select u.price,u.gift_price
+		from recharge_setting u
+        order by u.price,u.gift_price
+	</select>
+</mapper>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.UserRechargeDao" >
+
+	<parameterMap id="userRechargeParamMap" type="com.ycjcjy.gene.model.UserRecharge"></parameterMap>
+
+    <select id="findByUserRechargeId" parameterType="integer" resultType="com.ycjcjy.gene.model.UserRecharge">
+		select
+		t.*,
+		c.casefieldname as casefieldname,
+		cu.username as username,
+		cu.tel as tel,
+		c.avail as avail
+		from user_recharge t
+		left join sys_case_field c
+		on t.case_field_id = c.id
+		left join customer_user cu
+		on t.user_id = cu.id
+        where t.id= #{id}
+	</select>
+
+	<update id="updateStatusById" parameterType="com.ycjcjy.gene.model.UserRecharge">
+		update user_recharge
+		set status = #{status,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<update id="updateIdentifyingcodeById" parameterType="com.ycjcjy.gene.model.UserRecharge">
+		update user_recharge
+		set identifyingcode = #{identifyingcode,jdbcType=VARCHAR},update_time = #{update_time,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<select id="findByType" parameterType="string" resultType="com.ycjcjy.gene.model.UserRecharge">
+		select u.*
+		from user_recharge u
+        where u.type= #{type}
+	</select>
+
+	<select id="findUserRecharges" parameterMap="userRechargeParamMap" resultType="com.ycjcjy.gene.model.UserRecharge">
+		select
+		t.*,
+		c.casefieldname as casefieldname,
+		cu.username as username,
+		cu.tel as tel
+		from user_recharge t
+		left join sys_case_field c
+		on t.case_field_id = c.id
+		left join customer_user cu
+		on t.user_id = cu.id
+		<where>
+			<if test="case_field_id !=null and case_field_id!=''">
+				and t.case_field_id = #{case_field_id}
+			</if>
+			<if test="status !=null and status!=''">
+				and t.status = #{status}
+			</if>
+			<if test="order_id !=null and order_id!=''">
+				and t.order_id like concat('%',#{order_id},'%')
+			</if>
+			<if test="tel !=null and tel!=''">
+				and cu.tel like concat('%',#{tel},'%')
+			</if>
+			<if test="type !=null and type!=''">
+				and t.type = #{type}
+			</if>
+		</where>
+		<if test="base_sort !=null and base_sort !=''">
+			order by ${base_orderBy}  ${base_sort}
+		</if>
+		<if test="base_pageSize !=null and base_pageSize !=''">
+			limit  ${base_offset},${base_pageSize}
+		</if>
+	</select>
+
+	<select id="getAllCount" parameterMap="userRechargeParamMap" resultType="Integer">
+
+		select count(1) from (
+		select
+		t.*,
+		c.casefieldname as casefieldname,
+		cu.username as username,
+		cu.tel as tel
+		from user_recharge t
+		left join sys_case_field c
+		on t.case_field_id = c.id
+		left join customer_user cu
+		on t.user_id = cu.id
+		<where>
+			<if test="case_field_id !=null and case_field_id!=''">
+				and t.case_field_id = #{case_field_id}
+			</if>
+			<if test="status !=null and status!=''">
+				and t.status = #{status}
+			</if>
+			<if test="order_id !=null and order_id!=''">
+				and t.order_id like concat('%',#{order_id},'%')
+			</if>
+			<if test="tel !=null and tel!=''">
+				and cu.tel like concat('%',#{tel},'%')
+			</if>
+			<if test="type !=null and type!=''">
+				and t.type = #{type}
+			</if>
+		</where>
+		)
+		faketable
+
+	</select>
+
+	<insert id="insertCustomeruserRecharge" parameterMap="userRechargeParamMap" useGeneratedKeys="true" keyProperty="id">
+		insert into user_recharge
+		(type,order_id,user_id,actual,gift,status)
+		values (#{type},#{order_id},#{user_id},#{actual},#{gift},#{status})
+	</insert>
+
+	<update id="updateStatusByOrderId" parameterType="com.ycjcjy.gene.model.UserRecharge">
+		update user_recharge t
+		set t.status = #{status}
+		where t.order_id = #{order_id}
+	</update>
+</mapper>

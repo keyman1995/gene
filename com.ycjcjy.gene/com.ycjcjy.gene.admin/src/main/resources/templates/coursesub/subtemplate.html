@@ -1,0 +1,37 @@
+<script id="tpl-coursesub" type="text/html" th:fragment="subCourse" xmlns:th="http://www.w3.org/1999/xhtml">
+
+    <tr>
+        <th>选择</th>
+        <th>课程名称</th>
+        <th>课程价格</th>
+        <th>课时数</th>
+        <th>已排课时数</th>
+        <th>课程分类</th>
+        <th>所在案场</th>
+    </tr>
+    {{each $data as data}}
+    {{if data != null}}
+    <tr>
+        <td>
+            {{if data.weekcount>=data.coursecount}}
+            <input type="checkbox" name="id" disabled="disabled" onclick="change()" value="{{data.id}}"/>
+            {{else if data.weekcount<data.coursecount }}
+            <input type="checkbox" name="id"  onclick="change()" value="{{data.id}}"/>
+            {{/if}}
+        </td>
+        <td>{{data.coursename}}</td>
+        <td>{{data.courseprice}}</td>
+        <td>{{data.coursecount}}</td>
+        <td>{{data.weekcount}}</td>
+        <td>{{data.coursetypename}}</td>
+        <td>{{data.casename}}</td>
+        <td style="display: none"><input type="hidden" value="{{data.coursecircle}}"></td>
+        <td style="display: none"><input type="hidden" value="{{data.coursecount}}"></td>
+    </tr>
+    {{else}}
+
+    {{/if}}
+    {{/each}}
+
+</script>
+<script id="tpl-pagination" type="text/html" th:replace="/public/pagination :: paginationTemplate"></script>

@@ -1,0 +1,1118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.OrderMainDao" >
+    <parameterMap id="orderMainParamMap" type="com.ycjcjy.gene.model.OrderMain"></parameterMap>
+    <!--800讲座 801预约课程 802系列课程 803 私教课程 804团体课程-->
+    <select id="findAllOrderMain" parameterMap="orderMainParamMap" resultType="com.ycjcjy.gene.model.OrderMain">
+        SELECT c.coursename,u.tel,u.username,t.*
+        FROM order_main t
+        LEFT JOIN course_manager c on t.course_id = c.id
+        LEFT JOIN customer_user u on u.id = t.user_id
+        <where>
+            t.order_type = 0
+            <if test="case_field_id !=null and case_field_id !=''">
+                and
+                t.case_field_id = #{case_field_id}
+            </if>
+            <if test="course_type==1 ">
+                and t.course_type in (803,804)
+            </if>
+            <if test="course_type==2 ">
+                and t.course_type in (800,801,802)
+            </if>
+
+
+            <if test="tel !=null and tel !=''">
+                and
+                u.tel  like concat('%',#{tel},'%')
+            </if>
+            <if test="order_state !=null and order_state !=''">
+                and
+                t.order_state = #{order_state}
+            </if>
+            <if test="startTime !=null and startTime !=''">
+                and
+                t.create_time &gt; #{startTime}
+            </if>
+            <if test="endTime !=null and endTime !=''">
+                and
+                t.create_time &lt; #{endTime}
+            </if>
+
+        </where>
+
+
+        <if test="base_sort !=null and base_sort !=''">
+            order by ${base_orderBy}  ${base_sort}
+        </if>
+        <if test="base_pageSize !=null and base_pageSize !=''">
+            limit  ${base_offset},${base_pageSize}
+        </if>
+    </select>
+
+    <select id="getAllCount" parameterMap="orderMainParamMap" resultType="int">
+        SELECT count(*)
+        FROM order_main t
+        LEFT JOIN course_manager c on t.course_id = c.id
+        LEFT JOIN customer_user u on u.id = t.user_id
+        <where>
+            t.order_type = 0
+            <if test="case_field_id !=null and case_field_id !=''">
+                and
+                t.case_field_id = #{case_field_id}
+            </if>
+            <if test="course_type==1 ">
+                and t.course_type in (803,804)
+            </if>
+            <if test="course_type==2 ">
+                and t.course_type in (800,801,802)
+            </if>
+
+
+            <if test="tel !=null and tel !=''">
+                and
+                u.tel  like concat('%',#{tel},'%')
+            </if>
+            <if test="order_state !=null and order_state !=''">
+                and
+                t.order_state = #{order_state}
+            </if>
+            <if test="startTime !=null and startTime !=''">
+                and
+                t.create_time &gt; #{startTime}
+            </if>
+            <if test="endTime !=null and endTime !=''">
+                and
+                t.create_time &lt; #{endTime}
+            </if>
+
+        </where>
+    </select>
+
+
+    <select id="getOrderCountByCourseId" parameterType="String" resultType="int">
+        SELECT count(*)
+        FROM order_main t
+        <where>
+            t.order_type = 0
+            and
+            t.order_state != 3
+            <if test="course_id >0">
+                and
+                t.course_id = #{course_id}
+            </if>
+
+        </where>
+    </select>
+
+    <select id="getOrderMainByOrderNo" parameterType="String" resultType="com.ycjcjy.gene.model.OrderMain">
+      SELECT t.*,c.coursename
+      FROM order_main t
+        LEFT JOIN course_manager c on t.course_id = c.id
+      WHERE t.order_no = #{orderNo}
+    </select>
+    <update id="updateOrderState" parameterType="String">
+        UPDATE order_main SET order_state = #{orderState}
+        <if test="orderState == 1">
+            ,pay_time = #{time}
+        </if>
+        <if test="orderState == 2">
+            ,done_time = #{time}
+        </if>
+        <if test="orderState == 3">
+            ,close_time = #{time}
+        </if>
+        WHERE order_no = #{orderNo}
+    </update>
+
+    <select id="queryOrderByTime" parameterType="String" resultType="com.ycjcjy.gene.model.OrderMain">
+      SELECT *
+      FROM order_main
+      WHERE create_time &lt; #{nowTime} and order_state = 0
+    </select>
+    <!-- 用户订单列表页 -->
+    <select id="queryUserOrderList" parameterType="String" resultType="com.ycjcjy.gene.model.OrderMain">
+        select cm.coursename,cm.img_url,om.user_id,om.id,om.actual_price,om.order_state,om.course_num,om.discount_price,DATE_FORMAT(om.create_time,"%Y/%c/%d %H:%i:%s") as create_time_str
+        ,om.course_type
+        from order_main om
+        LEFT join course_manager cm on om.course_id = cm.id
+        where   om.user_id = #{userId}
+        <if test="orderState!=null and orderState != ''">
+            and om.order_state = #{orderState}
+        </if>
+        order by om.order_state asc,om.create_time desc
+        limit  ${base_offset},${base_pageSize}
+    </select>
+    <select id="queryUserOrderListCount" parameterType="String" resultType="int">
+        select count(*)
+        from order_main om
+        LEFT join course_manager cm on om.course_id = cm.id
+        where   om.user_id = #{userId}
+        <if test="orderState!=null and orderState != ''">
+            and om.order_state = #{orderState}
+        </if>
+    </select>
+    <!-- 用户共享课程订单列表页 -->
+    <select id="queryUserCourseOrderList" parameterType="String" resultType="com.ycjcjy.gene.model.OrderMain">
+        select cm.coursename,om.user_id,om.id,om.actual_price,om.order_state,om.course_num,om.discount_price,om.create_time,concat("南京 ",cf.casefieldname) as casefieldname
+        ,om.order_no
+
+        ,DATE_FORMAT(cm.coursestartline,"%Y/%c/%d %H:%i") as coursestartline
+        ,DATE_FORMAT(cm.courseendline,"%Y/%c/%d %H:%i") as courseendline
+        from order_main om
+        LEFT join course_manager cm on om.course_id = cm.id
+        LEFT join sys_case_field cf on cm.caseid = cf.id
+        where om.order_state in(1,2)
+        <if test="courseType!=null and courseType != ''">
+          and cm.specialcourse = #{courseType}
+        </if>
+        and om.course_type in (800,801,802) and om.user_id = #{userId}
+        order by om.order_state asc,om.create_time desc
+        limit  ${base_offset},${base_pageSize}
+    </select>
+    <select id="queryUserCourseOrderListCount" parameterType="String" resultType="int">
+        select count(*)
+        from order_main om
+        LEFT join course_manager cm on om.course_id = cm.id
+        where om.order_state in(1,2)
+        <if test="courseType!=null and courseType != ''">
+            and cm.specialcourse = #{courseType}
+        </if>
+
+        and om.course_type in (800,801,802) and om.user_id = #{userId}
+    </select>
+    <!-- 用户私教课订单列表页 -->
+    <select id="queryUserSiJiaoOrderList" parameterType="String" resultType="com.ycjcjy.gene.VO.SiJiaoListVo">
+        SELECT a.*,
+        (
+            select IFNULL(sum(om.course_num),0)
+            FROM order_main om
+            LEFT JOIN course_manager cmi on cmi.id = om.course_id
+            WHERE om.order_state in (1,2) and cmi.teacherids = a.teacherId and cmi.specialclass = 803
+            and om.user_id = #{userId}
+        ) as countLesson
+
+
+        FROM (
+
+        SELECT  DISTINCT t.id as teacherId,t.name as teacherName,t.img  as teacherImg,t.phone
+        FROM teacher t
+        left join course_manager cm on cm.teacherids = t.id and cm.specialclass = 803
+        WHERE t.type = 0 and t.id in (
+            SELECT cmi.teacherids
+            FROM order_main om
+            LEFT JOIN course_manager cmi on cmi.id = om.course_id
+            WHERE om.order_state in (1,2)  and cmi.specialclass = 803 and om.user_id = #{userId}
+        )
+
+        ) a
+      limit  ${base_offset},${base_pageSize}
+    </select>
+    <select id="queryUserSiJiaoOrderListCount" parameterType="String" resultType="int">
+        SELECT count(*)
+        FROM (
+
+        SELECT  DISTINCT t.id as teacherId,t.name as teacherName,t.img  as teacherImg
+        FROM teacher t
+        left join course_manager cm on cm.teacherids = t.id and cm.specialclass = 803
+        WHERE t.type = 0 and t.id in (
+        SELECT cmi.teacherids
+        FROM order_main om
+        LEFT JOIN course_manager cmi on cmi.id = om.course_id
+        WHERE om.order_state in (1,2)  and cmi.specialclass = 803 and om.user_id = #{userId}
+        )
+
+        ) a
+
+    </select>
+    <!-- 团体课列表 -->
+    <select id="queryUserTuanTiOrderList" parameterType="String" resultType="com.ycjcjy.gene.VO.TuanTiListVo">
+        select a.*,
+        CASE
+        WHEN a.coursestartline   &gt; DATE_FORMAT(#{nowTime},"%Y/%c/%d %H:%i") THEN 0
+        WHEN a.coursestartline &lt; DATE_FORMAT(#{nowTime},"%Y/%c/%d %H:%i") and a.courseendline &gt; DATE_FORMAT(#{nowTime},"%Y/%c/%d %H:%i") THEN 1
+        WHEN a.courseendline &lt; DATE_FORMAT(#{nowTime},"%Y/%c/%d %H:%i") THEN 2
+        END as courseState,
+        (
+        select count(*)
+        FROM order_main om
+        where om.course_id = a.id and om.order_state in (1,2)
+        ) as ybm,
+        (
+        select a.coursenum-count(*)
+        FROM order_main om
+        where om.course_id = a.id and om.order_state in (1,2)
+        ) as syme
+        FROM
+        (
+        SELECT cm.id,cm.coursename,cm.minnum,cm.coursenum,cf.casefieldname,om.id as orderId,om.order_no as orderNo
+        ,DATE_FORMAT(cm.coursestartline,"%Y/%c/%d %H:%i") as coursestartline
+        ,DATE_FORMAT(cm.courseendline,"%Y/%c/%d %H:%i") as courseendline,cm.fitness_url as fitnessUrl
+        from course_manager cm
+        LEFT JOIN order_main om on cm.id = om.course_id
+        left join sys_case_field cf on cf.id = cm.caseid
+        where  om.order_state in (1,2) and cm.specialclass = 804 and om.user_id = #{userId}
+        ) a
+        limit  ${base_offset},${base_pageSize}
+    </select>
+    <select id="queryUserTuanTiOrderListCount" parameterType="String" resultType="int">
+        select count(*)
+        FROM
+        (
+        SELECT cm.id,cm.coursename,cm.minnum,cm.coursenum,cf.casefieldname,DATE_FORMAT(cm.coursestartline,"%Y/%c/%d %H:%i") as coursestartline,
+        DATE_FORMAT(cm.courseendline,"%Y/%c/%d %H:%i") as courseendline
+        from course_manager cm
+        LEFT JOIN order_main om on cm.id = om.course_id
+        left join sys_case_field cf on cf.id = cm.caseid
+        where  om.order_state in (1,2) and cm.specialclass = 804 and om.user_id = #{userId}
+        GROUP BY cm.id,cm.coursename,cm.minnum,cm.coursenum
+        ) a
+    </select>
+    <!-- 用户端私教课 私教详情 -->
+    <select id="querySiJiaoOrderDetailBySiJiaoId" parameterType="String" resultType="com.ycjcjy.gene.VO.SiJiaoListVo">
+        SELECT b.*,b.countLesson-b.finishLesson-b.yuyueLesson-b.ingLesson as leftLesson
+        from (
+            SELECT a.*,
+            (
+                select IFNULL(sum(om.course_num),0)
+                FROM order_main om
+                LEFT JOIN course_manager cmi on cmi.id = om.course_id
+                WHERE om.order_state in (1,2) and cmi.teacherids = a.teacherId and cmi.specialclass = 803
+                  and om.user_id = #{userId}
+            ) as countLesson,
+                     (
+                select IFNULL((count(*)),0)
+                FROM order_sub os
+                LEFT JOIN order_main om on om.id = os.order_id
+                LEFT JOIN course_manager cmi on cmi.id = om.course_id
+                WHERE os.order_state =1 and cmi.teacherids = a.teacherId and cmi.specialclass = 803
+                   and om.user_id = #{userId}
+            ) as finishLesson,
+
+                     (
+                select IFNULL((count(*)),0)
+                FROM order_sub os
+                LEFT JOIN order_main om on om.id = os.order_id
+                LEFT JOIN course_manager cmi on cmi.id = om.course_id
+                WHERE os.order_state =2 and cmi.teacherids = a.teacherId and cmi.specialclass = 803
+                   and om.user_id = #{userId}
+            ) as yuyueLesson,
+
+                     (
+                select IFNULL((count(*)),0)
+                FROM order_sub os
+                LEFT JOIN order_main om on om.id = os.order_id
+                LEFT JOIN course_manager cmi on cmi.id = om.course_id
+                WHERE os.order_state =3 and cmi.teacherids = a.teacherId and cmi.specialclass = 803
+                   and om.user_id = #{userId}
+            ) as ingLesson
+
+
+            FROM
+
+                (
+
+                    SELECT  DISTINCT t.id as teacherId,t.name as teacherName,t.img  as teacherImg,t.phone
+                    FROM teacher t
+                    left join course_manager cm on cm.teacherids = t.id and cm.specialclass = 803
+                    WHERE t.type = 0 and t.id  = #{teacherId}
+
+                ) a
+
+        ) b
+    </select>
+
+    <select id="querySiJiaoOrderDetailVoList" parameterType="String" resultType="com.ycjcjy.gene.VO.SiJiaoListVo">
+        SELECT os.id as orderId,CONCAT(DATE_FORMAT(os.appointment_start_time,"%Y/%c/%d %H:%i"),"-",DATE_FORMAT(os.appointment_end_time,"%H:%i")) as lessonTime
+        ,c.casefieldname as caseFieldName,os.order_state,os.sijiao_index as nowLesson
+        FROM order_sub os
+        left join order_main om on om.id = os.order_id
+        LEFT JOIN course_manager cmi on cmi.id = om.course_id
+        LEFT JOIN teacher t on t.id = cmi.teacherids
+        LEFT JOIN sys_case_field c on c.id = cmi.caseid
+        WHERE  om.course_type = 803 and os.order_state>0 and t.id = #{teacherId} and om.user_id = #{userId}
+        order by os.appointment_start_time desc
+        limit  ${base_offset},${base_pageSize}
+    </select>
+    <select id="querySiJiaoOrderDetailVoListCount" parameterType="String" resultType="int">
+        SELECT count(*)
+        FROM order_sub os
+        left join order_main om on om.id = os.order_id
+        LEFT JOIN course_manager cmi on cmi.id = om.course_id
+        LEFT JOIN teacher t on t.id = cmi.teacherids
+        LEFT JOIN sys_case_field c on c.id = cmi.caseid
+        WHERE om.course_type = 803 and os.order_state>0 and t.id = #{teacherId} and om.user_id = #{userId}
+    </select>
+
+    <select id="queryUserOrderDetailById" parameterType="String" resultType="com.ycjcjy.gene.model.OrderMain">
+        SELECT om.id,om.order_no,cmi.coursename,om.course_num,om.course_type,om.actual_price
+        ,DATE_FORMAT(om.create_time,"%Y/%c/%d %H:%i:%s") as create_time_str,om.orgin_price,om.order_state,
+        ifnull(CASE rela.card_type
+                WHEN 0 THEN c.name
+                WHEN 1 THEN go.name
+                WHEN 2 THEN g.name
+                END,"") as cardName,tt.name as teacherName
+        FROM order_main om
+        LEFT JOIN course_manager cmi on cmi.id = om.course_id
+        LEFT JOIN teacher tt on tt.id = cmi.teacherids
+        LEFT JOIN card_user_rela rela on rela.id = om.ticket_id
+        LEFT JOIN card_gym_basic g on g.id = rela.card_id and rela.card_type = 2
+        LEFT JOIN card_goods_basic go on go.id = rela.card_id and rela.card_type = 1
+        LEFT JOIN card_courde_basic c on c.id = rela.card_id and rela.card_type = 0
+        WHERE om.id = #{id}
+    </select>
+
+    <select id="queryCourseOrderDetailById" parameterType="String" resultType="com.ycjcjy.gene.model.OrderMain">
+        SELECT om.id,om.order_no,cmi.coursename,ifnull(t.name,"") as teacherName,   DATE_FORMAT(cmi.coursestartline,"%c月%d日") as startTimeMD
+         ,cmi.coursetimeintro,cmi.coursestartline,cmi.courseendline,c.casefieldname,
+        (
+            select count(1)
+            FROM order_sub os
+            where os.order_id = om.id
+        ) as course_num,
+        (
+            select count(1)
+            FROM order_sub os
+            where os.order_id = om.id	and os.order_state = 0
+        ) as leftLesson,om.course_type
+        FROM order_main om
+        LEFT JOIN course_manager cmi on cmi.id = om.course_id
+        LEFT JOIN teacher t on t.id = cmi.teacherids
+        LEFT JOIN sys_case_field c on c.id = cmi.caseid
+        WHERE om.id = #{id}
+    </select>
+
+    <select id="querySiJiaoOrderDetailById" parameterType="String" resultType="com.ycjcjy.gene.VO.SiJiaoListVo">
+        SELECT t.id as teacherId,t.name as teacherName,t.img  as teacherImg,t.phone,os.sijiao_index as nowLesson,os.id as orderId,om.order_no as orderNo
+        ,CONCAT(DATE_FORMAT(os.appointment_start_time,"%Y年%c月%d日 %H:%i"),"-",DATE_FORMAT(os.appointment_end_time,"%H:%i")) as lessonTime,c.casefieldname as caseFieldName
+        , om.course_num as countLesson,om.course_type
+        from order_sub os
+        left join order_main om on om.id = os.order_id
+        LEFT JOIN course_manager cmi on cmi.id = om.course_id
+        LEFT JOIN teacher t on t.id = cmi.teacherids
+        LEFT JOIN sys_case_field c on c.id = cmi.caseid
+        where os.id = #{id}
+    </select>
+
+    <select id="queryTuanTiOrderDetailById" parameterType="String" resultType="com.ycjcjy.gene.VO.TuanTiListVo">
+      select a.*,
+         CASE
+         WHEN a.coursestartline &gt; DATE_FORMAT(#{nowTime},"%Y/%c/%d %H:%i")   THEN 0
+         WHEN a.coursestartline &lt; DATE_FORMAT(#{nowTime},"%Y/%c/%d %H:%i") and a.courseendline &gt; DATE_FORMAT(#{nowTime},"%Y/%c/%d %H:%i") THEN 1
+         WHEN a.courseendline &lt; DATE_FORMAT(#{nowTime},"%Y/%c/%d %H:%i") THEN 2
+         END as courseState,
+        (
+        select count(*)
+        FROM order_main om
+        where om.course_id = a.id and om.order_state in (1,2)
+        ) as ybm,
+        (
+        select a.coursenum-count(*)
+        FROM order_main om
+        where om.course_id = a.id and om.order_state in (1,2)
+        ) as syme
+        FROM
+        (
+        SELECT cm.id,cm.coursename,cm.minnum,cm.coursenum,cf.casefieldname,om.id as orderId,om.order_no as orderNo
+        ,DATE_FORMAT(cm.coursestartline,"%Y/%c/%d %H:%i") as coursestartline
+        ,DATE_FORMAT(cm.courseendline,"%Y/%c/%d %H:%i") as courseendline,cm.fitness_url as fitnessUrl,om.course_type
+        from course_manager cm
+        LEFT JOIN order_main om on cm.id = om.course_id
+        left join sys_case_field cf on cf.id = cm.caseid
+        where  om.order_state in (1,2) and cm.specialclass = 804  and om.user_id = #{userId}
+
+        ) a
+	  WHERE orderId = #{id}
+    </select>
+
+    <!--私教端 -->
+    <select id="querySiJiaoDuanTuanTiList" parameterType="String" resultType="com.ycjcjy.gene.VO.TuanTiListVo">
+        select a.*,
+        CASE
+         WHEN a.coursestartline &gt; DATE_FORMAT( #{nowTime} , "%Y/%c/%d %H:%i" ) THEN 0
+        WHEN a.coursestartline &lt; DATE_FORMAT( #{nowTime} , "%Y/%c/%d %H:%i" ) and a.courseendline &gt; DATE_FORMAT( #{nowTime} , "%Y/%c/%d %H:%i" )  THEN 1
+        WHEN a.courseendline &lt; DATE_FORMAT( #{nowTime} , "%Y/%c/%d %H:%i" ) THEN 2
+        END as courseState,
+        (
+        select count(*)
+        FROM order_main om
+        where om.course_id = a.courseId and om.order_state in (1,2)
+        ) as ybm,
+        (
+        select a.coursenum-count(*)
+        FROM order_main om
+        where om.course_id = a.courseId and om.order_state in (1,2)
+        ) as syme
+        FROM
+        (
+        SELECT cm.id as courseId,cm.coursename,cm.minnum,cm.coursenum,cf.casefieldname
+        ,DATE_FORMAT(cm.coursestartline,"%Y/%c/%d %H:%i") as coursestartline
+        ,DATE_FORMAT(cm.courseendline,"%Y/%c/%d %H:%i") as courseendline,
+		cm.fitness_url as fitnessUrl
+        from course_manager cm
+        left join sys_case_field cf on cf.id = cm.caseid
+        where   cm.specialclass = 804    and cm.teacherids = #{teacherId}
+        ) a
+        limit  ${base_offset},${base_pageSize}
+    </select>
+    <select id="querySiJiaoDuanTuanTiListCount" parameterType="String" resultType="int">
+        select count(*)
+        FROM
+        (
+        SELECT cm.id,cm.coursename,cm.minnum,cm.coursenum,cf.casefieldname
+        ,DATE_FORMAT(cm.coursestartline,"%Y/%c/%d %H:%i") as coursestartline
+        ,DATE_FORMAT(cm.courseendline,"%Y/%c/%d %H:%i") as courseendline,
+		cm.fitness_url as fitnessUrl
+        from course_manager cm
+        left join sys_case_field cf on cf.id = cm.caseid
+        where   cm.specialclass = 804    and cm.teacherids = #{teacherId}
+        ) a
+    </select>
+    <select id="querySiJiaoDuanTuanTiDetailById" parameterType="String" resultType="com.ycjcjy.gene.VO.TuanTiListVo">
+        select a.*,
+        CASE
+         WHEN a.coursestartline &gt; DATE_FORMAT( #{nowTime} , "%Y/%c/%d %H:%i" ) THEN 0
+        WHEN a.coursestartline &lt; DATE_FORMAT( #{nowTime} , "%Y/%c/%d %H:%i" ) and a.courseendline &gt; DATE_FORMAT( #{nowTime} , "%Y/%c/%d %H:%i" )  THEN 1
+        WHEN a.courseendline &lt; DATE_FORMAT( #{nowTime} , "%Y/%c/%d %H:%i" ) THEN 2
+        END as courseState,
+        (
+        select count(*)
+        FROM order_main om
+        where om.course_id = a.id and om.order_state in (1,2)
+        ) as ybm,
+        (
+        select a.coursenum-count(*)
+        FROM order_main om
+        where om.course_id = a.id and om.order_state in (1,2)
+        ) as syme
+        FROM
+        (
+        SELECT cm.id,cm.coursename,cm.minnum,cm.coursenum,cf.casefieldname
+        ,DATE_FORMAT(cm.coursestartline,"%Y/%c/%d %H:%i") as coursestartline
+        ,DATE_FORMAT(cm.courseendline,"%Y/%c/%d %H:%i") as courseendline,
+		cm.fitness_url as fitnessUrl
+        from course_manager cm
+        left join sys_case_field cf on cf.id = cm.caseid
+        where   cm.specialclass = 804  and cm.id = #{courseId}
+        ) a
+    </select>
+    <select id="querySiJiaoDuanTuanTiDetailCustomerUserList" parameterType="String" resultType="com.ycjcjy.gene.VO.TuanTiListVo">
+        SELECT cu.icon,cu.username,om.order_state as orderState
+        from course_manager cm
+        left join sys_case_field cf on cf.id = cm.caseid
+        left join order_main om on om.course_id = cm.id
+        left join customer_user cu on om.user_id = cu.id
+        where   cm.specialclass = 804 and om.order_state in (1,2)   and cm.id = #{courseId}
+    </select>
+
+    <!-- 历史记录列表（包含团课和私教） -->
+    <select id="querySiJiaoDuanTuanRecordList" parameterType="String" resultType="map">
+      select c.*
+      from (
+        select a.*,
+        CASE
+        WHEN a.coursestartline &gt; DATE_FORMAT(#{nowTime},"%Y/%c/%d %H:%i")   THEN 0
+        WHEN a.coursestartline &lt; DATE_FORMAT(#{nowTime},"%Y/%c/%d %H:%i") and a.courseendline &gt; DATE_FORMAT(#{nowTime},"%Y/%c/%d %H:%i")  THEN 1
+        WHEN a.courseendline &lt; DATE_FORMAT(#{nowTime},"%Y/%c/%d %H:%i") THEN 2
+        END as courseState,
+        (
+        select count(*)
+        FROM order_main om
+        where om.course_id = a.courseId and om.order_state in (1,2)
+        ) as ybm,
+        (
+        select a.coursenum-count(*)
+        FROM order_main om
+        where om.course_id = a.courseId and om.order_state in (1,2)
+        ) as syme,
+				"" as icon,"" as username,"" as orderState,0 countLesson,0 as type,0 as customerId
+        FROM
+        (
+        SELECT cm.id as courseId,cm.coursename,cm.minnum,cm.coursenum,cf.casefieldname,
+        DATE_FORMAT(cm.coursestartline,"%Y/%c/%d %H:%i") as coursestartline
+        , DATE_FORMAT(cm.courseendline,"%Y/%c/%d %H:%i") as courseendline,
+        cm.fitness_url as fitnessUrl
+        from course_manager cm
+        left join sys_case_field cf on cf.id = cm.caseid
+        where   cm.specialclass = 804    and cm.teacherids = #{teacherId}
+        ) a
+
+        union
+
+				 SELECT 	0 as courseId,"" as coursename,0 as minnum,0 as coursenum,"" as  casefieldname ,
+        DATE_FORMAT((
+        SELECT min(cmi.coursestartline)
+        from order_main om
+        LEFT JOIN course_manager cmi on cmi.id = om.course_id
+        WHERE om.order_state in (1,2) and cmi.teacherids = #{teacherId} and cmi.specialclass = 803  and om.user_id = b.id
+
+
+        ),"%Y/%c/%d") as coursestartline,
+
+
+        DATE_FORMAT((
+        SELECT max(cmi.courseendline)
+        from order_main om
+        LEFT JOIN course_manager cmi on cmi.id = om.course_id
+        WHERE om.order_state in (1,2) and cmi.teacherids = #{teacherId} and cmi.specialclass = 803  and om.user_id = b.id
+        ),"%Y/%c/%d") as courseendline
+                ,''  as fitnessUrl
+
+				 ,1 as courseState,0 as ybm, 0 as syme,
+				 b.icon,b.username,b.orderState,
+        (
+            select  IFNULL(sum(om.course_num),0)
+            FROM order_main om
+            LEFT JOIN course_manager cmi on cmi.id = om.course_id
+            WHERE om.order_state in (1,2) and cmi.teacherids = #{teacherId} and cmi.specialclass = 803 and b.id = om.user_id
+        ) as countLesson,1 as type,b.id as customerId
+
+
+        FROM (
+
+        SELECT  DISTINCT cu.id,cu.icon,cu.username,om.order_state as orderState
+        FROM  course_manager cm
+				left join order_main om on cm.id = om.course_id
+				left join customer_user cu on cu.id = om.user_id
+        WHERE om.order_state in (1,2) and  cm.specialclass = 803 and cm.teacherids  = #{teacherId}
+
+        ) b
+
+      ) c
+       limit  ${base_offset},${base_pageSize}
+    </select>
+    <select id="querySiJiaoDuanTuanRecordListCount" parameterType="String" resultType="int">
+        select count(*)
+        from (
+        select a.*,
+        CASE
+        WHEN a.coursestartline &gt; DATE_FORMAT(#{nowTime},"%Y/%c/%d %H:%i")   THEN 0
+        WHEN a.coursestartline &lt; DATE_FORMAT(#{nowTime},"%Y/%c/%d %H:%i") and a.courseendline &lt; DATE_FORMAT(#{nowTime},"%Y/%c/%d %H:%i") THEN 1
+        WHEN a.courseendline &lt; DATE_FORMAT(#{nowTime},"%Y/%c/%d %H:%i") THEN 2
+        END as courseState,
+        (
+        select count(*)
+        FROM order_main om
+        where om.course_id = a.id and om.order_state in (1,2)
+        ) as ybm,
+        (
+        select a.coursenum-count(*)
+        FROM order_main om
+        where om.course_id = a.id and om.order_state in (1,2)
+        ) as syme,
+        "" as icon,"" as username,"" as orderState,0 countLesson,0 as type
+        FROM
+        (
+        SELECT cm.id,cm.coursename,cm.minnum,cm.coursenum
+
+        ,DATE_FORMAT(cm.coursestartline,"%Y/%c/%d %H:%i") as coursestartline
+        ,DATE_FORMAT(cm.courseendline,"%Y/%c/%d %H:%i") as courseendline
+
+        from course_manager cm
+        left join sys_case_field cf on cf.id = cm.caseid
+        where   cm.specialclass = 804    and cm.teacherids = #{teacherId}
+        ) a
+
+        union
+
+        SELECT 	0 as id,"" as coursename,0 as minnum,0 as coursenum,
+
+        DATE_FORMAT((
+        SELECT min(cmi.coursestartline)
+        from order_main om
+        LEFT JOIN course_manager cmi on cmi.id = om.course_id
+        WHERE om.order_state in (1,2) and cmi.teacherids = #{teacherId} and cmi.specialclass = 803  and om.user_id = b.id
+
+
+        ),"%Y/%c/%d") as coursestartline,
+
+
+        DATE_FORMAT((
+        SELECT max(cmi.courseendline)
+        from order_main om
+        LEFT JOIN course_manager cmi on cmi.id = om.course_id
+        WHERE om.order_state in (1,2) and cmi.teacherids = #{teacherId} and cmi.specialclass = 803  and om.user_id = b.id
+        ),"%Y/%c/%d") as courseendline
+
+
+        ,1 as courseState,0 as ybm, 0 as syme,
+        b.icon,b.username,b.orderState,
+        (
+        select  IFNULL(sum(om.course_num),0)
+        FROM order_main om
+        LEFT JOIN course_manager cmi on cmi.id = om.course_id
+        WHERE om.order_state in (1,2) and cmi.teacherids = #{teacherId} and cmi.specialclass = 803
+        ) as countLesson,1 as type
+        FROM (
+        SELECT  DISTINCT cu.id,cu.icon,cu.username,om.order_state as orderState
+        FROM  course_manager cm
+        left join order_main om on cm.id = om.course_id
+        left join customer_user cu on cu.id = om.user_id
+        WHERE om.order_state in (1,2) and  cm.specialclass = 803 and cm.teacherids  = #{teacherId}
+        ) b
+        ) c
+
+    </select>
+    <select id="getAllCoachLessonForCoach" parameterType="int" resultType="com.ycjcjy.gene.VO.SiJiaoListVo">
+  SELECT ddd.*,ddd.countLesson-ddd.finishLesson-ddd.yuyueLesson-ddd.ingLesson as leftLesson
+        from (
+        SELECT
+	a.user_id as customerId,
+	(
+SELECT
+	IFNULL( sum( h.course_num ), 0 )
+FROM
+	order_main h
+	LEFT JOIN course_manager i ON h.course_id = i.id
+	LEFT JOIN teacher j ON i.teacherids = j.id
+WHERE
+	h.user_id = a.user_id
+	AND j.id = #{teacherId}
+	AND h.course_type = 803 and h.order_state in (1,2)
+GROUP BY
+	user_id
+	) AS countLesson,
+	(
+SELECT
+	IFNULL( ( count( * ) ), 0 )
+FROM
+	order_sub os
+	LEFT JOIN order_main om ON om.id = os.order_id
+	LEFT JOIN course_manager cmi ON cmi.id = om.course_id
+WHERE
+	os.order_state = 1
+	AND cmi.teacherids = #{teacherId}
+	AND cmi.specialclass = 803
+	AND om.user_id = a.user_id
+	) AS finishLesson,
+	c.username as customerName,
+	c.tel AS phone,
+	c.icon AS customerLogo,
+	(
+SELECT
+	IFNULL( ( count( * ) ), 0 )
+FROM
+	order_sub os
+	LEFT JOIN order_main om ON om.id = os.order_id
+	LEFT JOIN course_manager cmi ON cmi.id = om.course_id
+WHERE
+	os.order_state = 2
+	AND cmi.teacherids = #{teacherId}
+	AND cmi.specialclass = 803
+	AND om.user_id = a.user_id
+	) AS yuyueLesson,
+	(
+SELECT
+	IFNULL( ( count( * ) ), 0 )
+FROM
+	order_sub os
+	LEFT JOIN order_main om ON om.id = os.order_id
+	LEFT JOIN course_manager cmi ON cmi.id = om.course_id
+WHERE
+	os.order_state = 3
+	AND cmi.teacherids = #{teacherId}
+	AND cmi.specialclass = 803
+	AND om.user_id = a.user_id
+	) AS ingLesson
+
+
+FROM
+	order_main a
+	LEFT JOIN order_sub b ON a.id = b.order_id
+	LEFT JOIN customer_user c ON a.user_id = c.id
+	LEFT JOIN course_manager d ON a.course_id = d.id
+	LEFT JOIN teacher e ON d.teacherids = e.id
+WHERE
+    a.order_state = "1"
+    and
+	a.course_type = 803
+	AND e.id = #{teacherId}
+GROUP BY
+	a.user_id
+
+
+	) ddd
+	limit  ${base_offset},${base_pageSize}
+    </select>
+
+    <select id="getCountAllLessonForCoach" parameterType="int" resultType="int">
+        select count(1) from(
+        SELECT
+	a.user_id as customerId,
+	(
+SELECT
+	IFNULL( sum( h.course_num ), 0 )
+FROM
+	order_main h
+	LEFT JOIN course_manager i ON h.course_id = i.id
+	LEFT JOIN teacher j ON i.teacherids = j.id
+WHERE
+	h.user_id = a.user_id
+	AND j.id = #{teacherId}
+	AND h.course_type = 803
+GROUP BY
+	user_id
+	) AS countLesson,
+	(
+SELECT
+	IFNULL( ( count( * ) ), 0 )
+FROM
+	order_sub os
+	LEFT JOIN order_main om ON om.id = os.order_id
+	LEFT JOIN course_manager cmi ON cmi.id = om.course_id
+WHERE
+	os.order_state = 1
+	AND cmi.teacherids = #{teacherId}
+	AND cmi.specialclass = 803
+	AND om.user_id = a.user_id
+	) AS finishLesson,
+	c.username as customerName,
+	c.tel AS phone,
+	c.icon AS customerLogo,
+	(
+SELECT
+	IFNULL( ( count( * ) ), 0 )
+FROM
+	order_sub os
+	LEFT JOIN order_main om ON om.id = os.order_id
+	LEFT JOIN course_manager cmi ON cmi.id = om.course_id
+WHERE
+	os.order_state = 2
+	AND cmi.teacherids = #{teacherId}
+	AND cmi.specialclass = 803
+	AND om.user_id = a.user_id
+	) AS yuyueLesson
+FROM
+	order_main a
+	LEFT JOIN order_sub b ON a.id = b.order_id
+	LEFT JOIN customer_user c ON a.user_id = c.id
+	LEFT JOIN course_manager d ON a.course_id = d.id
+	LEFT JOIN teacher e ON d.teacherids = e.id
+WHERE
+    a.order_state = "1"
+    and
+	a.course_type = 803
+	AND e.id = #{teacherId}
+GROUP BY
+	a.user_id
+        )faketable
+    </select>
+
+    <select id="getsingleCoachLessonCustomer" parameterType="int" resultType="com.ycjcjy.gene.VO.SiJiaoListVo">
+       SELECT ddd.*,ddd.countLesson-ddd.finishLesson-ddd.yuyueLesson-ddd.ingLesson as leftLesson
+        from (
+        SELECT
+	a.user_id as customerId,
+	(
+SELECT
+	IFNULL( sum( h.course_num ), 0 )
+FROM
+	order_main h
+	LEFT JOIN course_manager i ON h.course_id = i.id
+	LEFT JOIN teacher j ON i.teacherids = j.id
+WHERE
+	h.user_id = a.user_id
+	AND j.id = #{teacherId}
+	AND h.course_type = 803  and h.order_state in (1,2)
+GROUP BY
+	user_id
+	) AS countLesson,
+	(
+SELECT
+	IFNULL( ( count( * ) ), 0 )
+FROM
+	order_sub os
+	LEFT JOIN order_main om ON om.id = os.order_id
+	LEFT JOIN course_manager cmi ON cmi.id = om.course_id
+WHERE
+	os.order_state = 1
+	AND cmi.teacherids = #{teacherId}
+	AND cmi.specialclass = 803
+	AND om.user_id = a.user_id
+	) AS finishLesson,
+	c.username as customerName,
+	c.tel AS phone,
+	c.icon AS customerLogo,
+	(
+SELECT
+	IFNULL( ( count( * ) ), 0 )
+FROM
+	order_sub os
+	LEFT JOIN order_main om ON om.id = os.order_id
+	LEFT JOIN course_manager cmi ON cmi.id = om.course_id
+WHERE
+	os.order_state = 2
+	AND cmi.teacherids = #{teacherId}
+	AND cmi.specialclass = 803
+	AND om.user_id = a.user_id
+	) AS yuyueLesson,
+	(
+SELECT
+	IFNULL( ( count( * ) ), 0 )
+FROM
+	order_sub os
+	LEFT JOIN order_main om ON om.id = os.order_id
+	LEFT JOIN course_manager cmi ON cmi.id = om.course_id
+WHERE
+	os.order_state = 3
+	AND cmi.teacherids = #{teacherId}
+	AND cmi.specialclass = 803
+	AND om.user_id = a.user_id
+	) AS ingLesson
+FROM
+	order_main a
+	LEFT JOIN order_sub b ON a.id = b.order_id
+	LEFT JOIN customer_user c ON a.user_id = c.id
+	LEFT JOIN course_manager d ON a.course_id = d.id
+	LEFT JOIN teacher e ON d.teacherids = e.id
+WHERE
+	a.course_type = 803
+	AND e.id = #{teacherId}
+	and a.user_id = #{user_id}
+GROUP BY
+	a.user_id
+	) ddd
+    </select>
+    <select id="getAppointmentTimeCoach" parameterType="int" resultType="com.ycjcjy.gene.VO.AppointmentTimeVO">
+        SELECT
+	a.appointment_start_time,
+	a.appointment_end_time
+FROM
+	order_sub a
+	LEFT JOIN order_main b ON a.order_id = b.id
+	LEFT JOIN course_manager c ON c.id = b.course_id
+WHERE
+	a.order_state = 2
+	AND c.teacherids = #{teacher_id}
+    </select>
+    
+    <select id="getCoachIndex" parameterType="int" resultType="int">
+        SELECT max(a.sijiao_index) from order_sub a WHERE a.order_id = #{order_id} and a.order_state = 1
+    </select>
+
+    <select id="getCoachClassName" parameterType="int" resultType="com.ycjcjy.gene.VO.CoachClassListVO">
+        SELECT
+	a.id,
+	b.coursename,
+	b.coursetime,
+	b.id as courseId,
+	(a.course_num -(
+		SELECT count(*)
+		FROM order_sub os
+		where os.order_id = a.id and os.order_state in (1,2,3)
+	) )as leftLeeson
+FROM
+	order_main a
+	LEFT JOIN course_manager b ON a.course_id = b.id
+WHERE
+	user_id = #{user_id}
+	AND a.course_type = 803
+	AND a.order_state = 1
+	AND b.teacherids = #{teacher_id}
+    </select>
+
+    <select id="queryCoachOrderDetailVoList" parameterType="String" resultType="com.ycjcjy.gene.VO.SiJiaoListVo">
+        SELECT os.id as orderId,CONCAT(DATE_FORMAT(os.appointment_start_time,"%Y/%c/%d %H:%i"),"-",DATE_FORMAT(os.appointment_end_time,"%H:%i")) as lessonTime
+        ,c.casefieldname as caseFieldName,os.order_state,os.sijiao_index as nowLesson
+        FROM order_sub os
+        left join order_main om on om.id = os.order_id
+        LEFT JOIN course_manager cmi on cmi.id = om.course_id
+        LEFT JOIN teacher t on t.id = cmi.teacherids
+        LEFT JOIN sys_case_field c on c.id = cmi.caseid
+        WHERE om.user_id = #{userId}
+        AND om.course_type = 803
+        and t.id = #{teacherId}
+        order by os.appointment_start_time desc
+        limit  ${base_offset},${base_pageSize}
+    </select>
+    <select id="queryCoachOrderDetailVoListCount" parameterType="String" resultType="int">
+        SELECT count(*)
+        FROM order_sub os
+        left join order_main om on om.id = os.order_id
+        LEFT JOIN course_manager cmi on cmi.id = om.course_id
+        LEFT JOIN teacher t on t.id = cmi.teacherids  and t.id = #{teacherId}
+        LEFT JOIN sys_case_field c on c.id = cmi.caseid
+        WHERE om.user_id = #{userId}
+        AND om.course_type = 803
+    </select>
+
+    <select id="coachLessonDone" resultType="com.ycjcjy.gene.VO.CoachLessonDoneVO">
+        SELECT
+	cm.teacherids,
+	(
+SELECT
+	COUNT( 1 )
+FROM
+	order_sub a
+	LEFT JOIN order_main b ON a.order_id = b.id
+	LEFT JOIN course_manager c ON b.course_id = c.id
+WHERE
+	a.order_state = 1
+	AND b.course_type = 803
+	AND c.teacherids = cm.teacherids
+	) AS lessonDone
+FROM
+	order_main om
+	LEFT JOIN course_manager cm ON om.course_id = cm.id
+WHERE
+	om.course_type = 803
+GROUP BY
+	cm.teacherids
+    </select>
+
+    <update id="updateOrderStateSiJiaoKeOut" parameterType="String">
+        update order_sub s set  s.order_state = 4
+        WHERE s.id in (
+
+        select a.* from
+        (select id
+        FROM order_sub
+        where appointment_start_time &gt; #{nowTime} and  order_state = 2
+        ) a
+
+        )
+
+    </update>
+    <update id="updateOrderStateSiJiaoKeFinish" parameterType="String">
+        update order_sub s set  s.order_state = 1
+        WHERE s.id in (
+
+        select a.* from
+        (select id
+        FROM order_sub
+        where appointment_end_time &gt; #{nowTime} and  order_state = 3
+        ) a
+
+        )
+    </update>
+    
+    <select id="findShareLessonByMonth" parameterType="string" resultType="int">
+        SELECT
+	COUNT( 1 )
+FROM
+	order_main a
+WHERE
+	DATE_FORMAT( a.create_time, '%Y%m' ) = DATE_FORMAT( now( ), '%Y%m' )
+	AND a.order_type = 0
+    AND a.order_state IN(1,2)
+	<if test="case_id != '' and case_id !=null">
+        AND a.case_field_id = #{case_id}
+    </if>
+    </select>
+
+    <select id="findSumMoney" resultType="map">
+  select (
+    select ifnull(sum(actual_price),0)
+    from
+    order_main
+    where
+    DATE_FORMAT(create_time,'%Y%m') =  DATE_FORMAT(now(),'%Y%m')
+    and
+    (order_state ='1' or order_state = '2')
+        <if test="caseid!=null and caseid!=''">
+            and	case_field_id = #{caseid}
+        </if>
+    ) mon,
+     (select ifnull(sum(actual_price),0)
+    from
+    order_main
+    where
+    DATE_FORMAT(create_time,'%Y%m%d') =  DATE_FORMAT(now(),'%Y%m%d')
+    and
+    (order_state ='1' or order_state = '2')
+        <if test="caseid!=null and caseid!=''">
+            and	case_field_id = #{caseid}
+        </if>
+    ) days from dual
+
+    </select>    <select id="queryOrderCreateNumForTu" parameterType="String" resultType="map" >
+        SELECT DATE_FORMAT(temp.date,"%c/%d") as date,
+        coalesce(u.unmber,0) 'number' from(
+        SELECT
+        adddate(#{startTime}, numlist.id) AS 'date'
+        FROM
+        (
+        SELECT
+        n1.i + n10.i * 10 + n100.i * 100 AS id
+        FROM
+        num n1
+        CROSS JOIN num AS n10
+        CROSS JOIN num AS n100
+        ) AS numlist
+        WHERE
+
+        adddate(#{startTime}, numlist.id) &lt;= #{endTime}
+
+        ) temp
+        LEFT JOIN
+        (SELECT left(om.create_time,10)as udate,count(om.id) unmber FROM order_main om
+        left join course_manager c on c.id = om.course_id
+        where om.order_state in (1,2)
+        <if test="caseId!='' and caseId != null and caseId != '-1'">
+            and c.caseid = #{caseId}
+        </if>
+
+        GROUP BY udate) u on temp.date = u.udate order by temp.date
+    </select>
+
+    <select id="queryOrderVerificationNumForTu" parameterType="String" resultType="map" >
+        SELECT DATE_FORMAT(temp.date,"%c/%d") as date,
+        coalesce(u.unmber,0) 'number' from(
+        SELECT
+        adddate(#{startTime}, numlist.id) AS 'date'
+        FROM
+        (
+        SELECT
+        n1.i + n10.i * 10 + n100.i * 100 AS id
+        FROM
+        num n1
+        CROSS JOIN num AS n10
+        CROSS JOIN num AS n100
+        ) AS numlist
+        WHERE
+
+        adddate(#{startTime}, numlist.id) &lt;= #{endTime}
+
+        ) temp
+        LEFT JOIN
+        (SELECT left(verification_time,10)as udate,count(id) unmber FROM order_sub
+        where order_state in (1,3)
+        <if test="caseId!='' and caseId != null and caseId != '-1'">
+            and case_field_id = #{caseId}
+        </if>
+
+
+        GROUP BY udate) u on temp.date = u.udate order by temp.date
+    </select>
+
+    <select id="queryCourseNumForTu" parameterType="String" resultType="map" >
+        SELECT DATE_FORMAT(temp.date,"%c/%d") as date,
+        coalesce(u.unmber,0) 'number' from(
+        SELECT
+        adddate(#{startTime}, numlist.id) AS 'date'
+        FROM
+        (
+        SELECT
+        n1.i + n10.i * 10 + n100.i * 100 AS id
+        FROM
+        num n1
+        CROSS JOIN num AS n10
+        CROSS JOIN num AS n100
+        ) AS numlist
+        WHERE
+
+        adddate(#{startTime}, numlist.id) &lt;= #{endTime}
+
+        ) temp
+        LEFT JOIN
+        (SELECT left(substartline,10)as udate,count(om.id) unmber FROM course_sub_manager om
+        left join course_manager c on c.id = om.pcourseid
+        where c.ispublic = 1
+        <if test="caseId!='' and caseId != null and caseId != '-1'">
+              and c.caseid = #{caseId}
+        </if>
+        GROUP BY udate) u on temp.date = u.udate order by temp.date
+    </select>
+
+
+</mapper>

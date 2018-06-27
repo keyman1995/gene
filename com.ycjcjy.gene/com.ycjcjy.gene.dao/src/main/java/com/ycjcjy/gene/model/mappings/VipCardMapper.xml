@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.VipCardDao" >
+
+    <parameterMap id="vipCardParamMap" type="com.ycjcjy.gene.model.VipCard"></parameterMap>
+    <select id="findAllCard" parameterMap="vipCardParamMap" resultType="com.ycjcjy.gene.model.VipCard">
+        SELECT t.*,cu.username,su.realname as salename,cf.casefieldname
+        FROM vip_card t
+        left join sys_user su on t.sale_id = su.id
+        left join customer_user cu on t.user_id = cu.id
+        left join sys_case_field cf on t.case_id = cf.id
+        <where>
+            1=1
+            <if test="card_no !=null and card_no!=''">
+                and t.card_no like concat('%',#{card_no},'%')
+            </if>
+            <if test="sale_phone !=null and sale_phone !=''">
+                and  su.mobile like  concat('%',#{sale_phone},'%')
+            </if>
+            <if test="user_phone !=null and user_phone !=''">
+                and  cu.tel like concat('%',#{user_phone},'%')
+            </if>
+
+            <if test="state !=null and state !=''">
+                and  t.state = #{state}
+            </if>
+            <if test="case_id !=null and case_id !=''">
+                and  t.case_id = #{case_id}
+            </if>
+        </where>
+
+
+        <if test="base_sort !=null and base_sort !=''">
+            order by t.${base_orderBy}  ${base_sort}
+        </if>
+        <if test="base_pageSize !=null and base_pageSize !=''">
+            limit  ${base_offset},${base_pageSize}
+        </if>
+    </select>
+
+    <select id="getAllCount" parameterMap="vipCardParamMap" resultType="int">
+        SELECT count(*)
+        FROM vip_card t
+        left join sys_user su on t.sale_id = su.id
+        left join customer_user cu on t.user_id = cu.id
+        left join sys_case_field cf on t.case_id = cf.id
+        <where>
+            1=1
+            <if test="card_no !=null and card_no!=''">
+                and t.card_no like concat('%',#{card_no},'%')
+            </if>
+            <if test="sale_phone !=null and sale_phone !=''">
+                and  su.mobile like  concat('%',#{sale_phone},'%')
+            </if>
+            <if test="user_phone !=null and user_phone !=''">
+                and  cu.tel like concat('%',#{user_phone},'%')
+            </if>
+
+            <if test="state !=null and state !=''">
+                and  t.state = #{state}
+            </if>
+            <if test="case_id !=null and case_id !=''">
+                and  t.case_id = #{case_id}
+            </if>
+        </where>
+    </select>
+
+    <select id="getByCardNo" parameterType="String" resultType="com.ycjcjy.gene.model.VipCard">
+      SELECT  *
+      FROM vip_card
+      where card_no = #{cardNo}
+      limit 1
+    </select>
+
+</mapper>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--author Ken Hu-->
+<!--description 案场区域管理 mapper-->
+<!--date 2018-06-11 15:26:53-->
+<mapper namespace="com.ycjcjy.gene.dao.SysCaseFieldAreaDao">
+    <select id="findAreaByCaseId" parameterType="Long" resultType="com.ycjcjy.gene.model.SysCaseFieldArea">
+        SELECT * FROM sys_case_field_area where case_field_id = #{caseId} and is_show = '1'
+    </select>
+
+    <select id="hasTable" parameterType="string" resultType="int">
+        select count(1) from sys_case_field_table where area = #{area} and case_field_id = #{case_id} and is_show = '1'
+    </select>
+
+</mapper>

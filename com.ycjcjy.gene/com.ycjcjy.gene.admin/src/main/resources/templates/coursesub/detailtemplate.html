@@ -1,0 +1,54 @@
+<script id="tpl-subdetail" type="text/html" th:fragment="subdetail" xmlns:th="http://www.w3.org/1999/xhtml">
+    {{set data = $datas}}
+    <input type="text" style="display: none" name="id" id="subid" value="{{$data.id}}"/>
+    <div class="am-form-group">
+        <label for="coursename" class="am-u-sm-3 am-form-label diy-font">课程名称 <span class="tpl-form-line-small-title">:</span></label>
+        <div class="am-u-sm-9">
+            <input type="text" class="tpl-form-input" readonly name="coursename" id="courseName" value="{{$data.coursename}}">
+        </div>
+    </div>
+
+    <div class="am-form-group">
+        <label for="subcousename" class="am-u-sm-3 am-form-label diy-font">课时名称 <span class="tpl-form-line-small-title">:</span></label>
+        <div class="am-u-sm-9">
+            <input type="text" class="tpl-form-input" name="subcousename" id="subcousename" value="{{$data.subcousename}}">
+        </div>
+    </div>
+
+    <div class="am-form-group">
+        <label for="subDeatil" class="am-u-sm-3 am-form-label diy-font">课时简介 <span class="tpl-form-line-small-title">:</span></label>
+        <div class="am-u-sm-9">
+            <textarea class="tpl-form-input" name="subDeatil" id="subDeatil">{{$data.subDeatil}}</textarea>
+        </div>
+    </div>
+
+    <div class="am-form-group">
+        <label for="casefieldname" class="am-u-sm-3 am-form-label diy-font">案场地点 <span class="tpl-form-line-small-title">:</span></label>
+        <div class="am-u-sm-9">
+            <input type="text" class="tpl-form-input" readonly name="casefieldname" id="casefieldname" value="{{$data.casefieldname}}"/>
+        </div>
+    </div>
+
+    <div class="am-form-group">
+        <label for="address" class="am-u-sm-3 am-form-label diy-font">案场地址 <span class="tpl-form-line-small-title">:</span></label>
+        <div class="am-u-sm-9">
+            <input type="text" class="tpl-form-input" readonly name="address" id="address" value="{{$data.address}}"/>
+        </div>
+    </div>
+
+
+    <div class="am-form-group">
+        <label for="substarttime" class="am-u-sm-3 am-form-label">开始时间 <span class="tpl-form-line-small-title">:</span></label>
+        <div class="am-u-sm-9">
+            <input type="text" id= "startedit" name="substartline" readonly class="onebean-data-picker-time" value="{{$data.substartline}}" data-date-startDate="{{$data.starline}}" data-date-endDate="{{$data.endline}}" placeholder="请选择时间">
+        </div>
+        <span class="error" id="editError" style="display: none;">开始时间大于结束时间</span>
+    </div>
+
+    <div class="am-form-group">
+        <label for="endtime" class="am-u-sm-3 am-form-label">结束时间 <span class="tpl-form-line-small-title">:</span></label>
+        <div class="am-u-sm-9">
+            <input type="text" id= "endedit" name="subendline" readonly class="onebean-data-picker-time" value="{{$data.subendline}}" data-date-startDate="{{$data.starline}}" data-date-endDate="{{$data.endline}}" placeholder="请选择时间">
+        </div>
+    </div>
+</script>

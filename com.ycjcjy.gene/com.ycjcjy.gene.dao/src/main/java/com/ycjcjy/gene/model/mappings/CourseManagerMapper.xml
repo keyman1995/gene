@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.CourseManagerDao" >
+
+    <parameterMap id="courseParamMap" type="com.ycjcjy.gene.model.CourseManager"></parameterMap>
+    <parameterMap id="courseParamMapVo" type="com.ycjcjy.gene.model.CourseManagerVo"></parameterMap>
+
+    <resultMap type="com.ycjcjy.gene.model.CourseManagerVo" id="courseMap">
+        <id column="id" property="id"/>
+        <result column="coursename" property="coursename"/>
+        <result column="specialclass" property="specialclass"/>
+        <result column="img_url" property="img_url"/>
+        <result column="courseprice" property="courseprice"/>
+        <result column="coursetime" property="coursetime"/>
+        <result column="coursecount" property="coursecount"/>
+        <result column="buycount" property="buycount"/>
+        <result column="teachername" property="teachername"/>
+        <result column="teacherimg" property="teacherimg"/>
+        <result column="teacherexperience" property="teacherexperience"/>
+        <result column="title" property="title"/>
+        <result column="coursetags" property="coursetags"/>
+        <collection property="courseDetailList" column="id"  select="getCourseDetail">
+        </collection>
+        <collection property="subCourseTimeList" column="id" select="getsubCourseTime">
+        </collection>
+        <collection property="evaluates" column="id" select="getEvaluates">
+        </collection>
+
+    </resultMap>
+
+    <resultMap id="evaluateMap" type="com.ycjcjy.gene.model.Evaluate">
+        <id column="id" property="id"/>
+        <result column="content" property="content"/>
+        <result column="score" property="score"/>
+        <result column="create_time" property="create_time"/>
+        <result column="customerName" property="customerName"/>
+        <collection property="evaluateImgList" column="id" select="getEvaluateImgs"></collection>
+    </resultMap>
+
+
+    <resultMap id="courseListMap" type="com.ycjcjy.gene.model.CourseManagerVo">
+        <id column="id" property="id"/>
+        <result column="coursename" property="coursename"/>
+        <result column="specialclass" property="specialclass"/>
+        <result column="img_url" property="img_url"/>
+        <result column="courseprice" property="courseprice"/>
+        <result column="coursetags" property="coursetags"/>
+        <result column="casefieldname" property="casefieldname"/>
+        <result column="coursetimeintro" property="coursetimeintro"/>
+        <result column="dic" property="dic"/>
+        <collection property="tagList" column="id" select="getAllTages"></collection>
+    </resultMap>
+
+    <select id="saleDetail" parameterType="long" resultType="com.ycjcjy.gene.model.CourseManager">
+        SELECT
+	b.`name` AS coarchName,
+	b.`id` AS coarchId,
+	b.service_info AS coarchServiceTime,
+	b.img AS coarchUrl,
+	date_format(IFNULL((
+		SELECT
+			c.substartline
+		FROM
+			course_sub_manager c
+		WHERE
+		    #{id} = c.pcourseid
+		ORDER BY
+			c.substartline
+		LIMIT 1
+	),a.coursestartline),'%Y年%c月%d日') AS startline,
+	a.*,
+	s.casefieldname
+FROM
+	course_manager a
+LEFT JOIN teacher b ON a.teacherids = b.id
+LEFT JOIN sys_case_field s ON s.id = a.caseid
+WHERE
+	a.id = #{id}
+    </select>
+
+    <select id="findAllCourse" parameterMap="courseParamMap" resultType="com.ycjcjy.gene.model.CourseManager">
+      select
+        t.*,
+        c.casefieldname as casename,
+        ct.name as coursetypename,
+        ct1.name as coursespecialname,
+        (select count(1) from course_sub_manager where pcourseid = t.id and #{coursestartline_str} between t.coursestartline and t.courseendline) as weekcount
+      from course_manager t
+      left join sys_case_field c
+      on t.caseid = c.id
+        left join course_type ct
+        on t.coursetype = ct.id
+        left join course_type ct1
+        on t.specialcourse = ct1.id
+
+        <where>
+            t.coursestatus = '0'
+            <if test="specialcourse !=null and specialcourse!=''">
+                and t.specialcourse = #{specialcourse}
+            </if>
+            <if test="coursename !=null and coursename!=''">
+                and t.coursename like concat('%',#{coursename},'%')
+            </if>
+            <if test="caseid !=null and caseid!=''">
+                and t.caseid = #{caseid}
+            </if>
+            <if test="coursetype !=null and coursetype!=''">
+                and t.coursetype = #{coursetype}
+            </if>
+            <if test="conditionParam == 0 ">
+                and t.specialclass in ('802','804')
+                and t.ispublic = '0'
+                and  #{coursestartline_str} between t.coursestartline and t.courseendline
+            </if>
+        </where>
+        <if test="base_sort !=null and base_sort !=''">
+            order by ${base_orderBy}  ${base_sort}
+        </if>
+        <if test="base_pageSize !=null and base_pageSize !=''">
+            limit  ${base_offset},${base_pageSize}
+        </if>
+    </select>
+
+    <select id="findCount" parameterMap="courseParamMap" resultType="Integer">
+
+        select count(1) from (
+        select
+        t.*,
+        c.casefieldname as casename,
+        ct.name as coursetypename,
+        ct1.name as coursespecialname
+        from course_manager t
+        left join sys_case_field c
+        on t.caseid = c.id
+        left join course_type ct
+        on t.coursetype = ct.id
+        left join course_type ct1
+        on t.specialcourse = ct1.id
+        <where>
+            t.coursestatus = '0'
+            <if test="specialcourse !=null and specialcourse!=''">
+                and t.specialcourse = #{specialcourse}
+            </if>
+            <if test="coursename !=null and coursename!=''">
+                and t.coursename like concat('%',#{coursename},'%')
+            </if>
+            <if test="caseid !=null and caseid!=''">
+                and t.caseid = #{caseid}
+            </if>
+            <if test="coursetype !=null and coursetype!=''">
+                and t.coursetype = #{coursetype}
+            </if>
+            <if test="conditionParam == 0 ">
+                and t.specialclass in ('802','804')
+                and t.ispublic = '0'
+                and  #{coursestartline_str} between t.coursestartline and t.courseendline
+            </if>
+        </where>
+        )
+        faketable
+
+    </select>
+
+    <select id="findByCourseId" parameterType="string" resultType="com.ycjcjy.gene.model.CourseManager">
+        select
+        t.*,
+        c.id as caseid,
+        c.casefieldname as casename
+        from course_manager t
+        left join sys_case_field c
+        on t.caseid = c.id
+        where t.id = #{id}
+    </select>
+
+    <select id="findCourseForWeb" parameterMap="courseParamMapVo" resultType="map">
+      SELECT c.id,c.coursename,c.courseprice, c.coursenum,c.courseintro,
+        c.coursecount,c.specialclass,t.name,s.casefieldname,
+        c.coursestartline,c.courseendline,c.coursetimeintro,c.weekday,
+        c.img_url,c.coursetags,c.coursetimeintro,d.dic,c.fitness_url,c.specialclass,
+        (
+        SELECT
+        COUNT(1)
+        FROM
+        order_main o
+        WHERE
+        o.course_id = c.id
+        )
+        AS remains
+      from course_manager c
+      left join sys_case_field s
+      on c.caseid = s.id
+      left join teacher t
+      on c.teacherids = t.id
+      left join dic_dictionary d
+      on c.specialclass = d.val
+      where c.coursestatus = '0'
+      and c.ispublic = '1'
+        <if test="coursename!=null and coursename!=''">
+            and c.coursename like concat('%',#{coursename},'%')
+        </if>
+      <if test="isgreate!=null and isgreate!=''">
+          and c.isgreate = #{isgreate}
+      </if>
+      <if test="teacherids!=null">
+          and c.teacherids = #{teacherids}
+      </if>
+        <if test="coursetype!=null">
+            and c.coursetype= #{coursetype}
+        </if>
+        <if test="specialcourse!=null and specialcourse!=''">
+            and c.specialcourse = #{specialcourse}
+        </if>
+        <if test="specialclass!=null and specialclass!=''">
+            and c.specialclass = #{specialclass}
+        </if>
+        <if test="caseid !=null">
+            and c.caseid = #{caseid}
+        </if>
+        <choose>
+            <when test="timeRange!=null and timeRange!=''">
+            and c.coursestartline BETWEEN  #{timeStart} and #{timeEnd}
+            </when>
+            <otherwise>
+                and now() &lt; c.coursestartline
+            </otherwise>
+        </choose>
+        <if test="base_pageSize !=null and base_pageSize !=''">
+            limit  ${base_offset},${base_pageSize}
+        </if>
+    </select>
+
+    <select id="findCoursesForIndex" parameterMap="courseParamMapVo" resultMap="courseListMap">
+        SELECT c.id,
+        c.coursename,
+        c.courseprice,
+        s.casefieldname,
+        c.coursetimeintro,
+        c.img_url,
+        c.coursetags,
+        c.specialclass,
+        d.dic
+        from course_manager c
+        left join sys_case_field s
+        on c.caseid = s.id
+        left join teacher t
+        on c.teacherids = t.id
+        left join dic_dictionary d
+        on c.specialclass = d.val
+        where c.coursestatus = '0'
+        and c.ispublic = '1'
+        <if test="coursetype!=null">
+            and c.coursetype=#{coursetype}
+        </if>
+        <if test="specialcourse!=null and specialcourse!=''">
+            and c.specialcourse = #{specialcourse}
+        </if>
+        <if test="isgreate!=null and isgreate!='' ">
+            and c.isgreate = #{isgreate}
+        </if>
+        and now() &lt; c.coursestartline
+        order by c.createtime desc,c.id desc
+        limit 5
+    </select>
+
+    <select id="findAcountForWeb" parameterMap="courseParamMapVo" resultType="integer">
+        select count(1) from (
+        SELECT c.id,c.coursename,c.courseprice, c.coursenum,c.courseintro,
+        c.coursecount,c.specialclass,t.name,s.casefieldname,
+        c.coursestartline,c.courseendline,c.coursetimeintro,
+        (select COUNT(1) from order_main o
+        where o.course_id = c.id) as remains
+        from course_manager c
+        left join sys_case_field s
+        on c.caseid = s.id
+        left join teacher t
+        on c.teacherids = t.id
+        where c.coursestatus = '0'
+        and c.ispublic = '1'
+        <if test="coursename!=null and coursename!=''">
+            and c.coursename like concat('%',#{coursename},'%')
+        </if>
+        <if test="isgreate!=null and isgreate!=''">
+            and c.isgreate = #{isgreate}
+        </if>
+        <if test="teacherids!=null">
+            and c.teacherids = #{teacherids}
+        </if>
+        <if test="coursetype!=null">
+            and c.coursetype= #{coursetype}
+        </if>
+        <if test="specialcourse!=null and specialcourse!=''">
+            and c.specialcourse = #{specialcourse}
+        </if>
+        <if test="specialclass!=null and specialclass!=''">
+            and c.specialclass = #{specialclass}
+        </if>
+        <if test="caseid !=null">
+            and c.caseid = #{caseid}
+        </if>
+        <choose>
+            <when test="timeRange!=null and timeRange!=''">
+                and c.coursestartline BETWEEN  #{timeStart} and #{timeEnd}
+            </when>
+            <otherwise>
+                and now() &lt; c.coursestartline
+            </otherwise>
+        </choose>
+        ) faketable
+    </select>
+
+    <select id="findPrivateByCouseId" resultMap="courseMap">
+        select c.id,c.coursename,c.specialclass,c.img_url,c.courseprice,c.coursetime,c.coursecount,c.courseprice,c.coursetime,c.courseintro,c.coursestartline,c.courseendline,
+        (select count(1) from order_main o where o.course_id = c.id and o.order_state!='3') as buycount,c.fitness_url,c.coursenum,c.coursetimeintro,c.coursetags,
+        t.name as teachername,t.img as teacherimg,t.experience as teacherexperience,t.title as title,
+        s.casefieldname,s.address,s.lng,s.lat,s.icon
+         from course_manager c
+        left join teacher t on c.teacherids = t.id
+        left join sys_case_field s on c.caseid = s.id
+        where c.id = #{id}
+    </select>
+
+
+    <select id="getCourseDetail" parameterType="integer" resultType="com.ycjcjy.gene.model.CourseDetail">
+        select d.* from course_detail d
+        where d.courseid = #{courseid}
+        order by sort asc
+    </select>
+
+    <select id="getEvaluates" parameterType="integer" resultMap="evaluateMap">
+        select e.*,cu.username as customerName,cu.icon as avatar_img,
+			DATE_FORMAT(e.create_time,'%Y-%m-%d') createtime_str
+        from evaluate e
+        left join customer_user cu on e.customer_id = cu.id
+        where e.target_id = #{id} and e.type = '0' limit 3
+    </select>
+
+    <select id="getAllTages" parameterType="string" resultType="com.ycjcjy.gene.model.CourseTag">
+        select t.* from course_tag t
+        left join course_linke_tag c on t.id = c.tagid
+        where c.courseid = #{id}
+    </select>
+
+
+    <select id="getEvaluateImgs" parameterType="integer" resultType="com.ycjcjy.gene.model.EvaluateImg">
+        select ei.img_url from evaluate_img ei where ei.e_id = #{id}
+    </select>
+
+    <select id="getsubCourseTime"  parameterType="integer" resultType="com.ycjcjy.gene.model.SubCourseManager">
+        select d.*
+        from course_sub_manager d
+        where d.pcourseid = #{pcourseid} and d.substartline > now()
+        order by d.substartline asc
+    </select>
+
+
+    <update id="deleteByCourseId">
+        update course_manager
+        set coursestatus ='1'
+        where id = #{id}
+    </update>
+
+    <update id="updateIsPublic">
+        update course_manager
+        set ispublic = #{ispublic}
+        where id = #{id}
+    </update>
+
+
+    <select id="findForSel" resultType="map">
+        select c.id,c.coursename,s.casefieldname,DATE_FORMAT(c.coursestartline,'%Y-%m-%d') startline
+        from course_manager c
+        left join sys_case_field s on c.caseid = s.id
+        where c.coursestatus = '0'
+         and now() &lt; c.coursestartline and c.ispublic = '1'
+    </select>
+
+    <select id="findYouXiaoCourse" parameterMap="courseParamMap" resultType="com.ycjcjy.gene.model.CourseManager">
+        select
+        t.*,
+        c.casefieldname as casename,
+        ct.name as coursetypename,
+        ct1.name as coursespecialname,
+        (select count(1) from course_sub_manager where pcourseid = t.id and #{coursestartline_str} between t.coursestartline and t.courseendline) as weekcount
+        from course_manager t
+        left join sys_case_field c
+        on t.caseid = c.id
+        left join course_type ct
+        on t.coursetype = ct.id
+        left join course_type ct1
+        on t.specialcourse = ct1.id
+        where
+        t.coursestatus = '0'
+        and t.ispublic = '1'
+        <if test="base_sort !=null and base_sort !=''">
+            order by ${base_orderBy}  ${base_sort}
+        </if>
+        <if test="base_pageSize !=null and base_pageSize !=''">
+            limit  ${base_offset},${base_pageSize}
+        </if>
+    </select>
+
+    <select id="findYouXiaoCount" parameterMap="courseParamMap" resultType="Integer">
+
+        select count(1) from (
+        select
+        t.*,
+        c.casefieldname as casename,
+        ct.name as coursetypename,
+        ct1.name as coursespecialname
+        from course_manager t
+        left join sys_case_field c
+        on t.caseid = c.id
+        left join course_type ct
+        on t.coursetype = ct.id
+        left join course_type ct1
+        on t.specialcourse = ct1.id
+         where
+            t.coursestatus = '0'
+            and t.ispublic = '1'
+
+        )
+        faketable
+
+    </select>
+
+
+</mapper>

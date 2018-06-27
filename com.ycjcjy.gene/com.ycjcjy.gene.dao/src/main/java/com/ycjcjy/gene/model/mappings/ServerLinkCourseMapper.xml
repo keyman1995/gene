@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--author chenjie-->
+<!--description 专题课程 mapper-->
+<!--date 2018-05-30 19:59:09-->
+<mapper namespace="com.ycjcjy.gene.dao.ServerLinkCourseDao">
+    <select id="selectLinkCourseByServerId" resultType="com.ycjcjy.gene.model.ServerLinkCourse">
+        select * from server_link_course where serverid = #{serverId}
+    </select>
+</mapper>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="/public/head :: onLoadHead(用户管理)">
+</head>
+<body ddata-type="widgets">
+<div class="am-g tpl-g">
+    <!-- 模态提示组件 -->
+    <div th:include="/public/tips :: Tips"></div>
+
+    <!-- 内容区域 -->
+    <div class="tpl-content-wrapper none-margin">
+        <div class="row-content am-cf">
+            <div class="row">
+                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                            <div class="row">
+                                <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+                                    <div class="widget am-cf">
+                                        <div class="widget-head am-cf">
+                                            <div class="widget-title am-fl" th:if="${add}">新增
+                                                <input type="hidden" name="createtime" value="">
+                                            </div>
+                                            <div class="widget-title am-fl" th:if="${view}">查看</div>
+                                            <div class="widget-title am-fl" th:if="${edit}">编辑</div>
+                                        </div>
+                                        <div class="widget-body am-fr">
+
+                                            <form class="am-form tpl-form-border-form tpl-form-border-br" id="DataFrom">
+                                                <input type="hidden" name="id" th:value="${entity.id}"/>
+
+
+
+
+                                                <div class="am-form-group">
+                                                    <label for="card_gym_type" class="am-u-sm-3 am-form-label">类型 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <dic:code name="card_gym_type" onchange="changeType()" id="card_gym_type" code="JSKYXQ" th:attr="value=${entity.card_gym_type},disabled=${view},name='card_gym_type'" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group" id="start">
+                                                    <label for="start_time" class="am-u-sm-3 am-form-label">体验卡开始时间 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" readonly class="tpl-form-input" name="start_time" id="start_time" th:disabled="${view}" th:inline="text" th:value="${entity.start_time}">
+                                                        </input>
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group" id="end">
+                                                    <label for="end_time" class="am-u-sm-3 am-form-label">体验卡结束时间 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" readonly class="tpl-form-input" name="end_time" id="end_time" th:disabled="${view}" th:inline="text" th:value="${entity.end_time}">
+                                                        </input>
+                                                    </div>
+                                                </div>
+
+
+
+                                                <div class="am-form-group">
+                                                    <label for="name" class="am-u-sm-3 am-form-label">名称 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" name="name" id="name" placeholder="请输入名称" th:disabled="${view}" th:value="${entity.name}">
+                                                     
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="am-form-group">
+                                                    <label for="price" class="am-u-sm-3 am-form-label">价格 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <input type="text" class="tpl-form-input" name="price" id="price" placeholder="请输入价格" th:disabled="${view}" th:value="${entity.price}">
+                                                        <!--<small th:unless="${view}">Vip卡价格</small>-->
+                                                    </div>
+                                                </div>
+                                                <div class="am-form-group">
+                                                    <label for="remarks" class="am-u-sm-3 am-form-label">体验卡描述 <span class="tpl-form-line-small-title">:</span></label>
+                                                    <div class="am-u-sm-9">
+                                                        <!--<input type="" class="tpl-form-input" name="remarks" id="remarks" placeholder="请输入体验券描述" th:disabled="${view}" th:inline="text" maxlength="30">
+                                                        </input>-->
+                                                        <th:block th:if="${not #lists.isEmpty(entity.remarks)}">
+                                                            <textarea name="remarks" id="remarks"  placeholder="请输入体验卡描述 "  th:disabled="${view}" th:inline="text" maxlength="30">[[${entity.remarks}]]</textarea>
+                                                        </th:block>
+
+                                                        <th:block th:if="${#lists.isEmpty(entity.remarks)}">
+                                                            <textarea name="remarks" id="remarks"  placeholder="请输入体验卡描述 "  th:disabled="${view}" th:inline="text" maxlength="30"></textarea>
+                                                        </th:block>
+                                                    </div>
+                                                </div>
+
+                                                <div class="am-form-group">
+                                                    <div class="am-u-sm-9 am-u-sm-push-3">
+                                                        <button type="submit" class="am-btn am-btn-primary tpl-btn-bg-color-success" th:unless="${view}">提交</button>
+                                                        <button type="button" class="am-btn am-btn-danger" onClick="routingPage('/cardGym/preview/','游泳健身卡列表')">返回</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<css th:replace="/public/css :: onLoadCSS"></css>
+<js th:replace="/public/js :: onLoadJS"></js>
+
+<script th:inline="javascript">
+    $(function () {
+        validateFrom();
+        onloadType();
+
+    })
+    $('#start_time').datetimepicker({
+        language:  'zh-CN',
+        format: 'yyyy-mm-dd 00:00:00',
+        autoclose: true,
+        startView:2,
+        minView:'month',
+        maxView:1,
+        startDate: getTodayDataStr()
+    });
+    $('#end_time').datetimepicker({
+        language:  'zh-CN',
+        format: 'yyyy-mm-dd 23:59:59',
+        autoclose: true,
+        startView:2,
+        minView:'month',
+        maxView:1,
+        startDate: getTodayDataStr()
+    });
+    $('#card_gym_type').on("change",changeType);
+    function changeType() {
+        if ($('#card_gym_type').val() == '491'){
+            $('#start').show();
+            $('#end').show();
+            $('#start_time').removeAttribute('disabled');
+            $('#end_time').removeAttribute('disabled');
+        } else {
+            $('#start_time').attr('disabled','disabled');
+            $('#end_time').attr('disabled','disabled');
+            $('#start').hide();
+            $('#end').hide();
+        }
+    }
+    function onloadType() {
+        if ($('#card_gym_type').val() != '491'){
+            $('#start').hide();
+            $('#end').hide();
+        }
+    }
+
+
+    /**
+     * 校验登录表单
+     * @returns void
+     */
+    function validateFrom(){
+        $("#DataFrom").validate({
+            rules: {
+                name: {
+                    required:true,
+                    maxlength: 50
+                },
+                price:{
+                    required:true,
+                    min:0
+                },
+                card_gym_type:{
+                    required:true
+                }
+
+            },
+            submitHandler: function(form) { //验证成功时调用
+                var cardType = $('#card_gym_type').val();
+                console.log(cardType);
+                if(cardType == 491){
+                    var start = $('#start_time').val();
+                    var end = $('#end_time').val();
+                    if(start == '' || start == null){
+                        alert('请输入开始时间');
+                        return
+                    }
+                    if(end == '' || end == null){
+                        alert('请输入结束时间');
+                        return
+                    }
+                    var s = new Date(start).valueOf();
+                    var e = new Date(end).valueOf();
+                    if (e<s){
+                        alert('结束时间不能早于开始时间');
+                        return
+                    }
+                }
+                var param = $('#DataFrom').serializeJson();
+                var url = "/cardGym/save";
+                var completeHandler = function (data) {
+                    routingPage('/cardGym/preview','游泳健身卡列表')
+                }
+                doPost(url,param,completeHandler)
+            }
+        });
+    }
+
+</script>
+
+</body>
+</html>

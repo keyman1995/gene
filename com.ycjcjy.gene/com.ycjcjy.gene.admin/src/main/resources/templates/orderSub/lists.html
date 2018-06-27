@@ -1,0 +1,42 @@
+    <script id="tpl-lockerkeys" type="text/html" th:fragment="lockerkeyTemps">
+    <div class="am-popup-inner onebean-am-popup-inner">
+        <div class="am-popup-hd">
+            <h4 class="am-popup-title">钥匙管理</h4>
+            <span data-am-modal-close class="am-close">&times;</span>
+        </div>
+        <div class="am-popup-bd" style="background: none!important;">
+           <!-- <div class="widget-head am-cf">
+                <div class="widget-title  am-cf">钥匙列表</div>
+            </div>-->
+            <div class="widget-body am-fr">
+
+                    <input type="hidden" id="keyId" />
+                <div class="am-form-group">
+
+                </div>
+            </div>
+
+
+                <div class="am-u-sm-12">
+                    <table width="100%" class="am-table am-table-compact am-table-bordered am-table-radius am-table-striped tpl-table-black "
+                           id="example-r">
+                        <thead>
+                        <tr style="color: black">
+                            <th>锁柜编号</th>
+                            <th>当前用户</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody id="keyTable">
+
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+</script>

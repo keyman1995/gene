@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--author yibin-->
+<!--description 首页资讯 mapper-->
+<!--date 2018-05-28 10:04:00-->
+<mapper namespace="com.ycjcjy.gene.dao.InformationDao">
+    <parameterMap id="informationMap" type="com.ycjcjy.gene.model.Information"></parameterMap>
+
+    <select id="findAllInfor" parameterMap="informationMap" resultType="com.ycjcjy.gene.model.Information">
+        select
+        t.*
+        from information t
+        where 1=1
+        <if test="title !=null and title!=''">
+            and t.title like concat('%',#{title},'%')
+        </if>
+        <if test="base_sort !=null and base_sort !=''">
+            order by ${base_orderBy}  ${base_sort}
+        </if>
+        <if test="base_pageSize !=null and base_pageSize !=''">
+            limit  ${base_offset},${base_pageSize}
+        </if>
+    </select>
+
+    <select id="getAllCount" parameterMap="informationMap" resultType="Integer">
+
+        select count(1) from (
+        select
+        t.*
+        from information t
+        )
+        faketable
+
+    </select>
+
+    <select id="findInforByTime" resultType="com.ycjcjy.gene.model.Information">
+        select
+        t.*
+        from information t
+        order by t.create_time desc
+        limit 3
+    </select>
+</mapper>

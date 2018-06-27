@@ -1,0 +1,849 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.CardTicketMasterDao">
+
+
+    <parameterMap id="ticketParamMap" type="com.ycjcjy.gene.model.CardTicketMaster"></parameterMap>
+	<resultMap id="ticketCardVoMap" type="com.ycjcjy.gene.VO.TicketCardVo">
+		<result property="totalNum" column="totalNum"></result>
+		<result property="leftNum" column="leftNum"></result>
+		<result property="giveSaleNum" column="giveSaleNum"></result>
+		<result property="giveUserNum" column="giveUserNum"></result>
+		<result property="userUseNum" column="userUseNum"></result>
+		<result property="isGuoQi" column="isGuoQi"></result>
+		<result property="cardName" column="cardName"></result>
+		<result property="cardStartTime" column="cardStartTime"></result>
+		<result property="cardEndTime" column="cardEndTime"></result>
+		<result property="price" column="price"></result>
+		<result property="masterId" column="master_id"></result>
+		<result property="remark" column="remark"></result>
+		<result property="isWeiDao" column="isWeiDao"></result>
+		<result property="to_type" column="to_type"></result>
+		<result property="channel_id" column="channel_id"></result>
+		<result property="vedio_src" column="vedio_src"></result>
+		<result property="content" column="content"></result>
+		<result property="caseFieldName" column="casefieldname"></result>
+		<result property="caseFieldLocation" column="caseFieldLocation"></result>
+		<result property="channelScript" column="channel_script"></result>
+		<result property="videoImg" column="video_img"></result>
+		<result property="target_id" column="target_id"></result>
+		<result property="ticket_type" column="ticket_type"></result>
+	</resultMap>
+
+	<resultMap id="ticketSalerVoMap" type="com.ycjcjy.gene.VO.TicketSalerVo">
+		<result property="totalNum" column="totalNum"></result>
+		<result property="leftNum" column="leftNum"></result>
+		<result property="userUseNum" column="userUseNum"></result>
+		<result property="saleId" column="saleId"></result>
+		<result property="saleName" column="saleName"></result>
+		<result property="price" column="price"></result>
+		<result property="userName" column="userName"></result>
+		<result property="cardName" column="cardName"></result>
+		<result property="touserTime" column="touser_time"></result>
+		<result property="cardCount" column="cardCount"></result>
+		<result property="goodsCount" column="goodsCount"></result>
+		<result property="shorName" column="shorName"></result>
+		<result property="orderState" column="orderState"></result>
+		<result property="goodsNum" column="goods_num"></result>
+		<result property="totalCardCount" column="totalCardCount"></result>
+		<result property="totalGoodsCount" column="totalGoodsCount"></result>
+		<result property="canSendCard" column="can_send_card"></result>
+		<result property="canSend" column="can_send"></result>
+	</resultMap>
+
+	<select id="queryMasterDetailById" parameterType="String" resultMap="ticketCardVoMap">
+		SELECT  a.*,
+		if(a.cardEndTime &lt; date_format(#{nowTime}, '%Y/%c/%d' ),1,0) as isGuoQi,
+		if(a.cardStartTime &gt; date_format(#{nowTime}, '%Y/%c/%d' ),1,0) as isWeiDao
+		FROM
+		(
+		SELECT
+		(
+		SELECT count(*)
+		FROM card_ticket_salve s
+		WHERE s.pid=m.id and s.state in (2,3,4)
+		<if test="saleId != null and saleId != ''">
+			and user_id = #{saleId}
+		</if>
+		) as
+		<if test="saleId != null and saleId != ''">
+			totalNum,
+			(
+			SELECT count(*)
+			FROM card_ticket_salve s
+			WHERE s.pid=m.id and s.state = 2
+			<if test="saleId != null and saleId != ''">
+				and user_id = #{saleId}
+			</if>
+			) as leftNum,
+			(
+			SELECT count(*)
+			FROM card_ticket_salve s
+			WHERE s.pid=m.id and s.state = 3
+			<if test="saleId != null and saleId != ''">
+				and user_id = #{saleId}
+			</if>
+			) as giveUserNum,
+		</if>
+		<if test="saleId == null or saleId == ''">
+			giveSaleNum,
+			(
+			SELECT count(*)
+			FROM card_ticket_salve s
+			WHERE s.pid=m.id and s.state in (1,2,3,4)
+			) as totalNum,
+			(
+			SELECT count(*)
+			FROM card_ticket_salve s
+			WHERE s.pid=m.id and s.state =1
+			) as leftNum,
+		</if>
+		(
+		SELECT count(*)
+		FROM card_ticket_salve s
+		WHERE s.pid=m.id and (s.state =3 and s.id in (
+		select r.salve_id
+		from card_user_rela r
+		LEFT JOIN card_gym_basic cgb on r.card_id = cgb.id and r.card_type=2
+		where (r.state = 1 or (cgb.card_gym_type!=491 and r.state=0 and r.start_time is not null)) and r.source = 0
+		) or s.state = 4)
+		<if test="saleId != null and saleId != ''">
+			and user_id = #{saleId}
+		</if>
+
+		) as userUseNum,
+		 m.id as master_id,
+		CASE m.ticket_type
+		WHEN 0 THEN c.name
+		WHEN 1 THEN go.name
+		WHEN 2 THEN g.name
+		END as cardName,
+		date_format(CASE m.ticket_type
+		WHEN 0 THEN c.start_time
+		WHEN 1 THEN go.start_time
+		WHEN 2 THEN g.start_time
+			END, '%Y/%c/%d' )
+		as cardStartTime,
+
+		date_format(
+		CASE m.ticket_type
+		WHEN 0 THEN c.end_time
+		WHEN 1 THEN go.end_time
+		WHEN 2 THEN g.end_time
+		END, '%Y/%c/%d' )
+		as cardEndTime,
+		m.price,
+		CASE m.ticket_type
+		WHEN 0 THEN c.remarks
+		WHEN 1 THEN go.remarks
+		WHEN 2 THEN g.remarks
+		END as remark
+		FROM card_ticket_master m
+		LEFT JOIN card_gym_basic g on g.id = m.target_id and m.ticket_type = 2
+		LEFT JOIN card_goods_basic go on go.id = m.target_id and m.ticket_type = 1
+		LEFT JOIN card_courde_basic c on c.id = m.target_id and m.ticket_type = 0
+		where m.to_type=0 and m.ticket_type in (0,2) and m.id = #{id}
+		) a
+	</select>
+
+
+	<!-- 案场端大卡分页（根据saleId判断是主管还是销售） -->
+	<select id="queryCardListInCaseTerminal" resultMap="ticketCardVoMap" parameterType="String">
+		select a.*,
+		if(a.guoQiTime &lt; #{nowTime},1,0) as isGuoQi
+		from
+		(
+		SELECT
+		(
+		SELECT count(*)
+		FROM card_ticket_salve s
+		WHERE s.pid=m.id and s.state in (2,3,4)
+		<if test="saleId != null and saleId != ''">
+			and user_id = #{saleId}
+		</if>
+		) as
+		<if test="saleId != null and saleId != ''">
+			totalNum,
+			(
+			SELECT count(*)
+			FROM card_ticket_salve s
+			WHERE s.pid=m.id and s.state = 2
+			<if test="saleId != null and saleId != ''">
+				and user_id = #{saleId}
+			</if>
+			) as leftNum,
+			(
+			SELECT count(*)
+			FROM card_ticket_salve s
+			WHERE s.pid=m.id and s.state = 3
+			<if test="saleId != null and saleId != ''">
+				and user_id = #{saleId}
+			</if>
+			) as giveUserNum,
+		</if>
+		<if test="saleId == null or saleId == ''">
+			giveSaleNum,
+			(
+			SELECT count(*)
+			FROM card_ticket_salve s
+			WHERE s.pid=m.id and s.state in (1,2,3,4)
+			) as totalNum,
+			(
+			SELECT count(*)
+			FROM card_ticket_salve s
+			WHERE s.pid=m.id and s.state =1
+			) as leftNum,
+		</if>
+		(
+		SELECT count(*)
+		FROM card_ticket_salve s
+		WHERE s.pid=m.id and (s.state =3 and s.id in (
+		select r.salve_id
+		from card_user_rela r
+		LEFT JOIN card_gym_basic cgb on r.card_id = cgb.id and r.card_type=2
+		where (r.state = 1 or (cgb.card_gym_type!=491 and r.state=0 and r.start_time is not null)) and r.source = 0
+		) or s.state = 4)
+		<if test="saleId != null and saleId != ''">
+			and user_id = #{saleId}
+		</if>
+
+		) as userUseNum,
+		m.id as master_id,
+		CASE m.ticket_type
+		WHEN 0 THEN c.name
+		WHEN 1 THEN go.name
+		WHEN 2 THEN g.name
+		END as cardName,
+
+		date_format(CASE m.ticket_type
+		WHEN 0 THEN c.start_time
+		WHEN 1 THEN go.start_time
+		WHEN 2 THEN g.start_time
+		END, '%Y年%c月%d日' )
+		as cardStartTime,
+
+		date_format(
+		CASE m.ticket_type
+		WHEN 0 THEN c.end_time
+		WHEN 1 THEN go.end_time
+		WHEN 2 THEN g.end_time
+		END, '%Y年%c月%d日' )
+		as cardEndTime,
+
+		CASE m.ticket_type
+		WHEN 0 THEN c.end_time
+		WHEN 1 THEN go.end_time
+		WHEN 2 THEN g.end_time
+		END as guoQiTime,
+		m.price,
+		CASE m.ticket_type
+		WHEN 0 THEN c.remarks
+		WHEN 1 THEN go.remarks
+		WHEN 2 THEN g.remarks
+		END as remark,
+		m.target_id,
+		m.ticket_type
+		FROM card_ticket_master m
+		LEFT JOIN card_gym_basic g on g.id = m.target_id and m.ticket_type = 2
+		LEFT JOIN card_goods_basic go on go.id = m.target_id and m.ticket_type = 1
+		LEFT JOIN card_courde_basic c on c.id = m.target_id and m.ticket_type = 0
+		where m.to_type=0 and m.org_id = #{caseId}
+	<!--	<if test="ticketType != null and ticketType != ''">
+			<choose>
+				<when test="ticketType==0">
+					and m.ticket_type in (0,2)
+				</when>
+				&lt;!&ndash;<when test="ticketType==1">
+					and m.ticket_type =1
+				</when>&ndash;&gt;
+			</choose>
+		</if>-->
+
+		and m.ticket_type in (0,2)
+		) a
+		where totalNum > 0
+		ORDER BY
+		<if test="saleId != null and saleId != ''">
+			leftNum desc,
+		</if>
+		cardEndTime desc,cardStartTime asc
+		limit  ${base_offset},${base_pageSize}
+	</select>
+	<!-- 案场端大卡分页（根据saleId判断是主管还是销售） -->
+	<select id="queryCardListInCaseTerminalCount" resultType="map" parameterType="String">
+		select count(*) as totalCount,ifnull(sum(mPrice),0) as totalPrice
+		from
+		(
+		SELECT
+		m.id
+		<if test="saleId != null and saleId != ''">
+			,(
+			SELECT count(*)
+			FROM card_ticket_salve s
+			WHERE s.pid=m.id and s.state in (2,3,4)
+			<if test="saleId != null and saleId != ''">
+				and user_id = #{saleId}
+			</if>
+
+			) as totalNum
+		</if>
+
+		<if test="saleId == null or saleId == ''">
+			,(
+			SELECT count(*)
+			FROM card_ticket_salve s
+			WHERE s.pid=m.id and s.state in (1,2,3,4)
+			) as totalNum
+		</if>
+
+
+		<if test="saleId != null and saleId != ''">
+			,(
+			SELECT count(*)
+			FROM card_ticket_salve s
+			WHERE s.pid=m.id and s.state in (2,3,4)
+			<if test="saleId != null and saleId != ''">
+				and user_id = #{saleId}
+			</if>
+
+			)*m.price as mPrice
+		</if>
+
+		<if test="saleId == null or saleId == ''">
+			,(
+			SELECT count(*)
+			FROM card_ticket_salve s
+			WHERE s.pid=m.id and s.state in (1,2,3,4)
+			)*m.price as mPrice
+		</if>
+
+
+
+		FROM card_ticket_master m
+		LEFT JOIN card_gym_basic g on g.id = m.target_id and m.ticket_type = 2
+		LEFT JOIN card_goods_basic go on go.id = m.target_id and m.ticket_type = 1
+		LEFT JOIN card_courde_basic c on c.id = m.target_id and m.ticket_type = 0
+		where m.to_type=0 and m.org_id = #{caseId}
+		<!--	<if test="ticketType != null and ticketType != ''">
+        <choose>
+            <when test="ticketType==0">
+                and m.ticket_type in (0,2)
+            </when>
+            &lt;!&ndash;<when test="ticketType==1">
+                and m.ticket_type =1
+            </when>&ndash;&gt;
+        </choose>
+    </if>-->
+
+		and m.ticket_type in (0,2)
+		) a
+		where totalNum > 0
+	</select>
+
+	<select id="querySaleVoListByMasterId" parameterType="String" resultMap="ticketSalerVoMap">
+		select
+		(
+		SELECT  count(*)
+		FROM card_ticket_salve s
+		LEFT JOIN card_ticket_master m on s.pid = m.id
+		where m.id = #{pId} and s.state in (2,3,4) and u.id = s.user_id
+		) as totalNum,
+
+		(
+		SELECT  count(*)
+		FROM card_ticket_salve s
+		LEFT JOIN card_ticket_master m on s.pid = m.id
+		where m.id = #{pId} and s.state in (3,4) and u.id = s.user_id
+		) as giveUserNum,
+
+		(
+		SELECT  count(*)
+		FROM card_ticket_salve s
+		LEFT JOIN card_ticket_master m on s.pid = m.id
+		where m.id = #{pId} and s.state =2 and u.id = s.user_id
+		) as leftNum,
+
+		(
+		SELECT  count(*)
+		FROM card_ticket_salve s
+		LEFT JOIN card_ticket_master m on s.pid = m.id
+		where m.id = #{pId} and  u.id = s.user_id
+		and
+		(
+		(
+		s.state =3 and s.id in (
+		select r.salve_id
+		from card_user_rela r
+		LEFT JOIN card_gym_basic cgb on r.card_id = cgb.id and r.card_type=2
+		where (r.state = 1 or (cgb.card_gym_type!=491 and r.state=0 and r.start_time is not null)) and r.source = 0
+		)
+		)or s.state = 4
+		)
+		) as userUseNum,
+		u.realname as saleName,u.id as saleId
+		from sys_user u
+		where u.field_id = #{caseId} and u.is_delete = 0 and u.user_type = 'sale' and u.is_lock = 0
+	</select>
+	<!-- 根据销售id来查询发放记录 -->
+	<select id="querySaleRecord" parameterType="String" resultMap="ticketSalerVoMap">
+		select a.*
+		from
+		(
+
+		SELECT u.username as userName,date_format(s.touser_time,'%m/%d*%H:%i') as touser_time,
+		CASE m.ticket_type
+		WHEN 0 THEN c.name
+		WHEN 2 THEN g.name
+		END as cardName,m.price,1 as orderState ,1 as goods_num
+		FROM card_ticket_salve s
+		LEFT JOIN card_user_rela r on r.salve_id = s.id and r.state != 3
+		LEFT JOIN customer_user u on r.user_id = u.id
+		LEFT JOIN card_ticket_master m on m.id = s.pid
+		LEFT JOIN card_gym_basic g on g.id = m.target_id and m.ticket_type = 2
+		LEFT JOIN card_courde_basic c on c.id = m.target_id and m.ticket_type = 0
+		WHERE m.to_type=0 and s.user_id = #{saleId} and (s.state =3  and r.source = 0)  and m.org_id = #{caseId}
+
+		 	<if test="ticketType != null and ticketType != ''">
+				<choose>
+					<when test="ticketType==0">
+						and m.ticket_type in (0,2)
+					</when>
+					 <when test="ticketType==1">
+						and m.ticket_type =1
+					</when>
+				</choose>
+			</if>
+
+
+
+		UNION  ALL
+		SELECT "" as userName,date_format(s.create_time,'%m/%d*%H:%i') as touser_time,
+		go.goods_name as cardName, go.price,s.order_state as orderState,s.goods_num
+		FROM goods_order_sub s
+		LEFT JOIN local_goods go ON go.id = s.goods_id
+		WHERE  s.saler_id = #{saleId}   and s.case_field_id = #{caseId}
+		<if test="ticketType != null and ticketType != ''">
+			<choose>
+				<when test="ticketType==0">
+					and 1=2
+				</when>
+			</choose>
+		</if>
+
+		) a
+
+		ORDER BY touser_time desc
+		limit  ${base_offset},${base_pageSize}
+	</select>
+
+	<select id="querySaleRecordCount" parameterType="String" resultType="map">
+		select ifnull(sum(goods_num),0) as totalCount,ifnull(sum(price*goods_num),0) as totalPrice
+		from
+		(
+
+		SELECT u.username as userName,date_format(s.touser_time,'%m/%d*%H:%i') as touser_time,
+		CASE m.ticket_type
+		WHEN 0 THEN c.name
+		WHEN 2 THEN g.name
+		END as cardName,m.price,1 as orderState,1 as goods_num
+		FROM card_ticket_salve s
+		LEFT JOIN card_user_rela r on r.salve_id = s.id and r.state != 3
+		LEFT JOIN customer_user u on r.user_id = u.id
+		LEFT JOIN card_ticket_master m on m.id = s.pid
+		LEFT JOIN card_gym_basic g on g.id = m.target_id and m.ticket_type = 2
+		LEFT JOIN card_courde_basic c on c.id = m.target_id and m.ticket_type = 0
+		WHERE m.to_type=0 and s.user_id = #{saleId} and (s.state =3  and r.source = 0)  and m.org_id = #{caseId}
+
+		<if test="ticketType != null and ticketType != ''">
+			<choose>
+				<when test="ticketType==0">
+					and m.ticket_type in (0,2)
+				</when>
+				<when test="ticketType==1">
+					and 1=2
+				</when>
+			</choose>
+		</if>
+
+		UNION  ALL
+		SELECT "" as userName,date_format(s.create_time,'%m/%d*%H:%i') as touser_time,
+		go.goods_name as cardName, go.price,s.order_state as orderState,s.goods_num
+		FROM goods_order_sub s
+		LEFT JOIN local_goods go ON go.id = s.goods_id
+		WHERE  s.saler_id = #{saleId}   and s.case_field_id = #{caseId}
+		<if test="ticketType != null and ticketType != ''">
+			<choose>
+				<when test="ticketType==0">
+					and 1=2
+				</when>
+			</choose>
+		</if>
+
+		) a
+	</select>
+
+	<!-- 根据masterId来查询銷售发放记录 全部or个人-->
+	<select id="querySaleRecordFromZhuGuan" parameterType="String" resultMap="ticketSalerVoMap">
+		select a.*
+		from
+		(
+		SELECT u.id as saleId,u.realname as saleName,right(u.realname,2) as shorName,u.can_send,u.can_send_card
+		,(
+		SELECT ifnull(sum(s.goods_num),0)
+		FROM goods_order_sub s
+		WHERE  s.saler_id = u.id   and s.case_field_id = #{caseId}
+
+		) as goodsCount
+		,(
+		SELECT count(*)
+		from
+		card_ticket_salve s
+
+		LEFT JOIN card_ticket_master m on m.id = s.pid
+		LEFT JOIN card_user_rela r on r.salve_id = s.id and r.state != 3
+		WHERE m.to_type=0 and
+		s.user_id = u.id and
+		m.ticket_type in (0,2) and
+		( s.state = 4 or (s.state =3  and r.source = 0))
+
+		) as cardCount,
+		(
+		SELECT count(*)
+		FROM card_ticket_salve s
+		LEFT JOIN card_ticket_master m on m.id = s.pid
+		where  m.to_type=0  and m.ticket_type in (0,2) and s.state in (2,3) and u.id = s.user_id
+		) as totalCardCount,
+		ROUND((
+		SELECT ifnull(sum(m.count),0)
+		from card_ticket_master m
+		where  m.to_type=0  and m.ticket_type = 1  and  m.org_id = #{caseId}
+		)/(select count(*) from sys_user where field_id = #{caseId} and user_type = 'sale' and is_lock = 0 and is_delete = 0 ))  as totalGoodsCount
+
+		FROM
+		sys_user u
+		where field_id = #{caseId} and is_delete = 0 and user_type = 'sale' and is_lock = 0
+		<if test="saleId != null and saleId != ''">
+			and id = #{saleId}
+		</if>
+		) a
+		order by goodsCount desc
+	</select>
+
+
+	<!-- 过期卡券总价值，根据案场id分组 -->
+	<select id="getTicketGuoQiPriceGroupByCaseId"  resultType="map">
+		SELECT
+
+			ifnull(sum( price ),0) AS totalPrice,
+			b.org_id
+		FROM
+		(
+
+		SELECT
+		org_id,guoQiTime,price
+		FROM
+			(
+		SELECT
+			s.pid,
+			m.org_id,
+		CASE
+			m.ticket_type
+			WHEN 0 THEN
+			c.end_time
+			WHEN 1 THEN
+			go.end_time
+			WHEN 2 THEN
+			g.end_time
+			END AS guoQiTime,
+			m.price
+		FROM
+			card_ticket_salve s
+			LEFT JOIN card_ticket_master m ON m.id = s.pid
+			LEFT JOIN card_gym_basic g ON g.id = m.target_id
+			AND m.ticket_type = 2
+			LEFT JOIN card_goods_basic go ON go.id = m.target_id
+			AND m.ticket_type = 1
+			LEFT JOIN card_courde_basic c ON c.id = m.target_id
+			AND m.ticket_type = 0
+		WHERE
+			(m.to_type = 0 or m.to_type = 1)
+			AND (
+			s.state IN ( 1, 2 )
+			OR (
+			(
+			s.state = 3
+			AND s.id NOT IN ( SELECT r.salve_id FROM card_user_rela r WHERE r.state = 1 AND r.source in (0,2) )
+			)
+
+			)
+			)
+			) a
+		WHERE
+			a.guoQiTime IS NOT NULL and  a.guoQiTime &lt; #{nowTime}
+			) b
+
+		GROUP BY
+			b.org_id
+	</select>
+
+	<!-- 后台-->
+    <select id="findList" parameterType="com.ycjcjy.gene.model.CardTicketMaster" resultType="com.ycjcjy.gene.model.CardTicketMaster">
+        SELECT
+CASE
+	a.ticket_type
+	WHEN 0 THEN
+	c.NAME
+	WHEN 1 THEN
+	d.NAME
+	WHEN 2 THEN
+	e.NAME
+	END AS cardName,
+		a.price,
+CASE
+	a.ticket_type
+	WHEN 0 THEN
+	c.remarks
+	WHEN 1 THEN
+	d.remarks
+	WHEN 2 THEN
+	e.remarks
+	END AS cardRemarks,
+CASE
+	a.ticket_type
+	WHEN 0 THEN
+	c.end_time
+	WHEN 1 THEN
+	d.end_time
+	WHEN 2 THEN
+	e.end_time
+	END AS cardEndTime,
+	CASE
+	a.ticket_type
+	WHEN 0 THEN
+	DATE_FORMAT(c.end_time,'%Y-%m-%d')
+	WHEN 1 THEN
+	DATE_FORMAT(d.end_time,'%Y-%m-%d')
+	WHEN 2 THEN
+	DATE_FORMAT(e.end_time,'%Y-%m-%d')
+	END AS endTimeStr,
+	b.casefieldname AS fieldName,
+	a.id,
+	a.create_time,
+		a.ticket_type,
+		a.to_type,
+		f.name as channel_name,
+	( SELECT COUNT( 1 ) FROM card_ticket_salve f WHERE a.id = f.pid ) AS zs,
+	( SELECT COUNT( 1 ) FROM card_ticket_salve f WHERE a.id = f.pid AND f.state = '0' ) AS kf,
+	( SELECT COUNT( 1 ) FROM card_ticket_salve f WHERE a.id = f.pid AND f.state = '1' ) AS zg,
+	( SELECT COUNT( 1 ) FROM card_ticket_salve f WHERE a.id = f.pid AND f.state = '2' ) AS xs,
+	( SELECT COUNT( 1 ) FROM card_ticket_salve f WHERE a.id = f.pid AND f.state = '3' ) AS yf,
+	(
+		SELECT count(1)
+		FROM card_ticket_salve f
+		WHERE f.pid=a.id and (f.state =3 and f.id in (
+		select r.salve_id
+		from card_user_rela r
+		where r.state = 1 and (r.source = 0 or r.source =2)
+		) or f.state = 4)
+	) AS yy,
+	( SELECT COUNT( 1 ) FROM card_ticket_salve f WHERE a.id = f.pid AND f.state = '5' ) AS gq
+FROM
+	card_ticket_master a
+	LEFT JOIN sys_case_field b ON a.org_id = b.id
+	LEFT JOIN card_courde_basic c ON a.ticket_type = '0'
+	AND a.target_id = c.id
+	LEFT JOIN card_goods_basic d ON a.ticket_type = '1'
+	AND a.target_id = d.id
+	LEFT JOIN card_gym_basic e ON a.ticket_type = '2'
+	AND a.target_id = e.id
+	left join channel f on a.channel_id = f.id
+	WHERE 1=1
+		<if test="org_id !=null and org_id !=''">
+			and a.org_id = #{org_id}
+		</if>
+		<if test="channel_name !=null and channel_name!=''">
+			AND f.name like concat('%',#{channel_name},'%')
+		</if>
+		<if test="base_sort !=null and base_sort !=''">
+			order by ${base_orderBy}  ${base_sort}
+		</if>
+        <if test="base_pageSize !=null and base_pageSize !=''">
+            limit  ${base_offset},${base_pageSize}
+        </if>
+    </select>
+
+    <select id="getCount" parameterType="com.ycjcjy.gene.model.CardTicketMaster" resultType="int">
+        select count(1) from(
+         SELECT
+CASE
+	a.ticket_type
+	WHEN 0 THEN
+	c.NAME
+	WHEN 1 THEN
+	d.NAME
+	WHEN 2 THEN
+	e.NAME
+	END AS cardName,
+a.price,
+CASE
+	a.ticket_type
+	WHEN 0 THEN
+	c.remarks
+	WHEN 1 THEN
+	d.remarks
+	WHEN 2 THEN
+	e.remarks
+	END AS cardRemarks,
+CASE
+	a.ticket_type
+	WHEN 0 THEN
+	c.end_time
+	WHEN 1 THEN
+	d.end_time
+	WHEN 2 THEN
+	e.end_time
+	END AS cardEndTime,
+	CASE
+	a.ticket_type
+	WHEN 0 THEN
+	DATE_FORMAT(c.end_time,'%Y-%m-%d')
+	WHEN 1 THEN
+	DATE_FORMAT(d.end_time,'%Y-%m-%d')
+	WHEN 2 THEN
+	DATE_FORMAT(e.end_time,'%Y-%m-%d')
+	END AS endTimeStr,
+	b.casefieldname,
+	( SELECT COUNT( 1 ) FROM card_ticket_salve f WHERE a.id = f.pid ) AS zs,
+	( SELECT COUNT( 1 ) FROM card_ticket_salve f WHERE a.id = f.pid AND f.state = '0' ) AS kf,
+	( SELECT COUNT( 1 ) FROM card_ticket_salve f WHERE a.id = f.pid AND f.state = '1' ) AS zg,
+	( SELECT COUNT( 1 ) FROM card_ticket_salve f WHERE a.id = f.pid AND f.state = '2' ) AS xs,
+	( SELECT COUNT( 1 ) FROM card_ticket_salve f WHERE a.id = f.pid AND f.state = '3' ) AS yf,
+	(
+SELECT count(1)
+		FROM card_ticket_salve f
+		WHERE f.pid=a.id and (f.state =3 and f.id in (
+		select r.salve_id
+		from card_user_rela r
+		where r.state = 1 and r.source = 0
+		) or f.state = 4)
+	) AS yy,
+	( SELECT COUNT( 1 ) FROM card_ticket_salve f WHERE a.id = f.pid AND f.state = '5' ) AS gq
+FROM
+	card_ticket_master a
+	LEFT JOIN sys_case_field b ON a.org_id = b.id
+	LEFT JOIN card_courde_basic c ON a.ticket_type = '0'
+	AND a.target_id = c.id
+	LEFT JOIN card_goods_basic d ON a.ticket_type = '1'
+	AND a.target_id = d.id
+	LEFT JOIN card_gym_basic e ON a.ticket_type = '2'
+	AND a.target_id = e.id
+        )faketable
+    </select>
+
+    <select id="getAllGymCard" resultType="com.ycjcjy.gene.model.CardGymBasic">
+        select * from card_gym_basic where end_time &gt;=#{now} or card_gym_type != '491'
+    </select>
+
+    <select id="getAllGoodsCard" resultType="com.ycjcjy.gene.model.CardGoodsBasic">
+        select * from card_goods_basic where end_time &gt;=#{now}
+    </select>
+
+    <select id="getAllCourseCard" resultType="com.ycjcjy.gene.model.CardCourdeBasic">
+        select * from card_courde_basic where end_time &gt;=#{now}
+    </select>
+
+	<update id="purchase" parameterType="hashmap">
+		UPDATE card_ticket_salve
+		SET state = '1'
+			, user_id =  #{user_id}
+		WHERE
+		id IN (
+		SELECT
+		id
+		FROM
+		(
+		SELECT
+		id
+		FROM
+		card_ticket_salve
+		WHERE
+		pid = #{pid}
+		AND state = '0'
+		LIMIT ${num}
+		) a
+		)
+
+	</update>
+
+	<select id="saleTicketCount" parameterType="int" resultType="int">
+		SELECT count(*) as countNum
+		FROM card_ticket_salve
+		WHERE pid = #{ticketId} and state = 2 and user_id = #{saleId}
+	</select>
+
+	<update id="updateSaleGoodsTicketState" parameterType="String">
+		UPDATE card_ticket_salve
+		SET state = 4,touser_time = #{nowTime}
+		WHERE  id in (
+			SELECT id FROM
+			(
+				SELECT id FROM
+				card_ticket_salve
+				where pid = #{ticketId} and state = 2 and user_id = #{saleId}
+				limit ${num}
+			) a
+
+		)
+	</update>
+
+	<!-- 渠道端 -->
+
+	<select id="queryQuDaoCardById" parameterType="String" resultMap="ticketCardVoMap">
+		select a.*,
+		if(a.cardEndTime &lt; #{nowTime},1,0) as isGuoQi
+		from
+		(SELECT m.*,
+		CASE m.ticket_type
+		WHEN 0 THEN c.name
+		WHEN 1 THEN go.name
+		WHEN 2 THEN g.name
+		END as cardName,
+
+		CASE m.ticket_type
+		WHEN 0 THEN c.end_time
+		WHEN 1 THEN go.end_time
+		WHEN 2 THEN g.end_time
+		END
+		as cardEndTime,
+
+		cf.casefieldname,cf.address as caseFieldLocation,
+		(
+			SELECT count(*)
+			FROM card_ticket_salve s
+			where s.pid = m.id and s.state = 1
+		) as leftNum
+		from card_ticket_master m
+		LEFT JOIN card_gym_basic g on g.id = m.target_id and m.ticket_type = 2
+		LEFT JOIN card_goods_basic go on go.id = m.target_id and m.ticket_type = 1
+		LEFT JOIN card_courde_basic c on c.id = m.target_id and m.ticket_type = 0
+		LEFT JOIN sys_case_field cf on cf.id = m.org_id
+		where m.to_type=1 and m.id = #{id}
+		) a
+	</select>
+
+	<select id="getShareDetail" resultType="map">
+		select c.id,co.img_url,co.coursename,
+		co.courseintro,
+		co.coursetimeintro,
+		IFNULL (m.content,'') content,
+		c.start_time,c.end_time
+		from
+		card_courde_basic c
+		LEFT JOIN course_manager co
+		on c.course_id = co.id
+		LEFT JOIN card_ticket_master m
+		on m.target_id = c.course_id and m.ticket_type = 0
+		where c.id = #{id}
+	</select>
+
+</mapper>

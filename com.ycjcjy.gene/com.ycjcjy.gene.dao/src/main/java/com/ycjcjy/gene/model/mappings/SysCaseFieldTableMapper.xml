@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--author Ken Hu-->
+<!--description 案场桌位管理 mapper-->
+<!--date 2018-06-11 15:35:49-->
+<mapper namespace="com.ycjcjy.gene.dao.SysCaseFieldTableDao">
+    <select id="queryAllTableByArea" parameterType="Long" resultType="com.ycjcjy.gene.model.SysCaseFieldTable">
+        SELECT  t.*,a.img_url,concat(a.area_name,t.num,"号桌") as tableInfo
+        FROM sys_case_field_table t
+        LEFT  join sys_case_field_area a on t.area = a.id and a.is_show = '1'
+        WHERE t.area = #{areaId} and t.is_show = '1'
+        order by t.num
+    </select>
+    <select id="queryAllTableById" parameterType="Long" resultType="com.ycjcjy.gene.model.SysCaseFieldTable">
+        SELECT  t.*,a.img_url,concat(a.area_name,t.num,"号桌") as tableInfo
+        FROM sys_case_field_table t
+        LEFT  join sys_case_field_area a on t.area = a.id and a.is_show = '1'
+        WHERE t.id = #{id} and t.is_show = '1'
+    </select>
+</mapper>

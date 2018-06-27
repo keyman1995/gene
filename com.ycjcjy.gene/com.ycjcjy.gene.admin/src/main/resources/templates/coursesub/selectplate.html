@@ -1,0 +1,17 @@
+
+
+
+<script id="tpl-select" type="text/html" th:fragment="selectTime" xmlns:th="http://www.w3.org/1999/xhtml">
+    {{set dateLine = $data}}
+    <input type="text" id= {{dateLine.name}} autocomplete="off" readonly class="onebean-data-picker-time" data-date-startDate="{{dateLine.startDate}}0:00" data-date-endDate="{{dateLine.endDate}}23:59" placeholder="请选择时间">
+</script>
+
+<script id="tpl-subName" type="text/html" th:fragment="selectTime" xmlns:th="http://www.w3.org/1999/xhtml">
+    {{set data = $data.subName}}
+</script>
+
+<script id="tpl-subDetail" type="text/html" th:fragment="selectTime" xmlns:th="http://www.w3.org/1999/xhtml">
+    {{set data = $data.subDetail}}
+</script>
+
+

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--author chenjie-->
+<!--description 课程标签 mapper-->
+<!--date 2018-05-28 13:31:09-->
+<mapper namespace="com.ycjcjy.gene.dao.CourseTagDao">
+
+    <select id="findCourseTags" parameterType="long" resultType="map">
+        select t.* from course_tag t
+        left join course_linke_tag c on t.id = c.tagid
+        where c.courseid = #{id}
+    </select>
+
+</mapper>

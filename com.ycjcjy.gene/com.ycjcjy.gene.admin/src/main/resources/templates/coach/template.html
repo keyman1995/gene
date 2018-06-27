@@ -1,0 +1,54 @@
+<script id="tpl-coachImgList" type="text/html" th:fragment="coachImgListTemp" xmlns:th="http://www.w3.org/1999/xhtml">
+
+
+
+
+    {{each $data as data}}
+    {{if data != null}}
+    <tr>
+        <td> <img src=" {{data.img_url}}"  height="100px" width="100px"/></td>
+        <td>
+            <div class="tpl-table-black-operation" >
+                <a href="javascript:;" onclick="deleteImg({{data.id}})"  class="tpl-table-black-operation-del">
+                    <i class="am-icon-trash" ></i> 删除
+                </a>
+            </div>
+        </td>
+    </tr>
+    {{else}}
+
+    {{/if}}
+    {{/each}}
+
+
+
+
+
+</script>
+
+<script id="tpl-coachCerList" type="text/html" th:fragment="coachCerListTemp" xmlns:th="http://www.w3.org/1999/xhtml">
+
+
+
+
+    {{each $data as data}}
+    {{if data != null}}
+    <tr>
+        <td>  <img src=" {{data.img_url}}"  height="100px" width="100px"/></td>
+        <td> {{data.name}}</td>
+        <td>
+            <div class="tpl-table-black-operation" >
+                <a href="javascript:;"  onclick="deleteImgCER({{data.id}})" class="tpl-table-black-operation-del">
+                    <i class="am-icon-trash" ></i> 删除
+                </a>
+            </div>
+        </td>
+    </tr>
+    {{else}}
+
+    {{/if}}
+    {{/each}}
+
+
+
+</script>

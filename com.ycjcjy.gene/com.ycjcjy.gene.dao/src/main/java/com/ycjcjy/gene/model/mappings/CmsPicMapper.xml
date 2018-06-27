@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.CmsPicDao" >
+    <parameterMap id="cmsPicParamMap" type="com.ycjcjy.gene.model.CmsPic"></parameterMap>
+    <select id="findAllPic" parameterMap="cmsPicParamMap" resultType="com.ycjcjy.gene.model.CmsPic">
+        SELECT  t.*,c.name as placeName
+        FROM cms_pic t
+        LEFT JOIN course_type c on c.id = t.place
+        WHERE 1=1
+        <if test="place !=null and place!=''">
+            and t.place =#{place}
+        </if>
+        <if test="status !=null and status!=''">
+            and t.status = #{status}
+        </if>
+        <if test="base_sort !=null and base_sort !=''">
+            order by t.${base_orderBy}  ${base_sort}
+        </if>
+        <if test="base_pageSize !=null and base_pageSize !=''">
+            limit  ${base_offset},${base_pageSize}
+        </if>
+    </select>
+
+    <select id="getAllCount" parameterMap="cmsPicParamMap" resultType="int">
+        SELECT count(*)
+        FROM cms_pic t
+        LEFT JOIN course_type c on c.id = t.place
+        WHERE 1=1
+        <if test="place !=null and place!=''">
+            and t.place =#{place}
+        </if>
+        <if test="status !=null and status!=''">
+            and t.status = #{status}
+        </if>
+    </select>
+
+    <update id="updateCms" parameterType="com.ycjcjy.gene.model.CmsPic">
+        update cms_pic
+        set img_url = #{img_url},
+            place = #{place},
+            url = #{url},
+            status = #{status},
+            sec_place = #{sec_place},
+            jump_type = #{jumpType},
+            course_id = #{course_id},
+            create_time = now(),
+            title = #{title}
+            where id = #{id}
+    </update>
+
+    <select id="findOneCmsByParam" resultType="map">
+        select t.img_url,t.jump_type as jumpType,t.title,t.course_id,t.url,co.specialclass
+        from cms_pic t
+        left join course_manager co on t.course_id = co.id
+        where t.place = #{place} and t.status= '1'
+        ORDER by t.create_time desc limit 1
+    </select>
+
+    <select id="findPicByPlace" parameterType="com.ycjcjy.gene.model.CmsPic" resultType="com.ycjcjy.gene.model.CmsPic">
+        SELECT f.* from(
+        SELECT tal.* FROM (
+        SELECT
+        t.img_url,
+        t.place,
+        t.url,
+        t.sec_place,
+        t.course_id,
+        t.jump_type AS jumpType,
+        t.id,
+        t.create_time,
+        c. NAME AS placeName,
+        t.title,
+        ifnull(co.specialclass, "") specialclass,
+        co.coursestatus,
+        co.ispublic,
+        co.coursestartline
+        FROM
+        cms_pic t
+        LEFT JOIN course_type c ON c.id = t.place
+        LEFT JOIN course_manager co ON t.course_id = co.id
+        WHERE
+        t. STATUS = '1'
+        <if test="place !=null">
+            and t.place =#{place}
+        </if>
+        <if test="sec_place !=null">
+            and t.sec_place = #{sec_place}
+        </if>
+        ORDER BY
+        t.create_time DESC
+        LIMIT 5) tal
+        where tal.coursestartline > now() or tal.coursestartline is null) f
+        where f.ispublic=1 and f.coursestatus=0 or f.ispublic is null or f.coursestatus is null
+    </select>
+
+    <select id="findPicCount" parameterType="Integer" resultType="Integer">
+
+         select
+            count(*)
+         from
+            cms_pic t
+         where t.status = '1'
+        <if test="place !=null and place!=''">
+            and t.place =#{place}
+        </if>
+        <if test="sec_place !=null and sec_place!=''">
+            and t.sec_place = #{sec_place}
+        </if>
+    </select>
+</mapper>

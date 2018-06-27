@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.SendCardLogDao" >
+    <select id="getList" parameterType="com.ycjcjy.gene.model.SendCardLog" resultType="com.ycjcjy.gene.model.SendCardLog">
+    SELECT
+    a.id,
+	a.customer_tel,
+	a.price,
+	b.username AS sys_customer_name,
+    DATE_FORMAT( c.end_time, '%Y-%m-%d' ) end_time,
+    DATE_FORMAT( a.create_time, '%Y-%m-%d' ) create_time,
+	c.remarks AS card_name,
+	d.username AS sys_username,
+	e.casefieldname AS field_name
+    FROM
+	send_card_log a
+    LEFT JOIN customer_user b ON a.sys_customer_id = b.id
+    LEFT JOIN card_ticket_master c ON a.card_id = c.id
+    LEFT JOIN sys_user d ON a.sys_user_id = d.id
+    LEFT JOIN sys_case_field e ON c.org_id = e.id
+    <where>
+        1=1
+        <if test="customer_tel !=null and customer_tel!=''">
+            AND a.customer_tel = #{customer_tel}
+        </if>
+        <if test="sys_customer_name !=null and sys_customer_name!=''">
+            and b.username like concat('%',#{sys_customer_name},'%')
+        </if>
+        <if test="current_user_org_id != null and current_user_org_id !=''">
+            AND e.id = #{current_user_org_id}
+        </if>
+    </where>
+        <if test="base_sort !=null and base_sort !=''">
+            order by ${base_orderBy}  ${base_sort}
+        </if>
+        <if test="base_pageSize !=null and base_pageSize !=''">
+            limit  ${base_offset},${base_pageSize}
+        </if>
+
+    </select>
+    <select id="pageCount" parameterType="com.ycjcjy.gene.model.SendCardLog" resultType="int">
+        SELECT count(1) FROM (
+        SELECT
+        a.create_time,
+        a.customer_tel,
+        a.price,
+        b.username AS sys_customer_name,
+        c.end_time AS end_time,
+        c.remarks AS card_name,
+        d.username AS sys_username,
+        e.casefieldname AS field_name
+        FROM
+        send_card_log a
+        LEFT JOIN customer_user b ON a.sys_customer_id = b.id
+        LEFT JOIN card_ticket_master c ON a.card_id = c.id
+        LEFT JOIN sys_user d ON a.sys_user_id = d.id
+        LEFT JOIN sys_case_field e ON c.org_id = e.id
+        <where>
+            <if test="customer_tel !=null and customer_tel!=''">
+                AND a.customer_tel = #{customer_tel}
+            </if>
+            <if test="sys_customer_name !=null and sys_customer_name!=''">
+                and b.username like concat('%',#{sys_customer_name},'%')
+            </if>
+            <if test="current_user_org_id != null and current_user_org_id !=''">
+                AND e.id = #{current_user_org_id}
+            </if>
+        </where>
+        ) faketable
+    </select>
+
+    <select id="getOne" parameterType="int" resultType="com.ycjcjy.gene.model.SendCardLog">
+        SELECT
+    a.id,
+	a.customer_tel,
+	a.price,
+	b.username AS sys_customer_name,
+    DATE_FORMAT( c.end_time, '%Y-%m-%d' ) end_time,
+    DATE_FORMAT( a.create_time, '%Y-%m-%d' ) create_time,
+	c.remarks AS card_name,
+	d.username AS sys_username,
+	e.casefieldname AS field_name
+    FROM
+	send_card_log a
+    LEFT JOIN customer_user b ON a.sys_customer_id = b.id
+    LEFT JOIN card_ticket_master c ON a.card_id = c.id
+    LEFT JOIN sys_user d ON a.sys_user_id = d.id
+    LEFT JOIN sys_case_field e ON c.org_id = e.id
+    WHERE
+    a.id = #{id}
+    </select>
+</mapper>

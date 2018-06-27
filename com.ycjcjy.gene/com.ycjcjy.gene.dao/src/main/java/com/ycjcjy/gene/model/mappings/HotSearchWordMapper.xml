@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.HotSearchWordDao" >
+
+    <parameterMap id="hotSearchWordParamMap" type="com.ycjcjy.gene.model.HotSearchWord"></parameterMap>
+
+    <select id="findHotSearchWords" parameterMap="hotSearchWordParamMap" resultType="com.ycjcjy.gene.model.HotSearchWord">
+        select
+        t.*
+        from hot_search_word t
+        <if test="base_sort !=null and base_sort !=''">
+            order by ${base_orderBy}  ${base_sort}
+        </if>
+        <if test="base_pageSize !=null and base_pageSize !=''">
+            limit  ${base_offset},${base_pageSize}
+        </if>
+    </select>
+
+    <select id="getAllCount" parameterMap="hotSearchWordParamMap" resultType="Integer">
+
+        select count(1) from (
+        select
+        t.*
+        from hot_search_word t
+        )
+        faketable
+
+    </select>
+
+    <select id="findAllHotSearchWords" resultType="com.ycjcjy.gene.model.HotSearchWord">
+        select
+        t.*
+        from hot_search_word t
+            order by t.weight asc
+    </select>
+</mapper>

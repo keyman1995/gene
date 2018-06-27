@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.CardTicketSalveDao" >
+
+
+    <insert id="bathInsert" parameterType="java.util.List">
+        insert into card_ticket_salve(pid,state) values
+        <foreach collection="list" item="item" index="index"
+                 separator=", ">
+            (#{item.pid},#{item.state})
+        </foreach>
+    </insert>
+
+    <!-- 收卡发卡，批量更新salve的userId -->
+
+    <update id="giveTicketToSale" parameterType="String">
+        update card_ticket_salve
+        set state =2 ,user_id = #{saleId},tosale_time = #{tosaleTime}
+        where id in (
+        SELECT id
+        from
+        (
+        SELECT id
+        from card_ticket_salve
+        where pid = #{pId} and state =1
+        limit ${num}
+        ) as t)
+    </update>
+
+
+    <update id="takeBackTicketToSale" parameterType="map">
+        update card_ticket_salve
+        set state =1 ,user_id = NULL
+        where user_id in
+        <foreach collection="list" item="item" index="index" separator=", " close=")" open="(">
+            #{item}
+        </foreach>
+        AND pid = #{pid} and state = 2
+    </update>
+
+    <select id="queryCanSendCardByCondition" parameterType="int" resultType="com.ycjcjy.gene.model.CardTicketSalve">
+      SELECT *
+      FROM card_ticket_salve
+      WHERE   pid = #{pId}
+      <if test="saleId>0">
+          AND state = 2 AND user_id = #{saleId}
+      </if>
+        <if test="saleId==0">
+            AND state = 1
+        </if>
+      limit 1
+    </select>
+
+    <select id="queryCardInfo" parameterType="int" resultType="map">
+        SELECT
+            CASE m.ticket_type
+            WHEN 0 THEN c.id
+            WHEN 1 THEN go.id
+            WHEN 2 THEN g.id
+            END as id,
+            CASE m.ticket_type
+            WHEN 0 THEN c.start_time
+            WHEN 1 THEN go.start_time
+            WHEN 2 THEN g.start_time
+            END as cardStartTime,
+            CASE m.ticket_type
+            WHEN 0 THEN c.end_time
+            WHEN 1 THEN go.end_time
+            WHEN 2 THEN g.end_time
+            END as cardEndTime,
+            CASE m.ticket_type
+            WHEN 0 THEN c.name
+            WHEN 1 THEN go.name
+            WHEN 2 THEN g.name
+            END as cardName,
+            m.ticket_type
+        FROM card_ticket_salve s
+	    LEFT JOIN card_ticket_master m on s.pid = m.id
+		LEFT JOIN card_gym_basic g on g.id = m.target_id and m.ticket_type = 2
+		LEFT JOIN card_goods_basic go on go.id = m.target_id and m.ticket_type = 1
+		LEFT JOIN card_courde_basic c on c.id = m.target_id and m.ticket_type = 0
+        WHERE s.id = #{id}
+    </select>
+
+    <update id="updateSaleStateGuoQi" parameterType="String">
+        update card_ticket_salve sa set sa.state = 5 where id in(
+        select id
+        from
+        (
+        select  s.id,
+        CASE m.ticket_type
+        WHEN 0 THEN c.end_time
+        WHEN 1 THEN go.end_time
+        WHEN 2 THEN g.end_time
+        END as guoQiTime
+        FROM card_ticket_salve s
+        LEFT JOIN card_ticket_master m on m.id = s.pid
+        LEFT JOIN card_gym_basic g on g.id = m.target_id and m.ticket_type = 2
+        LEFT JOIN card_goods_basic go on go.id = m.target_id and m.ticket_type = 1
+        LEFT JOIN card_courde_basic c on c.id = m.target_id and m.ticket_type = 0
+        WHERE 1=1 and (
+        s.state in (1,2) or
+
+        (
+        s.state =3 and s.id not in (
+        select r.salve_id
+        from card_user_rela r
+        where r.state = 1 and r.source in (0,2)
+        )
+        )
+
+
+
+        )
+        ) a
+        WHERE
+        guoQiTime is not null and guoQiTime &lt; #{nowTime}
+
+        )
+    </update>
+
+    <select id="findLeftCountByMonth" parameterType="int" resultType="int">
+        select count(*)
+        from card_ticket_salve s
+        left join card_ticket_master m on s.pid = m.id and m.ticket_type = 1
+        left join card_goods_basic g on g.id = m.target_id
+        where  s.state = 1 and month(g.start_time) = #{month}  and m.org_id = #{caseId}
+    </select>
+
+    <select id="getMaxMasterIdForGood" parameterType="String" resultType="int">
+        select ifnull(max(m.id),0)
+        from card_ticket_master m
+        left join card_goods_basic g on g.id = m.target_id
+        where   m.ticket_type = 1 and month(g.start_time) = #{month}  and m.org_id = #{caseId}
+    </select>
+
+    <update id="costGoodsToSale" parameterType="String">
+        update card_ticket_salve
+        set state =4 ,user_id = #{saleId},tosale_time = #{tosaleTime}
+        where id in (
+        SELECT id
+        from
+        (
+        SELECT s.id
+        from card_ticket_salve s
+        left join card_ticket_master m on s.pid = m.id and m.ticket_type = 1
+        left join card_goods_basic g on g.id = m.target_id
+        where s.state = 1 and month(g.start_time) = #{month}  and m.org_id = #{caseId}
+        limit ${num}
+        ) as t)
+    </update>
+
+    <update id="upDateCardIsSended">
+        update card_ticket_salve
+        set state = #{state}
+        where id = #{id}
+    </update>
+
+    <select id="getCountById" resultType="integer">
+        select count(1) from card_ticket_salve
+        where id = #{id} and state =6
+    </select>
+
+    <select id="getById" resultType="com.ycjcjy.gene.model.CardTicketSalve">
+        select * from card_ticket_salve where id = #{id}
+    </select>
+
+
+</mapper>
+

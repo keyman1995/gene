@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.SysOrganizationDao" >
+
+    <!-- 一对多查询关联  -->
+    <resultMap type="com.ycjcjy.gene.model.SysOrganization" id="defaultResultMap">
+        <id property="id" column="id"/>
+        <result property="parent_id" column="parent_id"/>
+        <result property="is_delete" column="is_delete"/>
+        <result property="is_root" column="is_root"/>
+        <result property="org_name" column="org_name"/>
+        <result property="remark" column="remark"/>
+        <result property="creat_time" column="creat_time"/>
+    </resultMap>
+
+    <!--查找所有子节点-->
+    <resultMap id="orgTreeResultMapSync" type="com.ycjcjy.gene.model.SysOrganization" extends="defaultResultMap">
+        <collection property="childList" javaType="java.util.ArrayList" column="id" ofType="com.ycjcjy.gene.model.SysOrganization" select="findChildSync"></collection>
+    </resultMap>
+
+    <!--异步查找子节点,每次查找一级-->
+    <select id="findChildAsync" resultType="com.ycjcjy.gene.VO.OrgTree" parameterType="long">
+        SELECT o.id,o.org_name as title,IF( EXISTS(SELECT o1.id FROM sys_organization o1  WHERE o1.parent_id = o.id) = 1 ,"folder","item") AS TYPE FROM sys_organization o
+          <where>
+              <choose>
+                  <when test="parent_id != null">
+                      o.parent_id = ${parent_id}
+                  </when>
+                  <otherwise>
+                      o.is_root = 1
+                  </otherwise>
+              </choose>
+          </where>
+    </select>
+
+    <!--查找所有子节点-->
+    <select id="findChildSync" resultMap="orgTreeResultMapSync" parameterType="long">
+        SELECT o.* FROM sys_organization o
+        <where>
+            o.parent_id = #{parent_id}
+        </where>
+        ORDER by o.sort asc
+    </select>
+    
+    
+    <select id="getParentOrgIds" parameterType="long" resultType="string">
+        SELECT getParentOrgIds(${childId});
+    </select>
+
+    <select id="findByUserId" parameterType="long" resultType="com.ycjcjy.gene.model.SysOrganization">
+        SELECT o.* FROM sys_organization o LEFT JOIN sys_user u ON o.`id` = u.`org_id`
+         <where>
+             u.`id` = ${userId};
+         </where>
+    </select>
+
+    <delete id="deleteSelfAndChildById" parameterType="long">
+        DELETE FROM sys_organization  WHERE FIND_IN_SET(#{id},parent_ids) OR id = #{id}
+    </delete>
+
+    <select id="findChildOrderNextNum" parameterType="long" resultType="int">
+        SELECT p.sort + 1 FROM `sys_organization` p
+        <where>
+            p.parent_id = #{parent_id} ORDER BY p.sort DESC LIMIT 1;
+        </where>
+    </select>
+
+</mapper>

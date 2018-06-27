@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--author chenjie-->
+<!--description 5A服务 mapper-->
+<!--date 2018-05-28 09:26:17-->
+<mapper namespace="com.ycjcjy.gene.dao.ServerManagerDao">
+    <parameterMap id="serverParam" type="com.ycjcjy.gene.model.ServerManager"></parameterMap>
+    <resultMap id="serverResult" type="com.ycjcjy.gene.VO.ServerManagerVo">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="title" property="title"/>
+        <result column="serverdetail" property="serverdetail"/>
+        <result column="detail_img" property="detail_img"/>
+        <collection property="serverLinkCourses" column="id" select="selectLink"></collection>
+    </resultMap>
+
+    <resultMap id="linklist" type="com.ycjcjy.gene.model.ServerLinkCourse">
+        <id column="id" property="id"/>
+        <result column="serverid" property="serverid"/>
+        <result column="courseids" property="courseids"/>
+        <result column="title" property="title"/>
+        <collection property="courseManagerVos" column="courseids" select="selectCourse"></collection>
+    </resultMap>
+
+
+    <resultMap id="courseList" type="com.ycjcjy.gene.model.CourseManagerVo">
+        <id column="id" property="id"/>
+        <result column="coursename" property="coursename"/>
+        <result column="specialclass" property="specialclass"/>
+        <result column="img_url" property="img_url"/>
+        <result column="courseprice" property="courseprice"/>
+        <result column="coursetags" property="coursetags"/>
+        <result column="casefieldname" property="casefieldname"/>
+        <result column="coursetimeintro" property="coursetimeintro"/>
+        <result column="dic" property="dic"/>
+        <collection property="tagList" column="id" select="getAllTages"></collection>
+    </resultMap>
+
+
+    <select id="findForWeb" parameterType="long" resultMap="serverResult">
+        select t.id,t.name,t.title,t.serverdetail,t.detail_img from server_manager t where id =#{id}
+    </select>
+
+    <select id="getAllTages" parameterType="string" resultType="com.ycjcjy.gene.model.CourseTag">
+        select t.* from course_tag t
+        left join course_linke_tag c on t.id = c.tagid
+        where c.courseid = #{id}
+    </select>
+
+    <select id="selectLink" parameterType="long" resultMap="linklist">
+        select lc.* from server_link_course lc where lc.serverid=#{id}
+    </select>
+
+    <select id="selectCourse" parameterType="string" resultMap="courseList">
+          SELECT c.id,
+        c.coursename,
+        c.courseprice,
+        s.casefieldname,
+        c.coursetimeintro,
+        c.img_url,
+        c.coursetags,
+        c.specialclass,
+        d.dic
+        from course_manager c
+        left join sys_case_field s
+        on c.caseid = s.id
+        left join teacher t
+        on c.teacherids = t.id
+        left join dic_dictionary d
+        on c.specialclass = d.val
+        where c.coursestatus = '0'
+        and c.ispublic = '1'
+        and find_in_set(c.id,#{courseids})
+        and now() &lt; c.coursestartline
+    </select>
+
+    <update id="updateStatus">
+        update server_manager
+        set status=#{status}
+        where id = #{id}
+    </update>
+
+    <select id="findAllForWeb" resultType="com.ycjcjy.gene.model.ServerManager">
+        select s.* from server_manager s
+        where s.status='1'
+    </select>
+
+
+
+</mapper>

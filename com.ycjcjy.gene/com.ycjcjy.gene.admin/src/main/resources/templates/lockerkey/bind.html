@@ -1,0 +1,49 @@
+<script id="tpl-lockerkeyBind" type="text/html" th:fragment="lockerkeyBindTemp" xmlns:th="http://www.w3.org/1999/xhtml">
+    <style>
+        .sexyKeybind {
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            color: #fff;
+            padding-top: 130px;
+            box-sizing: border-box;
+        }
+        .sexyKeybind .title {
+            font-size: 35px;
+        }
+        .theme-black .sexyKeybind {
+            background: #3a4144;
+        }
+        .theme-black .sexyKeybind .title {
+             color: #fff;
+        }
+        .theme-white .sexyKeybind .title {
+            color: #000;
+        }
+    </style>
+    <div class="am-popup-hd">
+        <span data-am-modal-close class="am-close"onclick="closeIt()">&times;</span>
+    </div>
+    <div class="sexyKeybind">
+        <div class="title">
+            <h4 class="am-popup-title">钥匙绑定</h4>
+            <div id="alertH"></div>
+        </div>
+        <div>
+            <input type="hidden" id="bindId" />
+            <div class="am-form-group am-form-group-sm am-cf" style="margin: 30px auto 100px auto;width: 50%;">
+                <input value="" autocomplete="off" type="text" placeholder="请点击此处并扫码绑定钥匙。" name="qrInfo" id="qrInfo" class="am-form-field">
+            </div>
+            <input type="hidden" id="castType" />
+            <input type="hidden" id="castId" />
+            <input type="hidden" id="castSaleId" />
+            <input type="hidden" id="castNum" />
+        </div>
+        <div style="display: block;margin: 0px auto;">
+            <button type="button" id="bindBtn" class="am-btn am-btn-default am-btn-secondary"  onclick="showQrInfo()"><span>绑定</span></button>
+        </div>
+        </div>
+    </div>
+
+
+</script>

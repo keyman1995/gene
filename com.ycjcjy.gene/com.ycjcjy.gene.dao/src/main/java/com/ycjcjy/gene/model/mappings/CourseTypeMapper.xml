@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ycjcjy.gene.dao.CourseTypeDao" >
+
+    <resultMap id="orgTreeResultMap" type="com.ycjcjy.gene.model.CourseType" extends="defaultResultMap"></resultMap>
+    <resultMap id="orgTreeResultMapSync" type="com.ycjcjy.gene.model.CourseType" extends="defaultResultMap">
+        <collection property="childList" javaType="java.util.ArrayList" column="id" ofType="com.ycjcjy.gene.model.CourseType" select="findChildSync"></collection>
+    </resultMap>
+
+    <resultMap type="com.ycjcjy.gene.model.CourseType" id="defaultResultMap">
+        <id property="id" column="id"/>
+        <result property="parentid" column="parentid"/>
+        <result property="is_delete" column="is_delete"/>
+        <result property="is_root" column="is_root"/>
+        <result property="name" column="name"/>
+        <result property="type" column="type"/>
+        <result property="newstype" column="newstype"/>
+        <result property="code" column="code"/>
+        <result property="sort" column="sort"/>
+        <result property="type_img" column="type_img"/>
+    </resultMap>
+
+    <select id="findChildSync" resultMap="orgTreeResultMapSync" parameterType="long">
+        SELECT o.* FROM course_type o
+        <where>
+            o.parentid = #{parentid}
+        </where>
+        ORDER by o.sort
+    </select>
+
+    <select id="findUnicode" resultType="string" parameterType="long">
+        select o.code from course_type o
+        <where>
+            1=1
+            <if test="id!=null">
+              and  id != #{id}
+            </if>
+        </where>
+
+    </select>
+
+    <select id="findPicPlace" resultMap="orgTreeResultMap">
+        SELECT o.* FROM course_type o
+        where parentid in (2,3)
+    </select>
+
+    <delete id="deleteSelfAndChildById" parameterType="long">
+        DELETE FROM course_type  WHERE FIND_IN_SET(#{id},parentids) OR id = #{id}
+    </delete>
+
+    <select id="getParentCtype" parameterType="long" resultType="string">
+        SELECT getParentCtype(${childId});
+    </select>
+
+    <select id="getChildByPId" parameterType="long" resultType="integer">
+        SELECT p.sort + 1 FROM `course_type` p
+        <where>
+            p.parentid = #{parentid} ORDER BY p.sort DESC LIMIT 1;
+        </where>
+    </select>
+
+    <select id="findByParentId" parameterType="int" resultType="com.ycjcjy.gene.model.CourseType">
+        SELECT
+           p.*
+        FROM
+           `course_type` p
+        where
+           p.parentid = #{parentid}
+
+    </select>
+
+
+</mapper>
